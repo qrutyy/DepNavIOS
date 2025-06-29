@@ -1,0 +1,29 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: end-of-file-fixer
+        name: Fix End of Files
+        files: \.(sh|swift|ya?ml)$
+  
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+        files: \.(sh|swift|ya?ml)$
+
+      - id: check-yaml
+        name: Check YAML syntax
+        files: \.ya?ml$
+
+  - repo: local
+    hooks:
+      - id: swiftformat
+        name: Swift Formatter
+        entry: swiftformat .
+        language: swift
+        always_run: true
+      
+      - id: swiftlint
+        name: Swift Linter
+        entry: swiftlint --fix
+        language: swift
+        always_run: true
