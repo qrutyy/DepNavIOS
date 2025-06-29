@@ -5,14 +5,18 @@ struct SVGMapView: View {
     
     let floor: String
     let department: String
+    
+    @State private var scale: CGFloat = 1.0
+    @State private var offset: CGSize = .zero
 
     var body: some View {
+
         if let url = Bundle.main.url(forResource: floor, withExtension: "svg", subdirectory: "Maps/\(department)") {
             
-            ZoomableSVGView(
-                            url: url,
-                            svgNaturalSize: CGSize(width: 1200, height: 1200)
-                        )
+            AdvSVGView(
+                url: url,
+                svgNaturalSize: CGSize(width: 1200, height: 1800)
+            )
                         .onAppear {
                             print("SVGView: layout for file 'Maps/\(department)/\(floor)'")
                         }
@@ -34,3 +38,5 @@ struct SVGMapView: View {
         }
     }
 }
+
+
