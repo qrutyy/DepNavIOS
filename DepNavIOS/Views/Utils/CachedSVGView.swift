@@ -1,45 +1,44 @@
 //
-//  ModSVGView.swift
+//  CachedSVGView.swift
 //  DepNavIOS
 //
 //  Created by Michael Gavrilenko on 29.06.2025.
 //
 
-import SwiftUI
 import SVGView
+import SwiftUI
 
 // Simple cached modification of the default SVGView.
 
 public struct CachedSVGView: View {
-
     public let svg: SVGNode?
 
     public init(contentsOf url: URL) {
         // Old: self.svg = SVGParser.parse(contentsOf: url)
-        self.svg = SVGCache.shared.getNode(for: url)
+        svg = SVGCache.shared.getNode(for: url)
     }
 
     @available(*, deprecated, message: "Use (contentsOf:) initializer instead")
     public init(fileURL: URL) {
         // old: self.svg = SVGParser.parse(contentsOf: fileURL)
-        self.svg = SVGCache.shared.getNode(for: fileURL)
+        svg = SVGCache.shared.getNode(for: fileURL)
     }
-    
+
     // other initializers remain the same, for kiss (fyi we don't use them)
     public init(data: Data) {
-        self.svg = SVGParser.parse(data: data)
+        svg = SVGParser.parse(data: data)
     }
 
     public init(string: String) {
-        self.svg = SVGParser.parse(string: string)
+        svg = SVGParser.parse(string: string)
     }
 
     public init(stream: InputStream) {
-        self.svg = SVGParser.parse(stream: stream)
+        svg = SVGParser.parse(stream: stream)
     }
 
     public init(xml: XMLElement) {
-        self.svg = SVGParser.parse(xml: xml)
+        svg = SVGParser.parse(xml: xml)
     }
 
     public init(svg: SVGNode) {
@@ -53,5 +52,4 @@ public struct CachedSVGView: View {
     public var body: some View {
         svg?.toSwiftUI()
     }
-
 }
