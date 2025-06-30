@@ -9,10 +9,12 @@ import SVGView
 import SwiftUI
 
 struct SVGMapView: View {
-    let floor: String
+    let floor: Int
     let department: String
 
     @Binding var markerCoordinate: CGPoint?
+
+    let coordinateLoader: CoordinateLoader
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -21,8 +23,10 @@ struct SVGMapView: View {
         if let url = Bundle.main.url(forResource: "floor\(floor)", withExtension: "svg", subdirectory: "Maps/\(department)") {
             AdvSVGView(
                 url: url,
-                svgNaturalSize: CGSize(width: 1200, height: 1800),
-                markerCoordinate: $markerCoordinate
+                floor: floor,
+                department: department,
+                markerCoordinate: $markerCoordinate,
+                coordinateLoader: coordinateLoader
             )
             .onAppear {
                 print("SVGView: layout for file 'Maps/\(department)/floor\(floor).svg'")
@@ -45,4 +49,3 @@ struct SVGMapView: View {
         }
     }
 }
-

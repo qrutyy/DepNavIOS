@@ -5,115 +5,128 @@
 //  Created by Michael Gavrilenko on 23.06.2025.
 //
 
-import SwiftUI
 import BottomSheet
+import SwiftUI
 
 struct ContentView: View {
-    @State private var selectedFloor: String = "1"
+    @State private var selectedFloor: Int = 1
     @State private var selectedDepartment: String = "spbu-mm"
     @State private var showWelcomeScreen = true
 
     @State private var idToFind: String = ""
     @State private var markerCoordinate: CGPoint?
-    @StateObject private var coordinateLoader = CoordinateLoader()
-    
+
     @State var bottomSheetPosition: BottomSheetPosition = .absolute(325)
     @State var isBottomSheetPresented: Bool = true
 
     @State private var isSearchAlertPresented: Bool = false
-    
-    // Updated detents for Maps-like behavior
+
+    // ADDED: CoordinateLoader is now owned by the parent view.
+    @StateObject private var coordinateLoader = CoordinateLoader()
+
     private let detents: Set<PresentationDetent> = [.height(55), .medium, .large]
 
     var body: some View {
-        
-            // Welcome Screen
-            Button(action: {
-                self.showWelcomeScreen = true
-            }) {}
-                .sheet(isPresented: $showWelcomeScreen) {
-                    WelcomeScreen(
-                        showWelcomeScreen: $showWelcomeScreen,
-                        selectedDepartment: $selectedDepartment
-                    )
-                }
-        
-            ZStack(alignment: .topTrailing) {
-                SVGMapView(floor: selectedFloor, department: selectedDepartment, markerCoordinate: $markerCoordinate)
-                    // The map should fill the available space
-                    .edgesIgnoringSafeArea(.all)
-                    .sheet(isPresented: $isBottomSheetPresented, onDismiss: {isBottomSheetPresented = true}) {
-                        // Maps-style bottom sheet content
-                        BottomSearchSheetView(callOnSubmit: findMarkerWithId, idToFind: $idToFind)
-                            .presentationDetents(detents)
-                            .presentationCornerRadius(20)
-                            .presentationDragIndicator(.visible)
-                            .interactiveDismissDisabled()
-                            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-                            .presentationBackground(.clear) // Optional: makes background transparent
-                    }
-                // .alert("Object with id: \(idToFind) wasn't found", isPresented: $isSearchAlertPresented, actions: {}, message: {})
-                
-                // Floor picker moved to the top right corner
-                VStack(spacing: 12) {
-                    ForEach(["1", "2", "3", "4"], id: \.self) { floor in
-                        Button(action: {
-                            selectedFloor = floor
-                        }) {
-                            Text(floor.capitalized)
-                                .fontWeight(.medium)
-                                .frame(width: 44, height: 44) // Consistent sizing for buttons
-                                .background(selectedFloor == floor ? Color.blue : Color.clear)
-                                .foregroundColor(selectedFloor == floor ? .white : .primary)
-                                .cornerRadius(12)
-                        }
-                    }
-                }
-                
-                
-                .background(.thinMaterial) // Use a modern, blurred background for better visibility
-                .cornerRadius(12)
-                .shadow(radius: 3)
-                .padding(.top, 35)      // Add padding from the top safe area
-                .padding(.trailing, 16) // Add padding from the right edge
-                
-                
+        // Welcome Screen
+        Button(action: {
+            self.showWelcomeScreen = true
+        }) {}
+            .sheet(isPresented: $showWelcomeScreen) {
+                WelcomeScreen(
+                    showWelcomeScreen: $showWelcomeScreen,
+                    selectedDepartment: $selectedDepartment
+                )
             }
-        
-        .onAppear {
-            coordinateLoader.load(department: selectedDepartment, floor: selectedFloor)
-        }
-        // call load each time we change the department
-        .onChange(of: selectedDepartment) { newDepartment in
-            coordinateLoader.load(department: newDepartment, floor: selectedFloor)
-            markerCoordinate = nil
-            idToFind = ""
-        }
-        // it shouldnt be changed when switching the floors, bc it will change it to appropriate one by itself
-        .onChange(of: isSearchAlertPresented) { _ in
-                    // Ensure sheet stays open even after alert
-                    if !isBottomSheetPresented {
-                        isBottomSheetPresented = true
+
+        ZStack(alignment: .topTrailing) {
+            // CHANGED: Pass the coordinateLoader down to the map view.
+            SVGMapView(
+                floor: selectedFloor,
+                department: selectedDepartment,
+                markerCoordinate: $markerCoordinate,
+                coordinateLoader: coordinateLoader
+            )
+            .edgesIgnoringSafeArea(.all)
+            .sheet(isPresented: $isBottomSheetPresented, onDismiss: { isBottomSheetPresented = true }) {
+                BottomSearchSheetView(callOnSubmit: findMarkerWithId, idToFind: $idToFind)
+                    .presentationDetents(detents)
+                    .presentationCornerRadius(20)
+                    .presentationDragIndicator(.visible)
+                    .interactiveDismissDisabled()
+                    .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                    .presentationBackground(.clear)
+            }
+
+            VStack(spacing: 12) {
+                ForEach([1, 2, 3, 4], id: \.self) { floor in
+                    Button(action: {
+                        selectedFloor = floor
+                    }) {
+                        Text(String(floor))
+                            .fontWeight(.medium)
+                            .frame(width: 44, height: 44)
+                            .background(selectedFloor == floor ? Color.blue : Color.clear)
+                            .foregroundColor(selectedFloor == floor ? .white : .primary)
+                            .cornerRadius(12)
                     }
                 }
+            }
+            .background(.thinMaterial)
+            .cornerRadius(12)
+            .shadow(radius: 3)
+            .padding(.top, 35)
+            .padding(.trailing, 16)
+        }
+        .onAppear {
+            // Load initial data when the view appears
+            coordinateLoader.load(fileName: selectedDepartment)
+        }
+        .onChange(of: selectedDepartment) { newDepartment in
+            // Reload data whenever the department changes
+            coordinateLoader.load(fileName: newDepartment)
+        }
+        .onChange(of: isSearchAlertPresented) { _ in
+            if !isBottomSheetPresented {
+                isBottomSheetPresented = true
+            }
+        }
+        // You can add an alert here if you want
+        .alert("Объект не найден", isPresented: $isSearchAlertPresented) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Объект с ID \"\(idToFind)\" не был найден на карте.")
+        }
     }
 
+    // This function now correctly works within ContentView's scope
     private func findMarkerWithId() {
-        if let room = coordinateLoader.coordinates[idToFind] {
-            print(room.coordinate.y, room.coordinate.x)
-            markerCoordinate = room.coordinate
-            // idToFind = "" idk mb we shouldn't clear
-            isBottomSheetPresented = true
-        } else {
-            markerCoordinate = nil
-            print("Object with id: \(idToFind) not found in coordinates file.")
-            isSearchAlertPresented = true
-            isBottomSheetPresented = true
+        guard let mapDescription = coordinateLoader.mapDescriptions[selectedDepartment] else {
+            print("Ошибка: Данные для факультета '\(selectedDepartment)' не загружены.")
+            showNotFoundState()
+            return
         }
+        for floorData in mapDescription.floors { // numbers with first digit as floor num - can be optimised
+            if let foundMarker = floorData.markers.first(where: {
+                ($0.ru.title ?? "") == idToFind || ($0.en.title ?? "") == idToFind
+            }) {
+                print("Найден маркер для '\(idToFind)' на координатах: \(foundMarker.coordinate)")
+                markerCoordinate = foundMarker.coordinate
+                isBottomSheetPresented = true
+                return
+            } else {
+                print("Объект с ID '\(idToFind)' не найден на этаже \(selectedFloor).")
+            }
+            showNotFoundState()
+        }
+    }
+
+    private func showNotFoundState() {
+        markerCoordinate = nil
+        isSearchAlertPresented = true
+        isBottomSheetPresented = true
     }
 }
 
 #Preview {
     ContentView()
 }
-

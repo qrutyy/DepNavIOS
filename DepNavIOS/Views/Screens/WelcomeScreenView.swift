@@ -80,4 +80,3 @@ struct WelcomeScreen_Previews: PreviewProvider {
         WelcomeScreen(showWelcomeScreen: .constant(true), selectedDepartment: .constant("spbu-mm"))
     }
 }
-

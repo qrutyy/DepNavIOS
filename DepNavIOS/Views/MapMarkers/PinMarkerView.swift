@@ -130,4 +130,3 @@ struct PinMarkerView_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
-
