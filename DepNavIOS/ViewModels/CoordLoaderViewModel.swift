@@ -15,7 +15,7 @@ class CoordinateLoader: ObservableObject {
     }
 
     func load(department: String, floor: String) {
-        let fileName = "\(floor)-coords"
+        let fileName = "floor\(floor)-coords"
         guard let url = Bundle.main.url(forResource: fileName, withExtension: "json", subdirectory: "Maps/\(department)") else {
             print("CoordLoaderVM: Error: Could not find \(fileName).json")
             return
@@ -32,3 +32,4 @@ class CoordinateLoader: ObservableObject {
         }
     }
 }
+

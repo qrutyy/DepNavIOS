@@ -1,5 +1,5 @@
 //
-//  MarkerView.swift
+//  PinMarkerView.swift
 //  DepNavIOS
 //
 //  Created by Michael Gavrilenko on 29.06.2025.
@@ -130,3 +130,4 @@ struct PinMarkerView_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
+
