@@ -11,7 +11,6 @@ import SwiftUI
 struct AdvSVGView: View {
     let url: URL
     let svgNaturalSize: CGSize
-    let containerHeightLimit: CGFloat = 250.0
 
     // Binding from the SVGMapView
     @Binding var markerCoordinate: CGPoint?
@@ -104,7 +103,7 @@ struct AdvSVGView: View {
         )
 
         let horizontalOverflow = (scaledContentSize.width - containerSize.width) / 2.0
-        let verticalOverflow = (containerHeightLimit * scale - containerSize.height) / 2.0
+        let verticalOverflow = (scaledContentSize.height * scale - containerSize.height) / 20.0
 
         let newX = max(-horizontalOverflow, min(horizontalOverflow, offset.width))
         let newY = max(-verticalOverflow, min(verticalOverflow, offset.height))

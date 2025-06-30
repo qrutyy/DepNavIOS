@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6A3A255B2E0DDDAA00C3249A /* Maps in Resources */ = {isa = PBXBuildFile; fileRef = 6A3A255A2E0DDDAA00C3249A /* Maps */; };
 		6A59DB522E117F1900174334 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 6A59DB512E117F1900174334 /* SVGView */; };
+		6A7031452E12933300CD9E38 /* BottomSheet in Frameworks */ = {isa = PBXBuildFile; productRef = 6A7031442E12933300CD9E38 /* BottomSheet */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6A59DB522E117F1900174334 /* SVGView in Frameworks */,
+				6A7031452E12933300CD9E38 /* BottomSheet in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,6 +131,7 @@
 			name = DepNavIOS;
 			packageProductDependencies = (
 				6A59DB512E117F1900174334 /* SVGView */,
+				6A7031442E12933300CD9E38 /* BottomSheet */,
 			);
 			productName = DepNavIOS;
 			productReference = 6AD4F8CA2E0D9BAB00201BF5 /* DepNavIOS.app */;
@@ -214,6 +217,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6A59DB502E117EC300174334 /* XCRemoteSwiftPackageReference "SVGView" */,
+				6A7031432E12932C00CD9E38 /* XCRemoteSwiftPackageReference "BottomSheet" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AD4F8CB2E0D9BAB00201BF5 /* Products */;
@@ -587,6 +591,14 @@
 				minimumVersion = 1.0.6;
 			};
 		};
+		6A7031432E12932C00CD9E38 /* XCRemoteSwiftPackageReference "BottomSheet" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lucaszischka/BottomSheet";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -594,6 +606,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6A59DB502E117EC300174334 /* XCRemoteSwiftPackageReference "SVGView" */;
 			productName = SVGView;
+		};
+		6A7031442E12933300CD9E38 /* BottomSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A7031432E12932C00CD9E38 /* XCRemoteSwiftPackageReference "BottomSheet" */;
+			productName = BottomSheet;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
