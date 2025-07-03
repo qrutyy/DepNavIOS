@@ -132,8 +132,8 @@ struct AdvSVGView: View {
             height: containerSize.height * scale
         )
 
-        let horizontalOverflow = (scaledContentSize.width - containerSize.width) / 2.0
-        let verticalOverflow = (scaledContentSize.height * scale - containerSize.height) / 20.0
+        let horizontalOverflow = (scaledContentSize.width - containerSize.width)
+        let verticalOverflow = (scaledContentSize.height - containerSize.height) / 5.0
 
         let newX = max(-horizontalOverflow, min(horizontalOverflow, offset.width))
         let newY = max(-verticalOverflow, min(verticalOverflow, offset.height))
