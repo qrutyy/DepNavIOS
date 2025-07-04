@@ -13,7 +13,7 @@ struct AdvSVGView: View {
     let floor: Int
     let department: String
     @Binding var markerCoordinate: CGPoint?
-    
+
     // This view now receives the loader from its parent.
     @ObservedObject var coordinateLoader: CoordinateLoader
 
@@ -21,14 +21,14 @@ struct AdvSVGView: View {
     @State private var offset: CGSize = .zero
     @State private var startOffset: CGSize = .zero
     @State private var startScale: CGFloat = 2.0
-    
+
     // REMOVED: No longer needed as we get it from the loader.
     // let svgSize: CGSize = .init(width: 1024, height: 1024)
 
     var body: some View {
         if let mapDescription = coordinateLoader.mapDescriptions[department] {
             let svgNaturalSize = CGSize(width: mapDescription.floorWidth, height: mapDescription.floorHeight)
-            
+
             GeometryReader { geometry in
                 let magnifyGesture = MagnificationGesture()
                     .onChanged { value in
@@ -64,17 +64,17 @@ struct AdvSVGView: View {
                                 svgNaturalSize: svgNaturalSize,
                                 containerSize: geometry.size
                             )
-                            
+
                             let displayTitle = marker.ru.title ?? marker.en.title ?? ""
                             GenericMarkerView(type: marker.type, title: displayTitle)
                                 .offset(y: -21)
                                 .scaleEffect(1.0 / 7.0)
                                 .position(markerPosition)
                                 .transition(
-                                   .move(edge: .top)
-                                   .combined(with: .opacity)
-                                   .animation(.spring(response: 0.6, dampingFraction: 0.6))
-                               )
+                                    .move(edge: .top)
+                                        .combined(with: .opacity)
+                                        .animation(.spring(response: 0.6, dampingFraction: 0.6))
+                                )
                         }
                     }
 
@@ -121,13 +121,13 @@ struct AdvSVGView: View {
             ProgressView()
         }
     }
-    
+
     private func movePinMarkerUpper(_ position: CGPoint) -> CGPoint {
         // either way it also can be moved backwards in terms of layers
         // (mb this one will affect as better UX)
         return CGPoint(x: position.x, y: position.y - 4)
     }
-    
+
     private func clampOffset(_ offset: CGSize, for scale: CGFloat, in containerSize: CGSize) -> CGSize {
         if scale <= 1.0 {
             return .zero

@@ -1,0 +1,273 @@
+//
+//  DatabaseManager.swift
+//  DepNavIOS
+//
+//  Created by Michael Gavrilenko on 04.07.2025.
+//
+import Foundation
+import SQLite3
+
+class DatabaseManager {
+    static let shared = DatabaseManager()
+    private var db: OpaquePointer?
+
+    // A serial dispatch queue to ensure thread-safe access to the database.
+    // All database operations will be performed on this queue.
+    private let dbQueue = DispatchQueue(label: "com.depnavios.database.serialqueue")
+
+    private init() {
+        dbQueue.sync {
+            self.openDatabase()
+            self.createTables()
+        }
+    }
+
+    deinit {
+        dbQueue.sync {
+            self.closeDatabase()
+        }
+    }
+
+    private func openDatabase() {
+        do {
+            let fileURL = try FileManager.default
+                .url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+                .appendingPathComponent("AppDatabase.sqlite")
+
+            if sqlite3_open(fileURL.path, &db) == SQLITE_OK {
+                print("Successfully opened connection to database.")
+            } else {
+                print("Unable to open database.")
+            }
+        } catch {
+            print("Could not find database file URL: \(error)")
+        }
+    }
+
+    private func closeDatabase() {
+        if sqlite3_close(db) == SQLITE_OK {
+            print("Successfully closed connection to database.")
+        } else {
+            print("Unable to close database.")
+        }
+    }
+
+    private func createTables() {
+        createHistoryTable()
+        createDBHandlerTable()
+    }
+
+    private func createDBHandlerTable() {
+        let createTableString = """
+            CREATE TABLE IF NOT EXISTS DBHandler(
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Name TEXT,
+            Result TEXT,
+            AvailableDepartments TEXT,
+            HistoryList TEXT);
+        """
+        if sqlite3_exec(db, createTableString, nil, nil, nil) != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db)!)
+            print("Error creating DBHandler table: \(errmsg)")
+        }
+    }
+
+    private func createHistoryTable() {
+        let createTableString = """
+            CREATE TABLE IF NOT EXISTS History(
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            DBHandlerId INTEGER,
+            Department TEXT,
+            Floor INT,
+            ObjectName TEXT,
+            ObjectDescription TEXT,
+            ObjectTypeName TEXT,
+            FOREIGN KEY(DBHandlerId) REFERENCES DBHandler(Id));
+        """
+        if sqlite3_exec(db, createTableString, nil, nil, nil) != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db)!)
+            print("Error creating History table: \(errmsg)")
+        }
+    }
+
+    // MARK: - Safe Binding Helper
+
+    private func bind(text: String, to statement: OpaquePointer?, at index: Int32) {
+        sqlite3_bind_text(statement, index, (text as NSString).utf8String, -1, nil)
+    }
+
+    // MARK: - History CRUD Operations
+
+    func insertHistory(_ history: HistoryModel) -> Bool {
+        var success = false
+        dbQueue.sync {
+            let insertSQL = "INSERT INTO History (Department, Floor, ObjectName, ObjectDescription, ObjectTypeName) VALUES (?, ?, ?, ?, ?);"
+            var statement: OpaquePointer?
+
+            if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
+                bind(text: history.department, to: statement, at: 1)
+                sqlite3_bind_int(statement, 2, Int32(history.floor)!)
+                bind(text: history.objectTitle, to: statement, at: 3)
+                bind(text: history.objectDescription, to: statement, at: 4)
+                bind(text: history.objectTypeName, to: statement, at: 5)
+
+                if sqlite3_step(statement) == SQLITE_DONE {
+                    success = true
+                } else {
+                    let errmsg = String(cString: sqlite3_errmsg(db)!)
+                    print("Failure inserting history: \(errmsg)")
+                }
+            }
+            sqlite3_finalize(statement)
+        }
+        return success
+    }
+
+    func getAllHistory() -> [HistoryModel] {
+        var histories: [HistoryModel] = []
+        dbQueue.sync {
+            let querySQL = "SELECT Id, Department, Floor, ObjectName, ObjectDescription, ObjectTypeName FROM History;"
+            var statement: OpaquePointer?
+
+            if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+                while sqlite3_step(statement) == SQLITE_ROW {
+                    let id = Int(sqlite3_column_int(statement, 0))
+                    let department = String(cString: sqlite3_column_text(statement, 1))
+                    let floor = Int(sqlite3_column_int(statement, 2))
+                    let objectTitle = String(cString: sqlite3_column_text(statement, 3))
+                    let objectDescription = String(cString: sqlite3_column_text(statement, 4))
+                    let objectTypeName = String(cString: sqlite3_column_text(statement, 5))
+
+                    let history = HistoryModel(
+                        id: id,
+                        floor: floor,
+                        department: department,
+                        objectTitle: objectTitle,
+                        objectDescription: objectDescription,
+                        objectTypeName: objectTypeName
+                    )
+                    histories.append(history)
+                }
+            } else {
+                let errmsg = String(cString: sqlite3_errmsg(db)!)
+                print("Failure preparing select all history: \(errmsg)")
+            }
+            sqlite3_finalize(statement)
+        }
+        return histories
+    }
+
+    func updateHistory(_ history: HistoryModel) -> Bool {
+        var success = false
+        dbQueue.sync {
+            let updateSQL = "UPDATE History SET Department = ?, Floor = ?, ObjectName = ?, ObjectDescription = ?, ObjectTypeName = ? WHERE Id = ?;"
+            var statement: OpaquePointer?
+
+            if sqlite3_prepare_v2(db, updateSQL, -1, &statement, nil) == SQLITE_OK {
+                bind(text: history.department, to: statement, at: 1)
+                sqlite3_bind_int(statement, 2, Int32(history.floor)!)
+                bind(text: history.objectTitle, to: statement, at: 3)
+                bind(text: history.objectDescription, to: statement, at: 4)
+                bind(text: history.objectTypeName, to: statement, at: 5)
+                sqlite3_bind_int(statement, 6, Int32(history.id))
+
+                if sqlite3_step(statement) == SQLITE_DONE {
+                    success = true
+                }
+            }
+            sqlite3_finalize(statement)
+        }
+        return success
+    }
+
+    func deleteHistory(id: Int) -> Bool {
+        var success = false
+        dbQueue.sync {
+            let deleteSQL = "DELETE FROM History WHERE Id = ?;"
+            var statement: OpaquePointer?
+
+            if sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK {
+                sqlite3_bind_int(statement, 1, Int32(id))
+
+                if sqlite3_step(statement) == SQLITE_DONE {
+                    success = true
+                }
+            }
+            sqlite3_finalize(statement)
+        }
+        return success
+    }
+
+    // MARK: - DBHandler CRUD Operations
+
+    // Note: The logic for storing arrays as JSON strings is maintained.
+
+    func insertDBHandler(_ handler: DBHandlerModel) -> Bool {
+        var success = false
+        dbQueue.sync {
+            let insertSQL = "INSERT INTO DBHandler (Name, Result, AvailableDepartments, HistoryList) VALUES (?, ?, ?, ?);"
+            var statement: OpaquePointer?
+
+            if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
+                bind(text: handler.name, to: statement, at: 1)
+                bind(text: handler.result, to: statement, at: 2)
+
+                let encoder = JSONEncoder()
+                if let departmentsData = try? encoder.encode(handler.availableDepartments),
+                   let departmentsJSON = String(data: departmentsData, encoding: .utf8) {
+                    bind(text: departmentsJSON, to: statement, at: 3)
+                }
+
+                if let historyData = try? encoder.encode(handler.historyList),
+                   let historyJSON = String(data: historyData, encoding: .utf8) {
+                    bind(text: historyJSON, to: statement, at: 4)
+                }
+
+                if sqlite3_step(statement) == SQLITE_DONE {
+                    success = true
+                }
+            }
+            sqlite3_finalize(statement)
+        }
+        return success
+    }
+
+    func getAllDBHandlers() -> [DBHandlerModel] {
+        var handlers: [DBHandlerModel] = []
+        dbQueue.sync {
+            let querySQL = "SELECT Id, Name, Result, AvailableDepartments, HistoryList FROM DBHandler;"
+            var statement: OpaquePointer?
+
+            if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+                while sqlite3_step(statement) == SQLITE_ROW {
+                    let id = Int(sqlite3_column_int(statement, 0))
+                    let name = String(cString: sqlite3_column_text(statement, 1))
+                    let result = String(cString: sqlite3_column_text(statement, 2))
+
+                    let decoder = JSONDecoder()
+                    var departments: [String]?
+                    if let departmentsText = sqlite3_column_text(statement, 3), let data = String(cString: departmentsText).data(using: .utf8) {
+                        departments = try? decoder.decode([String].self, from: data)
+                    }
+
+                    var historyList: [HistoryModel]?
+                    if let historyText = sqlite3_column_text(statement, 4), let data = String(cString: historyText).data(using: .utf8) {
+                        historyList = try? decoder.decode([HistoryModel].self, from: data)
+                    }
+
+                    let handler = DBHandlerModel(
+                        id: id,
+                        name: name,
+                        result: result,
+                        availableDepartments: departments,
+                        historyLength: historyList?.count, // Deriving length from the list
+                        historyList: historyList
+                    )
+                    handlers.append(handler)
+                }
+            }
+            sqlite3_finalize(statement)
+        }
+        return handlers
+    }
+}

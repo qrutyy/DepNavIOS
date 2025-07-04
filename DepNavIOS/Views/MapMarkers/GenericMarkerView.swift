@@ -17,7 +17,6 @@ struct GenericMarkerView: View {
             .frame(width: 40, alignment: .center)
     }
 
-    // Эта функция возвращает нужную иконку для каждого типа
     @ViewBuilder
     private func iconForType(_ type: MarkerType) -> some View {
         switch type {

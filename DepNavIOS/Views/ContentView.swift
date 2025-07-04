@@ -20,9 +20,11 @@ struct ContentView: View {
     @State var isBottomSheetPresented: Bool = true
 
     @State private var isSearchAlertPresented: Bool = false
+    @State private var searchElementCount: Int = 0
 
-    // ADDED: CoordinateLoader is now owned by the parent view.
     @StateObject private var coordinateLoader = CoordinateLoader()
+
+    @StateObject private var DBModel: DatabaseViewModel = .init()
 
     private let detents: Set<PresentationDetent> = [.height(55), .medium, .large]
 
@@ -48,7 +50,7 @@ struct ContentView: View {
             )
             .edgesIgnoringSafeArea(.all)
             .sheet(isPresented: $isBottomSheetPresented, onDismiss: { isBottomSheetPresented = true }) {
-                BottomSearchSheetView(callOnSubmit: findMarkerWithId, idToFind: $idToFind)
+                BottomSearchSheetView(callOnSubmit: findMarkerWithId, idToFind: $idToFind, DBModel: DBModel)
                     .presentationDetents(detents)
                     .presentationCornerRadius(20)
                     .presentationDragIndicator(.visible)
@@ -61,7 +63,7 @@ struct ContentView: View {
                 ForEach([1, 2, 3, 4], id: \.self) { floor in
                     Button(action: {
                         selectedFloor = floor
-                        showNotFoundState() // to remove the marker if it was set
+                        removeMarker()
                     }) {
                         Text(String(floor))
                             .fontWeight(.medium)
@@ -99,32 +101,62 @@ struct ContentView: View {
         }
     }
 
-    // This function now correctly works within ContentView's scope
+    // This function now correctly works within ContentView's scope.
+    // DBModel is appended with new fully descriptive record for minimising repeative JSON parsing.
     private func findMarkerWithId() {
+        var newDBHHistoryItem = HistoryModel()
+        searchElementCount += 1
+
         guard let mapDescription = coordinateLoader.mapDescriptions[selectedDepartment] else {
-            print("Ошибка: Данные для факультета '\(selectedDepartment)' не загружены.")
+            print("findMarkerWithId: Data for '\(selectedDepartment)' department isn' loaded.")
             showNotFoundState()
             return
         }
+
         for floorData in mapDescription.floors { // numbers with first digit as floor num - can be optimised
             if let foundMarker = floorData.markers.first(where: {
                 ($0.ru.title ?? "") == idToFind || ($0.en.title ?? "") == idToFind
             }) {
-                print("Найден маркер для '\(idToFind)' на координатах: \(foundMarker.coordinate)")
+                print("findMarkerWithId: marker with id = '\(idToFind)' was found on: \(foundMarker.coordinate)")
                 markerCoordinate = foundMarker.coordinate
                 isBottomSheetPresented = true
                 selectedFloor = floorData.floor
+                newDBHHistoryItem = HistoryModel(
+                    id: searchElementCount,
+                    floor: floorData.floor,
+                    department: selectedDepartment,
+                    objectTitle: foundMarker.ru.title ?? foundMarker.en.title ?? "",
+                    objectDescription: foundMarker.ru.description ?? foundMarker.en.description ?? "",
+                    objectTypeName: foundMarker.type.displayName
+                )
+                DBModel.addHistoryItem(newDBHHistoryItem)
                 return
             }
         }
+
+        newDBHHistoryItem = HistoryModel(
+            id: searchElementCount,
+            floor: nil,
+            department: nil,
+            objectTitle: idToFind,
+            objectDescription: nil,
+            objectTypeName: nil
+        )
+        DBModel.addHistoryItem(newDBHHistoryItem)
+
+        print("findMarkerWithId: Error: object with id \(idToFind) not found in data for faculty '\(selectedDepartment)'.")
         showNotFoundState()
     }
 
-    private func showNotFoundState() {
+    private func removeMarker() {
         markerCoordinate = nil
-        // isSearchAlertPresented = true
         idToFind = "" // mb ux will be better without
         isBottomSheetPresented = true
+    }
+
+    private func showNotFoundState() {
+        removeMarker()
+        isSearchAlertPresented = true
     }
 }
 
