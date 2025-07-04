@@ -61,6 +61,7 @@ struct ContentView: View {
                 ForEach([1, 2, 3, 4], id: \.self) { floor in
                     Button(action: {
                         selectedFloor = floor
+                        showNotFoundState() // to remove the marker if it was set
                     }) {
                         Text(String(floor))
                             .fontWeight(.medium)
@@ -112,17 +113,17 @@ struct ContentView: View {
                 print("Найден маркер для '\(idToFind)' на координатах: \(foundMarker.coordinate)")
                 markerCoordinate = foundMarker.coordinate
                 isBottomSheetPresented = true
+                selectedFloor = floorData.floor
                 return
-            } else {
-                print("Объект с ID '\(idToFind)' не найден на этаже \(selectedFloor).")
             }
-            showNotFoundState()
         }
+        showNotFoundState()
     }
 
     private func showNotFoundState() {
         markerCoordinate = nil
-        isSearchAlertPresented = true
+        // isSearchAlertPresented = true
+        idToFind = "" // mb ux will be better without
         isBottomSheetPresented = true
     }
 }

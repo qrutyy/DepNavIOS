@@ -88,7 +88,7 @@ struct AdvSVGView: View {
                         PinMarkerView(color: .red)
                             .offset(y: -21)
                             .scaleEffect(1.0 / self.scale)
-                            .position(markerPosition)
+                            .position(movePinMarkerUpper(markerPosition))
                             .transition(
                                 .move(edge: .top)
                                     .combined(with: .opacity)
@@ -120,6 +120,12 @@ struct AdvSVGView: View {
         } else {
             ProgressView()
         }
+    }
+    
+    private func movePinMarkerUpper(_ position: CGPoint) -> CGPoint {
+        // either way it also can be moved backwards in terms of layers
+        // (mb this one will affect as better UX)
+        return CGPoint(x: position.x, y: position.y - 4)
     }
     
     private func clampOffset(_ offset: CGSize, for scale: CGFloat, in containerSize: CGSize) -> CGSize {
