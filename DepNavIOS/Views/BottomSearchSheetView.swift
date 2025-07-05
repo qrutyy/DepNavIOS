@@ -170,7 +170,7 @@ struct BottomSearchSheetView: View {
                 )
             }
         }
-        return unsortedResults.sorted{
+        return unsortedResults.sorted {
             ($0.objectTitle.lowercased(), $0.objectTypeName.lowercased()) < ($1.objectTitle.lowercased(), $1.objectTypeName.lowercased())
         }
     }
@@ -191,21 +191,21 @@ struct BottomSearchSheetView: View {
                 if DBModel.isLoading {
                     ProgressView("Loading data from database...").padding()
                 } else {
-                    let historySize = DBModel.historyLength
-                    if historySize != nil && historySize != 0 {
-                        ForEach(0 ... min(5, historySize!), id: \.self) { (elementNumber: Int) in
-                            let historyItem = DBModel.historyItems[historySize! - elementNumber]
+                    if DBModel.historyItems.isEmpty {
+                        Text("No recent searches")
+                            .font(.system(size: 16))
+                            .foregroundColor(.secondary)
+                            .padding()
+                    } else {
+                        let recentItems = DBModel.historyItems.reversed().prefix(10)
+
+                        ForEach(Array(recentItems), id: \.id) { historyItem in
                             SearchResultRow(
                                 icon: getHistoryIconByType(objectTypeName: historyItem.objectTypeName),
                                 title: getFormattedTitle(objectTitle: historyItem.objectTitle, objectTypeName: historyItem.objectTypeName),
                                 subtitle: historyItem.objectDescription
                             )
                         }
-                    } else {
-                        Text("No recent searches")
-                            .font(.system(size: 16))
-                            .foregroundColor(.secondary)
-                            .padding()
                     }
                 }
             }
