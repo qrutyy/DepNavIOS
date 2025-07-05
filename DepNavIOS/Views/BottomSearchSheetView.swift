@@ -67,12 +67,6 @@ struct BottomSearchSheetView: View {
                 Text("Favourites")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.primary)
-                Spacer()
-                Button("More") {
-                    // More action
-                }
-                .font(.system(size: 16))
-                .foregroundColor(.blue)
             }
             .padding(.horizontal, 16)
 
@@ -124,11 +118,6 @@ struct BottomSearchSheetView: View {
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.primary)
                 Spacer()
-                Button("More") {
-                    // More action
-                }
-                .font(.system(size: 16))
-                .foregroundColor(.blue)
             }
             .padding(.horizontal, 16)
             .padding(.top, 16)
@@ -161,7 +150,7 @@ struct BottomSearchSheetView: View {
     // MARK: - Helper Functions
 
     private func getFormattedTitle(objectTitle: String, objectTypeName: String) -> String {
-        return "\(objectTitle), \(objectTypeName)"
+        return "\(objectTypeName) \(objectTitle)"
     }
 
     private func getHistoryIconByType(objectTypeName: String) -> String {
@@ -231,13 +220,19 @@ struct SearchResultRow: View {
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
-
-                Text(subtitle)
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                if (subtitle == "") {
+                    Text(title)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary)
+                } else {
+                    Text(title)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary)
+                    Text(subtitle)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                }
+                
             }
 
             Spacer()

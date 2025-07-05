@@ -93,12 +93,6 @@ struct ContentView: View {
                 isBottomSheetPresented = true
             }
         }
-        // You can add an alert here if you want
-        .alert("Объект не найден", isPresented: $isSearchAlertPresented) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Объект с ID \"\(idToFind)\" не был найден на карте.")
-        }
     }
 
     // This function now correctly works within ContentView's scope.

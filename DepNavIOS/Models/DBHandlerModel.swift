@@ -22,7 +22,7 @@ class HistoryModel: Codable {
         self.department = department ?? ""
         self.floor = floor != nil ? floor! : -99
         self.objectTitle = objectTitle ?? ""
-        self.objectDescription = objectDescription ?? "unknown"
+        self.objectDescription = objectDescription ?? "not found"
         self.objectTypeName = objectTypeName ?? ""
     }
 }
