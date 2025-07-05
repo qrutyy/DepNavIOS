@@ -5,78 +5,152 @@
 //  Created by Michael Gavrilenko on 23.06.2025.
 //
 
+import BottomSheet
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selectedFloor: String = "floor1"
+    @State private var selectedFloor: Int = 1
     @State private var selectedDepartment: String = "spbu-mm"
     @State private var showWelcomeScreen = true
 
     @State private var idToFind: String = ""
     @State private var markerCoordinate: CGPoint?
-    @StateObject private var coordinateLoader = CoordinateLoader()
+
+    @State var bottomSheetPosition: BottomSheetPosition = .absolute(325)
+    @State var isBottomSheetPresented: Bool = true
 
     @State private var isSearchAlertPresented: Bool = false
+    @State private var searchElementCount: Int = 0
+
+    @StateObject private var coordinateLoader = CoordinateLoader()
+
+    @StateObject private var DBModel: DatabaseViewModel = .init()
+
+    private let detents: Set<PresentationDetent> = [.height(55), .medium, .large]
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Welcome Screen
-            Button(action: {
-                self.showWelcomeScreen = true
-            }) {}
-                .sheet(isPresented: $showWelcomeScreen) {
-                    WelcomeScreen(
-                        showWelcomeScreen: $showWelcomeScreen,
-                        selectedDepartment: $selectedDepartment
-                    )
+        // Welcome Screen
+        Button(action: {
+            self.showWelcomeScreen = true
+        }) {}
+            .sheet(isPresented: $showWelcomeScreen) {
+                WelcomeScreen(
+                    showWelcomeScreen: $showWelcomeScreen,
+                    selectedDepartment: $selectedDepartment
+                )
+            }
+
+        ZStack(alignment: .topTrailing) {
+            // CHANGED: Pass the coordinateLoader down to the map view.
+            SVGMapView(
+                floor: selectedFloor,
+                department: selectedDepartment,
+                markerCoordinate: $markerCoordinate,
+                coordinateLoader: coordinateLoader
+            )
+            .edgesIgnoringSafeArea(.all)
+            .sheet(isPresented: $isBottomSheetPresented, onDismiss: { isBottomSheetPresented = true }) {
+                BottomSearchSheetView(callOnSubmit: findMarkerWithId, idToFind: $idToFind, DBModel: DBModel)
+                    .presentationDetents(detents)
+                    .presentationCornerRadius(20)
+                    .presentationDragIndicator(.visible)
+                    .interactiveDismissDisabled()
+                    .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                    .presentationBackground(.clear)
+            }
+
+            VStack(spacing: 12) {
+                ForEach([1, 2, 3, 4], id: \.self) { floor in
+                    Button(action: {
+                        selectedFloor = floor
+                        removeMarker()
+                    }) {
+                        Text(String(floor))
+                            .fontWeight(.medium)
+                            .frame(width: 44, height: 44)
+                            .background(selectedFloor == floor ? Color.blue : Color.clear)
+                            .foregroundColor(selectedFloor == floor ? .white : .primary)
+                            .cornerRadius(12)
+                    }
                 }
-
-            HStack {
-                TextField("Enter room number", text: $idToFind)
-                    .frame(width: 300, height: 50)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .onSubmit(findMarkerWithId) // Искать при нажатии Enter
-
-                Button("Find", action: findMarkerWithId).alert("Object with id: \(idToFind) wasn't found", isPresented: $isSearchAlertPresented, actions: {}, message: {})
             }
-
-            // Floor picker (should be reworked - dep from the files + change ui representation)
-            Picker("Select Floor", selection: $selectedFloor) {
-                Text("Floor 1").tag("floor1")
-                Text("Floor 2").tag("floor2")
-                Text("Floor 3").tag("floor3")
-                Text("Floor 4").tag("floor4")
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal)
-
-            SVGMapView(floor: selectedFloor, department: selectedDepartment, markerCoordinate: $markerCoordinate)
-                .frame(height: 600)
-                .border(Color.green, width: 2)
-                .padding()
+            .background(.thinMaterial)
+            .cornerRadius(12)
+            .shadow(radius: 3)
+            .padding(.top, 35)
+            .padding(.trailing, 16)
         }
         .onAppear {
-            coordinateLoader.load(department: selectedDepartment, floor: selectedFloor)
+            // Load initial data when the view appears
+            coordinateLoader.load(fileName: selectedDepartment)
         }
-        // call load each time we change the department
         .onChange(of: selectedDepartment) { newDepartment in
-            coordinateLoader.load(department: newDepartment, floor: selectedFloor)
-            markerCoordinate = nil
-            idToFind = ""
+            // Reload data whenever the department changes
+            coordinateLoader.load(fileName: newDepartment)
         }
-        // it shouldnt be changed when switching the floors, bc it will change it to appropriate one by itself
+        .onChange(of: isSearchAlertPresented) { _ in
+            if !isBottomSheetPresented {
+                isBottomSheetPresented = true
+            }
+        }
     }
 
+    // This function now correctly works within ContentView's scope.
+    // DBModel is appended with new fully descriptive record for minimising repeative JSON parsing.
     private func findMarkerWithId() {
-        if let room = coordinateLoader.coordinates[idToFind] {
-            print(room.coordinate.y, room.coordinate.x)
-            markerCoordinate = room.coordinate
-            // idToFind = "" idk mb we shouldn't clear
-        } else {
-            markerCoordinate = nil
-            print("Object with id: \(idToFind) not found in coordinates file.")
-            isSearchAlertPresented = true
+        var newDBHHistoryItem = HistoryModel()
+        searchElementCount += 1
+
+        guard let mapDescription = coordinateLoader.mapDescriptions[selectedDepartment] else {
+            print("findMarkerWithId: Data for '\(selectedDepartment)' department isn' loaded.")
+            showNotFoundState()
+            return
         }
+
+        for floorData in mapDescription.floors { // numbers with first digit as floor num - can be optimised
+            if let foundMarker = floorData.markers.first(where: {
+                ($0.ru.title ?? "") == idToFind || ($0.en.title ?? "") == idToFind
+            }) {
+                print("findMarkerWithId: marker with id = '\(idToFind)' was found on: \(foundMarker.coordinate)")
+                markerCoordinate = foundMarker.coordinate
+                isBottomSheetPresented = true
+                selectedFloor = floorData.floor
+                newDBHHistoryItem = HistoryModel(
+                    id: searchElementCount,
+                    floor: floorData.floor,
+                    department: selectedDepartment,
+                    objectTitle: foundMarker.ru.title ?? foundMarker.en.title ?? "",
+                    objectDescription: foundMarker.ru.description ?? foundMarker.en.description ?? "",
+                    objectTypeName: foundMarker.type.displayName
+                )
+                DBModel.addHistoryItem(newDBHHistoryItem)
+                return
+            }
+        }
+
+        newDBHHistoryItem = HistoryModel(
+            id: searchElementCount,
+            floor: nil,
+            department: nil,
+            objectTitle: idToFind,
+            objectDescription: nil,
+            objectTypeName: nil
+        )
+        DBModel.addHistoryItem(newDBHHistoryItem)
+
+        print("findMarkerWithId: Error: object with id \(idToFind) not found in data for faculty '\(selectedDepartment)'.")
+        showNotFoundState()
+    }
+
+    private func removeMarker() {
+        markerCoordinate = nil
+        idToFind = "" // mb ux will be better without
+        isBottomSheetPresented = true
+    }
+
+    private func showNotFoundState() {
+        removeMarker()
+        isSearchAlertPresented = true
     }
 }
 

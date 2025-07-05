@@ -1,5 +1,5 @@
 //
-//  MarkerView.swift
+//  PinMarkerView.swift
 //  DepNavIOS
 //
 //  Created by Michael Gavrilenko on 29.06.2025.

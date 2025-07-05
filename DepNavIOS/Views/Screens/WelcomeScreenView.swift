@@ -43,7 +43,7 @@ struct WelcomeScreen: View {
                     FeatureCell(
                         image: "plus.circle.fill",
                         title: "Add Your Faculty",
-                        subtitle: "Create and share maps to make campus life easier.",
+                        subtitle: "Easily import and use custom maps of your faculty.",
                         color: .orange
                     )
                 }
