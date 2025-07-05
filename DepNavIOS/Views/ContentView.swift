@@ -50,7 +50,7 @@ struct ContentView: View {
             )
             .edgesIgnoringSafeArea(.all)
             .sheet(isPresented: $isBottomSheetPresented, onDismiss: { isBottomSheetPresented = true }) {
-                BottomSearchSheetView(callOnSubmit: findMarkerWithId, idToFind: $idToFind, DBModel: DBModel)
+                BottomSearchSheetView(callOnSubmit: findMarkerWithId, department: selectedDepartment, idToFind: $idToFind, DBModel: DBModel, coordinateLoader: coordinateLoader)
                     .presentationDetents(detents)
                     .presentationCornerRadius(20)
                     .presentationDragIndicator(.visible)
@@ -95,7 +95,6 @@ struct ContentView: View {
         }
     }
 
-    // This function now correctly works within ContentView's scope.
     // DBModel is appended with new fully descriptive record for minimising repeative JSON parsing.
     private func findMarkerWithId() {
         var newDBHHistoryItem = HistoryModel()

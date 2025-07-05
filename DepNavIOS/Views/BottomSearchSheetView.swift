@@ -9,8 +9,10 @@ import SwiftUI
 
 struct BottomSearchSheetView: View {
     let callOnSubmit: () -> Void
+    let department: String
     @Binding var idToFind: String
     @StateObject var DBModel: DatabaseViewModel
+    @ObservedObject var coordinateLoader: CoordinateLoader
 
     // MARK: - Main Body
 
@@ -103,11 +105,74 @@ struct BottomSearchSheetView: View {
             .padding(.top, 16)
 
             LazyVStack(spacing: 0) {
-                SearchResultRow(icon: "building.2.fill", title: "Room \(idToFind)", subtitle: "Main Building, Floor 2")
-                SearchResultRow(icon: "person.fill", title: "Professor \(idToFind)", subtitle: "Mathematics Department")
+                if !idToFind.isEmpty {
+                    if DBModel.isLoading {
+                        ProgressView("Loading data from database...").padding()
+                    } else {
+                        if searchResults.isEmpty {
+                            Text("No results found")
+                        }
+                        ForEach(searchResults, id: \.id) { item in
+                            SearchResultRow(
+                                icon: getHistoryIconByType(objectTypeName: item.objectTypeName),
+                                title: getFormattedTitle(objectTitle: item.objectTitle, objectTypeName: item.objectTypeName),
+                                subtitle: item.objectDescription
+                            )
+                        }
+                    }
+                }
             }
         }
         .padding(.horizontal, 16)
+    }
+
+    private var searchResults: [HistoryModel] {
+        if idToFind.isEmpty {
+            return []
+        }
+
+        guard let mapDescription = coordinateLoader.mapDescriptions[department] else {
+            return []
+        }
+
+        let searchText = idToFind.lowercased()
+        var uniqueID = 0
+
+        // Use `flatMap` to iterate through all floors and directly map matching markers to HistoryModel.
+        let unsortedResults = mapDescription.floors.flatMap { floorData -> [HistoryModel] in
+            // For each floor, filter its markers.
+            let matchingMarkersOnThisFloor = floorData.markers.filter { marker in
+                // Safely check optional titles.
+                let titleMatch = (marker.ru.title?.lowercased().hasPrefix(searchText) ?? false) ||
+                    (marker.en.title?.lowercased().hasPrefix(searchText) ?? false)
+
+                let typeMatch = marker.type.displayName.lowercased().hasPrefix(searchText)
+
+                let descriptionMatch = (marker.ru.description?.lowercased().hasPrefix(searchText) ?? false) ||
+                    (marker.en.description?.lowercased().hasPrefix(searchText) ?? false)
+
+                return titleMatch || typeMatch || descriptionMatch
+            }
+
+            // Now, map the found markers on THIS floor to HistoryModel, using the floorData.
+            return matchingMarkersOnThisFloor.map { marker -> HistoryModel in
+                uniqueID += 1
+
+                return HistoryModel(
+                    // Use the marker's own ID, assuming it's unique across the entire dataset.
+                    id: uniqueID,
+                    // CRITICAL FIX: Use the floor number from the current floorData.
+                    floor: floorData.floor,
+                    department: department,
+                    objectTitle: marker.ru.title ?? marker.en.title ?? "Unknown",
+                    objectDescription: marker.ru.description ?? marker.en.description ?? "",
+                    objectTypeName: marker.type.displayName
+                )
+            }
+        }
+        return unsortedResults.sorted{
+            ($0.objectTitle.lowercased(), $0.objectTypeName.lowercased()) < ($1.objectTitle.lowercased(), $1.objectTypeName.lowercased())
+        }
     }
 
     /// The view for displaying recent searches.
@@ -220,7 +285,7 @@ struct SearchResultRow: View {
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                if (subtitle == "") {
+                if subtitle == "" {
                     Text(title)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
@@ -232,7 +297,6 @@ struct SearchResultRow: View {
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                 }
-                
             }
 
             Spacer()
