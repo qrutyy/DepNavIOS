@@ -10,7 +10,7 @@ class DepartmentMapModel: Codable {}
 class HistoryModel: Codable {
     var id: Int = 1
     var department: String = ""
-    var floor: String = ""
+    var floor: Int = -99
     var objectTitle: String = ""
     var objectDescription: String = ""
     var objectTypeName: String = ""
@@ -20,7 +20,7 @@ class HistoryModel: Codable {
     init(id: Int, floor: Int?, department: String? = nil, objectTitle: String?, objectDescription: String?, objectTypeName: String?) {
         self.id = id
         self.department = department ?? ""
-        self.floor = floor != nil ? String(floor!) : ""
+        self.floor = floor != nil ? floor! : -99
         self.objectTitle = objectTitle ?? ""
         self.objectDescription = objectDescription ?? "unknown"
         self.objectTypeName = objectTypeName ?? ""

@@ -139,7 +139,7 @@ struct BottomSearchSheetView: View {
                 } else {
                     let historySize = DBModel.historyLength
                     if historySize != nil && historySize != 0 {
-                        ForEach(1 ... min(5, historySize!), id: \.self) { (elementNumber: Int) in
+                        ForEach(0 ... min(5, historySize!), id: \.self) { (elementNumber: Int) in
                             let historyItem = DBModel.historyItems[historySize! - elementNumber]
                             SearchResultRow(
                                 icon: getHistoryIconByType(objectTypeName: historyItem.objectTypeName),

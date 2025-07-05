@@ -106,7 +106,7 @@ class DatabaseManager {
 
             if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
                 bind(text: history.department, to: statement, at: 1)
-                sqlite3_bind_int(statement, 2, Int32(history.floor)!)
+                sqlite3_bind_int(statement, 2, Int32(history.floor))
                 bind(text: history.objectTitle, to: statement, at: 3)
                 bind(text: history.objectDescription, to: statement, at: 4)
                 bind(text: history.objectTypeName, to: statement, at: 5)
@@ -165,7 +165,7 @@ class DatabaseManager {
 
             if sqlite3_prepare_v2(db, updateSQL, -1, &statement, nil) == SQLITE_OK {
                 bind(text: history.department, to: statement, at: 1)
-                sqlite3_bind_int(statement, 2, Int32(history.floor)!)
+                sqlite3_bind_int(statement, 2, Int32(history.floor))
                 bind(text: history.objectTitle, to: statement, at: 3)
                 bind(text: history.objectDescription, to: statement, at: 4)
                 bind(text: history.objectTypeName, to: statement, at: 5)
