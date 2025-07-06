@@ -13,8 +13,7 @@ struct SVGMapView: View {
     let department: String
 
     @Binding var markerCoordinate: CGPoint?
-
-    let coordinateLoader: CoordinateLoader
+    let mapDescription: MapDescription
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -26,7 +25,7 @@ struct SVGMapView: View {
                 floor: floor,
                 department: department,
                 markerCoordinate: $markerCoordinate,
-                coordinateLoader: coordinateLoader
+                mapDescription: mapDescription
             )
             .onAppear {
                 print("SVGView: layout for file 'Maps/\(department)/floor\(floor).svg'")

@@ -4,53 +4,70 @@
 //
 //  Created by Michael Gavrilenko on 30.06.2025.
 //
-
 import SwiftUI
 
 struct BottomSearchSheetView: View {
-    let callOnSubmit: () -> Void
-    let department: String
-    @Binding var idToFind: String
-    @StateObject var DBModel: DatabaseViewModel
-    @ObservedObject var coordinateLoader: CoordinateLoader
+    // ИЗМЕНЕНИЕ: Используем @ObservedObject, так как жизненный цикл этой ViewModel
+    // управляется родительским ContentView.
+    @ObservedObject var mapViewModel: MapViewModel
+    
+    // ИЗМЕНЕНИЕ: Убрал isPresented, так как он не используется внутри View.
+    // Состоянием управляет родительский ContentView.
 
     // MARK: - Main Body
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
             searchBar
+                .padding(.top, 25)
+                .padding(.bottom, 20)
+
             ScrollView {
                 VStack(spacing: 0) {
-                    favoritesSection
-                    mainContentSection
+                    if mapViewModel.searchQuery.isEmpty {
+                        // Показываем избранное и недавние, если поиск пуст
+                        favoritesSection
+                        recentsSection
+                    } else {
+                        // Показываем результаты поиска, если что-то введено
+                        resultsSection
+                    }
                 }
             }
         }
         .background(Color(.systemBackground))
+        
+        .onChange(of: mapViewModel.searchQuery) { newValue in
+            Task {
+                if newValue == mapViewModel.searchQuery {
+                    await mapViewModel.searchMarkers()
+                }
+            }
+        }
     }
 
     // MARK: - Helper Views
 
-    /// The search bar view at the top of the sheet.
+    /// Панель поиска
     private var searchBar: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
-                .font(.system(size: 16, weight: .medium))
 
-            TextField("Search Maps", text: $idToFind)
-                .font(.system(size: 16))
-                .onSubmit(callOnSubmit)
+            TextField("Search Maps", text: $mapViewModel.searchQuery)
+                .submitLabel(.search)
+                .onSubmit {
+                    Task { await mapViewModel.searchMarkers() }
+                }
 
-            if !idToFind.isEmpty {
+            if !mapViewModel.searchQuery.isEmpty {
                 Button(action: {
-                    idToFind = ""
+                    mapViewModel.searchQuery = ""
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
-                        .font(.system(size: 16))
                 }
+                // .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
@@ -58,20 +75,16 @@ struct BottomSearchSheetView: View {
         .background(Color(.systemGray6))
         .cornerRadius(12)
         .padding(.horizontal, 20)
-        .padding(.top, 25)
-        .padding(.bottom, 20)
     }
 
-    /// The section displaying favorite items in a grid.
+    /// Секция "Избранное"
     private var favoritesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Favourites")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.primary)
-            }
-            .padding(.horizontal, 16)
+            Text("Favourites")
+                .font(.title2.bold())
+                .padding(.horizontal, 16)
 
+            // TODO: Заменить на реальные данные из ViewModel
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
                 FavoriteItemView(icon: "house.fill", title: "SE lab", subtitle: "7777", iconColor: .blue, backgroundColor: Color(.systemGray5))
                 FavoriteItemView(icon: "briefcase.fill", title: "Work", subtitle: "Add", iconColor: .blue, backgroundColor: Color(.systemGray5))
@@ -80,131 +93,84 @@ struct BottomSearchSheetView: View {
             }
             .padding(.horizontal, 16)
         }
-        .padding(.top, 10)
+        .padding(.vertical, 10)
     }
 
-    /// The main content area, showing either search results or recent searches.
-    @ViewBuilder
-    private var mainContentSection: some View {
-        if !idToFind.isEmpty {
-            resultsSection
-        } else {
-            recentsSection
-        }
-    }
-
-    /// The view for displaying search results.
+    /// Секция результатов поиска
     private var resultsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Results")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.title2.bold())
                 Spacer()
             }
-            .padding(.top, 16)
+            .padding([.top, .horizontal], 16)
+            .padding(.bottom, 8)
 
-            LazyVStack(spacing: 0) {
-                if !idToFind.isEmpty {
-                    if DBModel.isLoading {
-                        ProgressView("Loading data from database...").padding()
-                    } else {
-                        if searchResults.isEmpty {
-                            Text("No results found")
-                        }
-                        ForEach(searchResults, id: \.id) { item in
-                            SearchResultRow(
-                                icon: getHistoryIconByType(objectTypeName: item.objectTypeName),
-                                title: getFormattedTitle(objectTitle: item.objectTitle, objectTypeName: item.objectTypeName),
-                                subtitle: item.objectDescription
-                            )
+            if mapViewModel.isLoading {
+                ProgressView().frame(maxWidth: .infinity, alignment: .center)
+            } else if mapViewModel.searchResults.isEmpty {
+                Text("No suggestions found.")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+                // TODO: opportunity to add custom markers
+            } else {
+                LazyVStack(spacing: 0) {
+                    ForEach(mapViewModel.searchResults) { marker in
+                        SearchResultRow(
+                            icon: getHistoryIconByType(objectTypeName: marker.type.displayName),
+                            title: marker.title,
+                            subtitle: marker.description
+                             ?? ""
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            // Сообщаем ViewModel, что пользователь выбрал маркер
+                            mapViewModel.selectMarker(marker)
                         }
                     }
                 }
             }
         }
-        .padding(.horizontal, 16)
     }
 
-    private var searchResults: [HistoryModel] {
-        if idToFind.isEmpty {
-            return []
-        }
-
-        guard let mapDescription = coordinateLoader.mapDescriptions[department] else {
-            return []
-        }
-
-        let searchText = idToFind.lowercased()
-        var uniqueID = 0
-
-        // Use `flatMap` to iterate through all floors and directly map matching markers to HistoryModel.
-        let unsortedResults = mapDescription.floors.flatMap { floorData -> [HistoryModel] in
-            // For each floor, filter its markers.
-            let matchingMarkersOnThisFloor = floorData.markers.filter { marker in
-                // Safely check optional titles.
-                let titleMatch = (marker.ru.title?.lowercased().hasPrefix(searchText) ?? false) ||
-                    (marker.en.title?.lowercased().hasPrefix(searchText) ?? false)
-
-                let typeMatch = marker.type.displayName.lowercased().hasPrefix(searchText)
-
-                let descriptionMatch = (marker.ru.description?.lowercased().hasPrefix(searchText) ?? false) ||
-                    (marker.en.description?.lowercased().hasPrefix(searchText) ?? false)
-
-                return titleMatch || typeMatch || descriptionMatch
-            }
-
-            // Now, map the found markers on THIS floor to HistoryModel, using the floorData.
-            return matchingMarkersOnThisFloor.map { marker -> HistoryModel in
-                uniqueID += 1
-
-                return HistoryModel(
-                    // Use the marker's own ID, assuming it's unique across the entire dataset.
-                    id: uniqueID,
-                    // CRITICAL FIX: Use the floor number from the current floorData.
-                    floor: floorData.floor,
-                    department: department,
-                    objectTitle: marker.ru.title ?? marker.en.title ?? "Unknown",
-                    objectDescription: marker.ru.description ?? marker.en.description ?? "",
-                    objectTypeName: marker.type.displayName
-                )
-            }
-        }
-        return unsortedResults.sorted {
-            ($0.objectTitle.lowercased(), $0.objectTypeName.lowercased()) < ($1.objectTitle.lowercased(), $1.objectTypeName.lowercased())
-        }
-    }
-
-    /// The view for displaying recent searches.
+    /// Секция недавних поисков
     private var recentsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Recents")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.title2.bold())
                 Spacer()
+                if !mapViewModel.dbViewModel.historyItems.isEmpty {
+                    Button("Clear") {
+                        mapViewModel.dbViewModel.clearAllHistory()
+                    }
+                    .font(.subheadline)
+                    .buttonStyle(.borderless)
+                }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
+            .padding([.top, .horizontal], 16)
+            .padding(.bottom, 8)
 
-            LazyVStack(spacing: 0) {
-                if DBModel.isLoading {
-                    ProgressView("Loading data from database...").padding()
-                } else {
-                    if DBModel.historyItems.isEmpty {
-                        Text("No recent searches")
-                            .font(.system(size: 16))
-                            .foregroundColor(.secondary)
-                            .padding()
-                    } else {
-                        let recentItems = DBModel.historyItems.reversed().prefix(10)
-
-                        ForEach(Array(recentItems), id: \.id) { historyItem in
-                            SearchResultRow(
-                                icon: getHistoryIconByType(objectTypeName: historyItem.objectTypeName),
-                                title: getFormattedTitle(objectTitle: historyItem.objectTitle, objectTypeName: historyItem.objectTypeName),
-                                subtitle: historyItem.objectDescription
-                            )
+            // ИЗМЕНЕНИЕ: Используем `historyItems` из вложенной `dbViewModel`
+            if mapViewModel.dbViewModel.historyItems.isEmpty {
+                Text("История поиска пуста")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else {
+                LazyVStack(spacing: 0) {
+                    ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { historyItem in
+                        SearchResultRow(
+                            icon: getHistoryIconByType(objectTypeName: historyItem.objectTypeName),
+                            title: getFormattedTitle(objectTitle: historyItem.objectTitle, objectTypeName: historyItem.objectTypeName),
+                            subtitle: historyItem.objectDescription
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            // Сообщаем ViewModel, что пользователь выбрал элемент истории
+                            mapViewModel.selectHistoryItem(historyItem)
                         }
                     }
                 }
@@ -214,11 +180,14 @@ struct BottomSearchSheetView: View {
 
     // MARK: - Helper Functions
 
-    private func getFormattedTitle(objectTitle: String, objectTypeName: String) -> String {
-        return "\(objectTypeName) \(objectTitle)"
+    private func getFormattedTitle(objectTitle: String?, objectTypeName: String?) -> String {
+        // Защита от nil
+        let type = objectTypeName ?? ""
+        let title = objectTitle ?? ""
+        return "\(type) \(title)".trimmingCharacters(in: .whitespaces)
     }
 
-    private func getHistoryIconByType(objectTypeName: String) -> String {
+    private func getHistoryIconByType(objectTypeName: String?) -> String {
         switch objectTypeName {
         case "Entrance": return "door.french.open"
         case "Room": return "door.left.hand.open"
@@ -226,10 +195,7 @@ struct BottomSearchSheetView: View {
         case "Stairs down": return "arrow.down.square"
         case "Stairs both": return "arrow.up.arrow.down.square"
         case "Elevator": return "arrow.up.and.down.square"
-        case "WC man": return "figure.dress.line.vertical.figure"
-        case "WC woman": return "figure.dress.line.vertical.figure"
-        case "WC": return "toilet"
-        case "Other": return "questionmark.circle"
+        case "WC man", "WC woman", "WC": return "toilet"
         default: return "mappin.circle"
         }
     }

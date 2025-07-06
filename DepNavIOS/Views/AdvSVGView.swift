@@ -13,20 +13,14 @@ struct AdvSVGView: View {
     let floor: Int
     let department: String
     @Binding var markerCoordinate: CGPoint?
-
-    // This view now receives the loader from its parent.
-    @ObservedObject var coordinateLoader: CoordinateLoader
+    let mapDescription: MapDescription
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var startOffset: CGSize = .zero
     @State private var startScale: CGFloat = 2.0
 
-    // REMOVED: No longer needed as we get it from the loader.
-    // let svgSize: CGSize = .init(width: 1024, height: 1024)
-
     var body: some View {
-        if let mapDescription = coordinateLoader.mapDescriptions[department] {
             let svgNaturalSize = CGSize(width: mapDescription.floorWidth, height: mapDescription.floorHeight)
 
             GeometryReader { geometry in
@@ -117,10 +111,8 @@ struct AdvSVGView: View {
                     }
                 }
             }
-        } else {
-            ProgressView()
         }
-    }
+    
 
     private func movePinMarkerUpper(_ position: CGPoint) -> CGPoint {
         // either way it also can be moved backwards in terms of layers

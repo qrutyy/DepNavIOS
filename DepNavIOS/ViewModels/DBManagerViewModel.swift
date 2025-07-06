@@ -11,8 +11,6 @@ class DatabaseManager {
     static let shared = DatabaseManager()
     private var db: OpaquePointer?
 
-    // A serial dispatch queue to ensure thread-safe access to the database.
-    // All database operations will be performed on this queue.
     private let dbQueue = DispatchQueue(label: "com.depnavios.database.serialqueue")
 
     private init() {
@@ -75,25 +73,35 @@ class DatabaseManager {
     private func createHistoryTable() {
         let createTableString = """
             CREATE TABLE IF NOT EXISTS History(
-            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            DBHandlerId INTEGER,
+            Id INTEGER PRIMARY KEY,
             Department TEXT,
             Floor INT,
             ObjectName TEXT,
             ObjectDescription TEXT,
-            ObjectTypeName TEXT,
-            FOREIGN KEY(DBHandlerId) REFERENCES DBHandler(Id));
+            ObjectTypeName TEXT);
         """
+        // ИЗМЕНЕНИЕ: Убрал внешний ключ и автоинкремент для Id, так как Id теперь приходит от ViewModel.
+        // Это упрощает логику и делает Id более предсказуемым.
         if sqlite3_exec(db, createTableString, nil, nil, nil) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             print("Error creating History table: \(errmsg)")
         }
     }
 
-    // MARK: - Safe Binding Helper
-
-    private func bind(text: String, to statement: OpaquePointer?, at index: Int32) {
+    private func bind(text: String?, to statement: OpaquePointer?, at index: Int32) {
+        guard let text = text else {
+            sqlite3_bind_null(statement, index)
+            return
+        }
         sqlite3_bind_text(statement, index, (text as NSString).utf8String, -1, nil)
+    }
+
+    private func bind(int: Int?, to statement: OpaquePointer?, at index: Int32) {
+        guard let int = int else {
+            sqlite3_bind_null(statement, index)
+            return
+        }
+        sqlite3_bind_int(statement, index, Int32(int))
     }
 
     // MARK: - History CRUD Operations
@@ -101,15 +109,16 @@ class DatabaseManager {
     func insertHistory(_ history: HistoryModel) -> Bool {
         var success = false
         dbQueue.sync {
-            let insertSQL = "INSERT INTO History (Department, Floor, ObjectName, ObjectDescription, ObjectTypeName) VALUES (?, ?, ?, ?, ?);"
+            let insertSQL = "INSERT INTO History (Id, Department, Floor, ObjectName, ObjectDescription, ObjectTypeName) VALUES (?, ?, ?, ?, ?, ?);"
             var statement: OpaquePointer?
 
             if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
-                bind(text: history.department, to: statement, at: 1)
-                sqlite3_bind_int(statement, 2, Int32(history.floor))
-                bind(text: history.objectTitle, to: statement, at: 3)
-                bind(text: history.objectDescription, to: statement, at: 4)
-                bind(text: history.objectTypeName, to: statement, at: 5)
+                bind(int: history.id, to: statement, at: 1)
+                bind(text: history.department, to: statement, at: 2)
+                bind(int: history.floor, to: statement, at: 3)
+                bind(text: history.objectTitle, to: statement, at: 4)
+                bind(text: history.objectDescription, to: statement, at: 5)
+                bind(text: history.objectTypeName, to: statement, at: 6)
 
                 if sqlite3_step(statement) == SQLITE_DONE {
                     success = true
@@ -122,7 +131,7 @@ class DatabaseManager {
         }
         return success
     }
-
+    
     func getAllHistory() -> [HistoryModel] {
         var histories: [HistoryModel] = []
         dbQueue.sync {
@@ -165,15 +174,13 @@ class DatabaseManager {
 
             if sqlite3_prepare_v2(db, updateSQL, -1, &statement, nil) == SQLITE_OK {
                 bind(text: history.department, to: statement, at: 1)
-                sqlite3_bind_int(statement, 2, Int32(history.floor))
+                bind(int: history.floor, to: statement, at: 2)
                 bind(text: history.objectTitle, to: statement, at: 3)
                 bind(text: history.objectDescription, to: statement, at: 4)
                 bind(text: history.objectTypeName, to: statement, at: 5)
-                sqlite3_bind_int(statement, 6, Int32(history.id))
+                bind(int: history.id, to: statement, at: 6)
 
-                if sqlite3_step(statement) == SQLITE_DONE {
-                    success = true
-                }
+                if sqlite3_step(statement) == SQLITE_DONE { success = true }
             }
             sqlite3_finalize(statement)
         }
@@ -185,15 +192,26 @@ class DatabaseManager {
         dbQueue.sync {
             let deleteSQL = "DELETE FROM History WHERE Id = ?;"
             var statement: OpaquePointer?
-
             if sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK {
                 sqlite3_bind_int(statement, 1, Int32(id))
-
-                if sqlite3_step(statement) == SQLITE_DONE {
-                    success = true
-                }
+                if sqlite3_step(statement) == SQLITE_DONE { success = true }
             }
             sqlite3_finalize(statement)
+        }
+        return success
+    }
+    
+    // ИЗМЕНЕНИЕ: Добавлен метод для очистки истории.
+    func clearAllHistory() -> Bool {
+        var success = false
+        dbQueue.sync {
+            let deleteSQL = "DELETE FROM History;"
+            if sqlite3_exec(db, deleteSQL, nil, nil, nil) == SQLITE_OK {
+                success = true
+            } else {
+                let errmsg = String(cString: sqlite3_errmsg(db)!)
+                print("Error clearing history table: \(errmsg)")
+            }
         }
         return success
     }

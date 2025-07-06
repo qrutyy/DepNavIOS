@@ -5,154 +5,96 @@
 //  Created by Michael Gavrilenko on 23.06.2025.
 //
 
-import BottomSheet
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selectedFloor: Int = 1
-    @State private var selectedDepartment: String = "spbu-mm"
     @State private var showWelcomeScreen = true
+    
+    // ИЗМЕНЕНИЕ: Изначально нижний sheet НЕ должен быть показан.
+    @State private var isBottomSheetPresented = false
 
-    @State private var idToFind: String = ""
-    @State private var markerCoordinate: CGPoint?
+    @StateObject private var mapViewModel = MapViewModel()
 
-    @State var bottomSheetPosition: BottomSheetPosition = .absolute(325)
-    @State var isBottomSheetPresented: Bool = true
-
-    @State private var isSearchAlertPresented: Bool = false
-    @State private var searchElementCount: Int = 0
-
-    @StateObject private var coordinateLoader = CoordinateLoader()
-
-    @StateObject private var DBModel: DatabaseViewModel = .init()
-
-    private let detents: Set<PresentationDetent> = [.height(55), .medium, .large]
+    private let detents: Set<PresentationDetent> = [.height(85), .medium, .large]
 
     var body: some View {
-        // Welcome Screen
-        Button(action: {
-            self.showWelcomeScreen = true
-        }) {}
-            .sheet(isPresented: $showWelcomeScreen) {
-                WelcomeScreen(
-                    showWelcomeScreen: $showWelcomeScreen,
-                    selectedDepartment: $selectedDepartment
-                )
-            }
-
         ZStack(alignment: .topTrailing) {
-            // CHANGED: Pass the coordinateLoader down to the map view.
-            SVGMapView(
-                floor: selectedFloor,
-                department: selectedDepartment,
-                markerCoordinate: $markerCoordinate,
-                coordinateLoader: coordinateLoader
-            )
-            .edgesIgnoringSafeArea(.all)
-            .sheet(isPresented: $isBottomSheetPresented, onDismiss: { isBottomSheetPresented = true }) {
-                BottomSearchSheetView(callOnSubmit: findMarkerWithId, department: selectedDepartment, idToFind: $idToFind, DBModel: DBModel, coordinateLoader: coordinateLoader)
-                    .presentationDetents(detents)
-                    .presentationCornerRadius(20)
-                    .presentationDragIndicator(.visible)
-                    .interactiveDismissDisabled()
-                    .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-                    .presentationBackground(.clear)
+            // ... (индикатор загрузки и SVGMapView остаются без изменений) ...
+             if mapViewModel.isLoading {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.1))
+                    .zIndex(10)
             }
+            if (mapViewModel.currentMapDescription != nil) {
+                SVGMapView(
+                    floor: mapViewModel.selectedFloor,
+                    department: mapViewModel.selectedDepartment,
+                    markerCoordinate: $mapViewModel.markerCoordinate,
+                    mapDescription: mapViewModel.currentMapDescription!
+                )
+                .edgesIgnoringSafeArea(.all)
+                FloorSelectionView(
+                    selectedFloor: $mapViewModel.selectedFloor,
+                    onFloorChange: { floor in
+                        mapViewModel.changeFloor(floor)
+                    }, availableFloors: mapViewModel.availableFloors
+                )
+            } else {
+         
+                                Color(.systemGroupedBackground) // Фоновый цвет, чтобы не было черного экрана
+                                    .edgesIgnoringSafeArea(.all)
+                                    .onAppear {
+                                        // Если по какой-то причине мы оказались здесь без WelcomeScreen,
+                                        // можно добавить защитную логику.
+                                        if !showWelcomeScreen {
+                                            Task {
+                                                await mapViewModel.loadMapData()
+                                            }
+                                        }
+                                    }
+                            
+            }
+            
+            
 
-            VStack(spacing: 12) {
-                ForEach([1, 2, 3, 4], id: \.self) { floor in
-                    Button(action: {
-                        selectedFloor = floor
-                        removeMarker()
-                    }) {
-                        Text(String(floor))
-                            .fontWeight(.medium)
-                            .frame(width: 44, height: 44)
-                            .background(selectedFloor == floor ? Color.blue : Color.clear)
-                            .foregroundColor(selectedFloor == floor ? .white : .primary)
-                            .cornerRadius(12)
-                    }
-                }
+        }
+       
+        .sheet(isPresented: $showWelcomeScreen) {
+            Task {
+                await mapViewModel.loadMapData()
+                isBottomSheetPresented = true
             }
-            .background(.thinMaterial)
-            .cornerRadius(12)
-            .shadow(radius: 3)
-            .padding(.top, 35)
-            .padding(.trailing, 16)
+        } content: {
+            WelcomeScreen(
+                showWelcomeScreen: $showWelcomeScreen,
+                selectedDepartment: $mapViewModel.selectedDepartment
+            )
+        }
+        // Этот sheet для BottomSearchSheetView.
+        // Он привязан к isBottomSheetPresented и появится, когда нужно.
+        .sheet(isPresented: $isBottomSheetPresented) {
+            BottomSearchSheetView(mapViewModel: mapViewModel)
+                .presentationDetents(detents)
+                .presentationCornerRadius(20)
+                .presentationDragIndicator(.visible)
+                .interactiveDismissDisabled()
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .presentationBackground(.clear)
         }
         .onAppear {
-            // Load initial data when the view appears
-            coordinateLoader.load(fileName: selectedDepartment)
+                Task {
+                    await mapViewModel.loadMapData()
+                }
+
         }
-        .onChange(of: selectedDepartment) { newDepartment in
-            // Reload data whenever the department changes
-            coordinateLoader.load(fileName: newDepartment)
-        }
-        .onChange(of: isSearchAlertPresented) { _ in
-            if !isBottomSheetPresented {
-                isBottomSheetPresented = true
+        .onChange(of: mapViewModel.selectedDepartment) { _ in
+            if !showWelcomeScreen {
+                Task {
+                    await mapViewModel.loadMapData()
+                }
             }
         }
     }
-
-    // DBModel is appended with new fully descriptive record for minimising repeative JSON parsing.
-    private func findMarkerWithId() {
-        var newDBHHistoryItem = HistoryModel()
-        searchElementCount += 1
-
-        guard let mapDescription = coordinateLoader.mapDescriptions[selectedDepartment] else {
-            print("findMarkerWithId: Data for '\(selectedDepartment)' department isn' loaded.")
-            showNotFoundState()
-            return
-        }
-
-        for floorData in mapDescription.floors { // numbers with first digit as floor num - can be optimised
-            if let foundMarker = floorData.markers.first(where: {
-                ($0.ru.title ?? "") == idToFind || ($0.en.title ?? "") == idToFind
-            }) {
-                print("findMarkerWithId: marker with id = '\(idToFind)' was found on: \(foundMarker.coordinate)")
-                markerCoordinate = foundMarker.coordinate
-                isBottomSheetPresented = true
-                selectedFloor = floorData.floor
-                newDBHHistoryItem = HistoryModel(
-                    id: searchElementCount,
-                    floor: floorData.floor,
-                    department: selectedDepartment,
-                    objectTitle: foundMarker.ru.title ?? foundMarker.en.title ?? "",
-                    objectDescription: foundMarker.ru.description ?? foundMarker.en.description ?? "",
-                    objectTypeName: foundMarker.type.displayName
-                )
-                DBModel.addHistoryItem(newDBHHistoryItem)
-                return
-            }
-        }
-
-        newDBHHistoryItem = HistoryModel(
-            id: searchElementCount,
-            floor: nil,
-            department: nil,
-            objectTitle: idToFind,
-            objectDescription: nil,
-            objectTypeName: nil
-        )
-        DBModel.addHistoryItem(newDBHHistoryItem)
-
-        print("findMarkerWithId: Error: object with id \(idToFind) not found in data for faculty '\(selectedDepartment)'.")
-        showNotFoundState()
-    }
-
-    private func removeMarker() {
-        markerCoordinate = nil
-        idToFind = "" // mb ux will be better without
-        isBottomSheetPresented = true
-    }
-
-    private func showNotFoundState() {
-        removeMarker()
-        isSearchAlertPresented = true
-    }
-}
-
-#Preview {
-    ContentView()
 }

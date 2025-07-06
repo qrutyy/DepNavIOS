@@ -7,7 +7,7 @@
 
 class DepartmentMapModel: Codable {}
 
-class HistoryModel: Codable {
+class HistoryModel: Codable, Identifiable {
     var id: Int = 1
     var department: String = ""
     var floor: Int = -99
@@ -47,3 +47,5 @@ class DBHandlerModel: Codable {
         self.historyList = historyList
     }
 }
+
+

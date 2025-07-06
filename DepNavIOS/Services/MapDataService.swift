@@ -9,79 +9,28 @@ import CoreGraphics
 import Foundation
 
 protocol MapDataServiceProtocol {
-    func loadMapData(for department: String) async throws
-    func getMapDescription(for department: String) -> MapDescription?
-    func findMarker(query: String, department: String) async throws -> MarkerWithFloor
-}
-
-struct MarkerWithFloor {
-    let marker: Marker
-    let floor: Int
-    let title: String
-    let description: String
-    let type: MarkerType
-    let coordinate: CGPoint
+    func loadMapData(for department: String) async throws -> MapDescription
 }
 
 class MapDataService: MapDataServiceProtocol {
-    private var mapDescriptions: [String: MapDescription] = [:]
+    func loadMapData(for department: String) async throws -> MapDescription {
+            guard let url = Bundle.main.url(
+                forResource: department,
+                withExtension: "json",
+                subdirectory: "Maps/\(department)"
+            ) else {
+                throw MapDataError.fileNotFound(department)
+            }
 
-    func loadMapData(for department: String) async throws {
-        // Check if already loaded
-        if mapDescriptions[department] != nil {
-            return
-        }
-
-        guard let url = Bundle.main.url(
-            forResource: department,
-            withExtension: "json",
-            subdirectory: "Maps/\(department)"
-        ) else {
-            throw MapDataError.fileNotFound(department)
-        }
-
-        do {
-            let data = try Data(contentsOf: url)
-            let decodedData = try JSONDecoder().decode(MapDescription.self, from: data)
-            mapDescriptions[decodedData.internalName] = decodedData
-        } catch {
-            throw MapDataError.decodingError(error)
-        }
-    }
-
-    func getMapDescription(for department: String) -> MapDescription? {
-        return mapDescriptions[department]
-    }
-
-    func findMarker(query: String, department: String) async throws -> MarkerWithFloor {
-        guard let mapDescription = mapDescriptions[department] else {
-            throw MapDataError.departmentNotFound(department)
-        }
-
-        let searchQuery = query.lowercased()
-
-        for floorData in mapDescription.floors {
-            if let foundMarker = floorData.markers.first(where: { marker in
-                let titleMatch = marker.ru.title?.lowercased().contains(searchQuery) == true ||
-                    marker.en.title?.lowercased().contains(searchQuery) == true
-                let typeMatch = marker.type.displayName.lowercased().contains(searchQuery) == true
-                let descriptionMatch = marker.ru.description?.lowercased().contains(searchQuery) == true
-
-                return titleMatch || typeMatch || descriptionMatch
-            }) {
-                return MarkerWithFloor(
-                    marker: foundMarker,
-                    floor: floorData.floor,
-                    title: foundMarker.ru.title ?? foundMarker.en.title ?? "",
-                    description: foundMarker.ru.description ?? foundMarker.en.description ?? "",
-                    type: foundMarker.type,
-                    coordinate: foundMarker.coordinate
-                )
+            do {
+                let data = try Data(contentsOf: url)
+                let decodedData = try JSONDecoder().decode(MapDescription.self, from: data)
+                // ИЗМЕНЕНИЕ: Просто возвращаем результат.
+                return decodedData
+            } catch {
+                throw MapDataError.decodingError(error)
             }
         }
-
-        throw MapDataError.markerNotFound(query)
-    }
 }
 
 enum MapDataError: LocalizedError {
