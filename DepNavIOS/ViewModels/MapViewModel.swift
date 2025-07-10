@@ -95,14 +95,15 @@ class MapViewModel: ObservableObject {
             selectSearchResult(topResult)
         } else {
             let failedSearchItem = HistoryModel(
+                id: nil,
                 floor: nil,
                 department: selectedDepartment,
                 objectTitle: searchQuery,
-                objectDescription: "Не найдено",
+                objectDescription: "Not found",
                 objectTypeName: nil
             )
             dbViewModel.addHistoryItem(failedSearchItem)
-            errorMessage = "Объект '\(searchQuery)' не найден."
+            errorMessage = "Object with id '\(searchQuery)' wasn't found."
         }
     }
 

@@ -17,42 +17,37 @@ class HistoryModel: Codable, Identifiable {
 
     init() {}
 
-    init(floor: Int?, department: String? = nil, objectTitle: String?, objectDescription: String?, objectTypeName: String?) {
-        id = 0
+    init(id: Int?, floor: Int?, department: String? = nil, objectTitle: String?, objectDescription: String?, objectTypeName: String?) {
+        if (id != nil) {
+            self.id = id!
+        }
         self.department = department ?? ""
         self.floor = floor != nil ? floor! : -99
         self.objectTitle = objectTitle ?? ""
-        self.objectDescription = objectDescription ?? "Not found"
+        self.objectDescription = objectDescription ?? ""
         self.objectTypeName = objectTypeName ?? ""
     }
 }
 
 extension HistoryModel {
     func toInternalMarkerModel(mapDescription: MapDescription?) -> InternalMarkerModel? {
-        // 1. Убеждаемся, что у нас есть данные карты
         guard let description = mapDescription else {
             print("Conversion failed: mapDescription is nil.")
             return nil
         }
 
-        // 2. Ищем нужный этаж в данных карты.
-        // Используем `first(where:)` для безопасного поиска.
         guard let floorData = description.floors.first(where: { $0.floor == self.floor }) else {
             print("Conversion failed: floor \(floor) not found in map data.")
             return nil
         }
 
-        // 3. Ищем на этом этаже маркер с таким же названием.
         guard let originalMarker = floorData.markers.first(where: { marker in
-            // Сравниваем названия, учитывая, что в JSON они тоже могут быть опциональными
             (marker.ru.title ?? marker.en.title) == self.objectTitle
         }) else {
             print("Conversion failed: marker with title '\(objectTitle)' not found on floor \(floor).")
             return nil
         }
 
-        // 4. Если все нашлось, создаем и возвращаем полный InternalMarkerModel.
-        // ID генерируем заново, чтобы он был стабильным и соответствовал формату.
         let uniqueID = "\(description.internalName)-\(floorData.floor)-\(objectTitle)"
 
         return InternalMarkerModel(
@@ -60,9 +55,9 @@ extension HistoryModel {
             title: objectTitle,
             description: objectDescription,
             floor: floor,
-            coordinate: originalMarker.coordinate, // Берем актуальные координаты
-            type: originalMarker.type, // Берем актуальный тип
-            marker: originalMarker // Сохраняем весь оригинальный объект
+            coordinate: originalMarker.coordinate,
+            type: originalMarker.type,
+            marker: originalMarker
         )
     }
 }

@@ -7,10 +7,8 @@
 
 import SwiftUI
 
-// ИЗМЕНЕНИЕ: Модель для найденного маркера, которая содержит всю необходимую информацию для отображения и навигации.
-// Она Identifiable, что идеально подходит для SwiftUI.
 struct InternalMarkerModel: Identifiable, Equatable {
-    let id: String // Уникальный идентификатор, например "floor2-room101"
+    let id: String 
     let title: String
     let description: String?
     let floor: Int
@@ -22,6 +20,7 @@ struct InternalMarkerModel: Identifiable, Equatable {
 extension InternalMarkerModel {
     func toHistoryModel(currentDepartment: String) -> HistoryModel {
         return HistoryModel(
+            id: nil,
             floor: floor,
             department: currentDepartment,
             objectTitle: title,

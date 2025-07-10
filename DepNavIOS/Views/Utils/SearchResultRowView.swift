@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SearchResultRow: View {
+struct SearchResultRowView: View {
     let icon: String
     let title: String
     let subtitle: String
@@ -47,5 +47,5 @@ struct SearchResultRow: View {
 }
 
 #Preview {
-    SearchResultRow(icon: "door.french.open", title: "Test", subtitle: "")
+    SearchResultRowView(icon: "door.french.open", title: "Test", subtitle: "")
 }

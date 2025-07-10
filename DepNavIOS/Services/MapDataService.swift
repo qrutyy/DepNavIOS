@@ -25,7 +25,6 @@ class MapDataService: MapDataServiceProtocol {
         do {
             let data = try Data(contentsOf: url)
             let decodedData = try JSONDecoder().decode(MapDescription.self, from: data)
-            // ИЗМЕНЕНИЕ: Просто возвращаем результат.
             return decodedData
         } catch {
             throw MapDataError.decodingError(error)
@@ -42,13 +41,13 @@ enum MapDataError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case let .fileNotFound(department):
-            return "Файл карты для \(department) не найден"
+            return "File fot the \(department) wasn't found"
         case let .decodingError(error):
-            return "Ошибка чтения данных карты: \(error.localizedDescription)"
+            return "Decoding error at loading map data: \(error.localizedDescription)"
         case let .departmentNotFound(department):
-            return "Данные для \(department) не загружены"
+            return "\(department) map wasn't found"
         case let .markerNotFound(query):
-            return "Маркер '\(query)' не найден"
+            return "Marker with id '\(query)' wasn't found"
         }
     }
 }

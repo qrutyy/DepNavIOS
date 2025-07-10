@@ -80,8 +80,6 @@ class DatabaseManager {
             ObjectDescription TEXT,
             ObjectTypeName TEXT);
         """
-        // ИЗМЕНЕНИЕ: Убрал внешний ключ и автоинкремент для Id, так как Id теперь приходит от ViewModel.
-        // Это упрощает логику и делает Id более предсказуемым.
         if sqlite3_exec(db, createTableString, nil, nil, nil) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             print("Error creating History table: \(errmsg)")
@@ -139,6 +137,7 @@ class DatabaseManager {
 
             if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
                 while sqlite3_step(statement) == SQLITE_ROW {
+                    let id = Int(sqlite3_column_int(statement, 0))
                     let department = String(cString: sqlite3_column_text(statement, 1))
                     let floor = Int(sqlite3_column_int(statement, 2))
                     let objectTitle = String(cString: sqlite3_column_text(statement, 3))
@@ -146,6 +145,7 @@ class DatabaseManager {
                     let objectTypeName = String(cString: sqlite3_column_text(statement, 5))
 
                     let history = HistoryModel(
+                        id: id,
                         floor: floor,
                         department: department,
                         objectTitle: objectTitle,

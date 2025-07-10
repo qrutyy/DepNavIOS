@@ -8,19 +8,17 @@
 import Foundation
 
 @MainActor
-// Это гарантирует, что все @Published свойства обновляются безопасно.
+// It guarantees that all the @Published properties are updating safely.
 class DatabaseViewModel: ObservableObject {
     @Published var historyItems: [HistoryModel] = []
-    @Published var DBHandlerItems: [DBHandlerModel] = [] // Предполагаем, что это тоже нужно будет переделать по аналогии
+    @Published var DBHandlerItems: [DBHandlerModel] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
     private let databaseService: DatabaseServiceProtocol
 
-    // Позволяет подменять реальный сервис на фальшивый в тестах.
     init(databaseService: DatabaseServiceProtocol = DatabaseService()) {
         self.databaseService = databaseService
-        // Загружаем данные при инициализации.
         loadData()
     }
 
@@ -35,9 +33,8 @@ class DatabaseViewModel: ObservableObject {
         errorMessage = nil
         Task {
             let items = await databaseService.getHistoryItems()
-            // Обновления @Published свойств теперь автоматически происходят в главном потоке
-            // благодаря @MainActor на классе.
-            self.historyItems = items.sorted(by: { $0.id > $1.id }) // Сразу сортируем для UI
+            // @Published properties updates are happening in the main thread, bc of the @MainActor
+            self.historyItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
             self.isLoading = false
         }
     }
@@ -46,8 +43,6 @@ class DatabaseViewModel: ObservableObject {
         Task {
             let success = await databaseService.addHistoryItem(item)
             if success {
-                // Если добавление успешно, просто вставляем новый элемент в начало массива,
-                // вместо того чтобы перезагружать все из БД. Это эффективнее.
                 self.historyItems.insert(item, at: 0)
             } else {
                 self.errorMessage = "Не удалось добавить элемент истории"
@@ -59,8 +54,6 @@ class DatabaseViewModel: ObservableObject {
         Task {
             let success = await databaseService.addHistoryItem(item.toHistoryModel(currentDepartment: department))
             if success {
-                // Если добавление успешно, просто вставляем новый элемент в начало массива,
-                // вместо того чтобы перезагружать все из БД. Это эффективнее.
                 self.historyItems.insert(item.toHistoryModel(currentDepartment: department), at: 0)
             } else {
                 self.errorMessage = "Не удалось добавить элемент истории"
@@ -72,7 +65,6 @@ class DatabaseViewModel: ObservableObject {
         Task {
             let success = await databaseService.updateHistoryItem(item)
             if success, let index = historyItems.firstIndex(where: { $0.id == item.id }) {
-                // Обновляем элемент прямо в массиве.
                 self.historyItems[index] = item
             } else {
                 self.errorMessage = "Не удалось обновить элемент истории"
@@ -84,7 +76,6 @@ class DatabaseViewModel: ObservableObject {
         Task {
             let success = await databaseService.deleteHistoryItem(id: id)
             if success {
-                // Удаляем элемент из массива.
                 self.historyItems.removeAll { $0.id == id }
             } else {
                 self.errorMessage = "Не удалось удалить элемент истории"
@@ -106,7 +97,6 @@ class DatabaseViewModel: ObservableObject {
     // MARK: - Common Methods
 
     func loadData() {
-        // Запускаем асинхронные задачи
         Task {
             loadHistoryItems()
             // loadDBHandlerItems() // По аналогии нужно будет реализовать

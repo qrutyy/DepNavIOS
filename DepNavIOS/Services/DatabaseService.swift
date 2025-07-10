@@ -4,9 +4,9 @@
 //
 //  Created by Michael Gavrilenko on 23.06.2025.
 //
+
 import Foundation
 
-// "Контракт", который описывает, что должен уметь делать наш сервис баз данных.
 protocol DatabaseServiceProtocol {
     func addHistoryItem(_ item: HistoryModel) async -> Bool
     func getHistoryItems() async -> [HistoryModel]
@@ -15,13 +15,11 @@ protocol DatabaseServiceProtocol {
     func clearHistory() async -> Bool
 }
 
-// ИЗМЕНЕНИЕ: Полностью переписанная реализация для чистоты и ясности.
-// Это "прораб", который нанимает "сантехника" (DatabaseManager).
 class DatabaseService: DatabaseServiceProtocol {
     private let databaseManager = DatabaseManager.shared
 
-    // Эта функция-помощник выполняет любую синхронную работу менеджера
-    // в отдельном фоновом потоке, не блокируя UI, и возвращает результат.
+    // This helper function performs any manager synchronous work
+    // in a separate background stream, without blocking the UI, and returns the result.
     private func perform<T>(work: @escaping @Sendable () -> T) async -> T {
         await Task.detached(priority: .background) {
             work()

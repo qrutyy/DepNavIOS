@@ -11,6 +11,8 @@ struct BottomSearchSheetView: View {
     @ObservedObject var mapViewModel: MapViewModel
 
     @Binding var detent: PresentationDetent
+    
+    @State private var isEmptyHistoryForced: Bool = false
 
     // MARK: - Main Body
 
@@ -43,7 +45,7 @@ struct BottomSearchSheetView: View {
             if newCoord != nil {
                 hideKeyboard()
                 withAnimation {
-                    self.detent = .height(85)
+                    self.detent = .height(50)
                 }
             }
         }
@@ -65,15 +67,18 @@ struct BottomSearchSheetView: View {
             })
             .submitLabel(.search)
             .onSubmit {
+                isEmptyHistoryForced = false
                 mapViewModel.commitSearch()
+                if (mapViewModel.searchResults != []) {
+                    withAnimation(.spring()) {
+                        self.detent = .height(50)
+                    }
+                }
             }
 
             if !mapViewModel.searchQuery.isEmpty {
                 Button(action: {
                     mapViewModel.searchQuery = ""
-                    withAnimation(.spring()) {
-                        self.detent = .medium
-                    }
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
@@ -153,6 +158,7 @@ struct BottomSearchSheetView: View {
                 if !mapViewModel.dbViewModel.historyItems.isEmpty {
                     Button("Clear") {
                         mapViewModel.dbViewModel.clearAllHistory()
+                        isEmptyHistoryForced = true
                     }
                     .font(.subheadline)
                     .buttonStyle(.borderless)
@@ -161,7 +167,7 @@ struct BottomSearchSheetView: View {
             .padding([.top, .horizontal], 16)
             .padding(.bottom, 8)
 
-            if mapViewModel.dbViewModel.historyItems.isEmpty {
+            if mapViewModel.dbViewModel.historyItems.isEmpty || isEmptyHistoryForced {
                 Text("History is empty")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
