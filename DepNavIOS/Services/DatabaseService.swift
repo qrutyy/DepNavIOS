@@ -4,7 +4,6 @@
 //
 //  Created by Michael Gavrilenko on 23.06.2025.
 //
-
 import Foundation
 
 protocol DatabaseServiceProtocol {

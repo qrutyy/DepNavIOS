@@ -12,8 +12,6 @@ struct BottomSearchSheetView: View {
 
     @Binding var detent: PresentationDetent
     
-    @State private var isEmptyHistoryForced: Bool = false
-
     // MARK: - Main Body
 
     var body: some View {
@@ -67,7 +65,6 @@ struct BottomSearchSheetView: View {
             })
             .submitLabel(.search)
             .onSubmit {
-                isEmptyHistoryForced = false
                 mapViewModel.commitSearch()
                 if (mapViewModel.searchResults != []) {
                     withAnimation(.spring()) {
@@ -158,7 +155,6 @@ struct BottomSearchSheetView: View {
                 if !mapViewModel.dbViewModel.historyItems.isEmpty {
                     Button("Clear") {
                         mapViewModel.dbViewModel.clearAllHistory()
-                        isEmptyHistoryForced = true
                     }
                     .font(.subheadline)
                     .buttonStyle(.borderless)
@@ -167,7 +163,7 @@ struct BottomSearchSheetView: View {
             .padding([.top, .horizontal], 16)
             .padding(.bottom, 8)
 
-            if mapViewModel.dbViewModel.historyItems.isEmpty || isEmptyHistoryForced {
+            if mapViewModel.dbViewModel.historyItems.isEmpty {
                 Text("History is empty")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)

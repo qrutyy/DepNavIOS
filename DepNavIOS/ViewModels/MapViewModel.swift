@@ -8,6 +8,7 @@
 import CoreGraphics
 import Foundation
 import SwiftUI
+import Combine
 
 @MainActor
 class MapViewModel: ObservableObject {
@@ -29,9 +30,16 @@ class MapViewModel: ObservableObject {
     private let mapDataService: MapDataService
 
     private var loadedMapDescriptions: [String: MapDescription] = [:]
-
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     init(mapDataService: MapDataService = MapDataService()) {
         self.mapDataService = mapDataService
+        dbViewModel.objectWillChange
+                    .sink { [weak self] _ in
+                        self?.objectWillChange.send()
+                    }
+                    .store(in: &cancellables)
     }
 
     // MARK: - Map Management
@@ -120,8 +128,7 @@ class MapViewModel: ObservableObject {
     func selectHistoryItem(_ item: HistoryModel) {
         let fullMarker = item.toInternalMarkerModel(mapDescription: loadedMapDescriptions[selectedDepartment])
         if fullMarker == nil {
-            print("miaou - MapViewModel: Internal error...")
-            Text("MapViewModel: Internal error...")
+            print("MapViewModel: Internal error...")
         } else {
             selectSearchResult(fullMarker!)
         }

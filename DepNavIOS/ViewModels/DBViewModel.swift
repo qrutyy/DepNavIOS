@@ -99,7 +99,7 @@ class DatabaseViewModel: ObservableObject {
     func loadData() {
         Task {
             loadHistoryItems()
-            // loadDBHandlerItems() // По аналогии нужно будет реализовать
+            // loadDBHandlerItems()ь
         }
     }
 

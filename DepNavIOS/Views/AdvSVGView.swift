@@ -138,7 +138,7 @@ struct AdvSVGView: View {
         // Make sure the calculated offset is within the allowed bounds
         targetOffset = clampOffset(targetOffset, for: targetScale, in: containerSize)
 
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) {
+        withAnimation(.spring(response: 1, dampingFraction: 0.8)) {
             self.scale = targetScale
             self.offset = targetOffset
 
