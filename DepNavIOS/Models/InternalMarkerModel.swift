@@ -1,5 +1,5 @@
 //
-//  Model.swift
+//  InternalMarkerModel.swift
 //  DepNavIOS
 //
 //  Created by Michael Gavrilenko on 06.07.2025.
@@ -22,12 +22,11 @@ struct InternalMarkerModel: Identifiable, Equatable {
 extension InternalMarkerModel {
     func toHistoryModel(currentDepartment: String) -> HistoryModel {
         return HistoryModel(
-            id: Int(marker.id) ?? 0,
-            floor: self.floor,
+            floor: floor,
             department: currentDepartment,
-            objectTitle: self.title,
-            objectDescription: self.description,
-            objectTypeName: self.type.displayName
+            objectTitle: title,
+            objectDescription: description,
+            objectTypeName: type.displayName
         )
     }
 }

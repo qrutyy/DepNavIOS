@@ -14,23 +14,23 @@ protocol MapDataServiceProtocol {
 
 class MapDataService: MapDataServiceProtocol {
     func loadMapData(for department: String) async throws -> MapDescription {
-            guard let url = Bundle.main.url(
-                forResource: department,
-                withExtension: "json",
-                subdirectory: "Maps/\(department)"
-            ) else {
-                throw MapDataError.fileNotFound(department)
-            }
-
-            do {
-                let data = try Data(contentsOf: url)
-                let decodedData = try JSONDecoder().decode(MapDescription.self, from: data)
-                // ИЗМЕНЕНИЕ: Просто возвращаем результат.
-                return decodedData
-            } catch {
-                throw MapDataError.decodingError(error)
-            }
+        guard let url = Bundle.main.url(
+            forResource: department,
+            withExtension: "json",
+            subdirectory: "Maps/\(department)"
+        ) else {
+            throw MapDataError.fileNotFound(department)
         }
+
+        do {
+            let data = try Data(contentsOf: url)
+            let decodedData = try JSONDecoder().decode(MapDescription.self, from: data)
+            // ИЗМЕНЕНИЕ: Просто возвращаем результат.
+            return decodedData
+        } catch {
+            throw MapDataError.decodingError(error)
+        }
+    }
 }
 
 enum MapDataError: LocalizedError {

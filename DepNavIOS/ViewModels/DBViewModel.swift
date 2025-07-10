@@ -7,29 +7,27 @@
 
 import Foundation
 
-@MainActor // ИЗМЕНЕНИЕ: Помечаем класс как работающий в главном потоке.
-           // Это гарантирует, что все @Published свойства обновляются безопасно.
+@MainActor
+// Это гарантирует, что все @Published свойства обновляются безопасно.
 class DatabaseViewModel: ObservableObject {
     @Published var historyItems: [HistoryModel] = []
     @Published var DBHandlerItems: [DBHandlerModel] = [] // Предполагаем, что это тоже нужно будет переделать по аналогии
     @Published var isLoading = false
     @Published var errorMessage: String?
-    
-    // ИЗМЕНЕНИЕ: Зависимость от "контракта" (протокола), а не от конкретной реализации.
+
     private let databaseService: DatabaseServiceProtocol
 
-    // ИЗМЕНЕНИЕ: Внедрение зависимости через конструктор.
     // Позволяет подменять реальный сервис на фальшивый в тестах.
     init(databaseService: DatabaseServiceProtocol = DatabaseService()) {
         self.databaseService = databaseService
         // Загружаем данные при инициализации.
         loadData()
     }
-    
+
     var historyLength: Int {
         historyItems.count
     }
-    
+
     // MARK: - History Methods
 
     func loadHistoryItems() {
@@ -56,7 +54,7 @@ class DatabaseViewModel: ObservableObject {
             }
         }
     }
-    
+
     func addHistoryItem(_ item: InternalMarkerModel, department: String) {
         Task {
             let success = await databaseService.addHistoryItem(item.toHistoryModel(currentDepartment: department))
@@ -93,7 +91,7 @@ class DatabaseViewModel: ObservableObject {
             }
         }
     }
-    
+
     func clearAllHistory() {
         Task {
             let success = await databaseService.clearHistory()

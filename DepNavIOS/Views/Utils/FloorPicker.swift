@@ -38,9 +38,9 @@ struct FloorSelectionView: View {
             Text("No floors available")
         }
     }
-    
 }
+
 //
-//#Preview {
+// #Preview {
 //    FloorSelectionView(selectedFloor: 1, onFloorChange: {floor in print("Selected floor: \(floor)")}, availableFloors: [1, 2, 3, 4])
-//}
+// }

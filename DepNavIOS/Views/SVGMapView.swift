@@ -8,6 +8,9 @@
 import SVGView
 import SwiftUI
 
+/// Just a middle handler for the AdvSVGView.
+/// Incapsulates all in all MapView and handles the loading error.
+/// May be appended with the better error screen (when the custom map loading will be implemented) TODO
 struct SVGMapView: View {
     let floor: Int
     let department: String

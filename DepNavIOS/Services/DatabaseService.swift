@@ -27,7 +27,7 @@ class DatabaseService: DatabaseServiceProtocol {
             work()
         }.value
     }
-    
+
     func addHistoryItem(_ item: HistoryModel) async -> Bool {
         await perform {
             self.databaseManager.insertHistory(item)
@@ -51,7 +51,7 @@ class DatabaseService: DatabaseServiceProtocol {
             self.databaseManager.deleteHistory(id: id)
         }
     }
-    
+
     func clearHistory() async -> Bool {
         await perform {
             self.databaseManager.clearAllHistory()

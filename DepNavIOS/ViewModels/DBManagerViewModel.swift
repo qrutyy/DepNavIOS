@@ -73,7 +73,7 @@ class DatabaseManager {
     private func createHistoryTable() {
         let createTableString = """
             CREATE TABLE IF NOT EXISTS History(
-            Id INTEGER PRIMARY KEY,
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
             Department TEXT,
             Floor INT,
             ObjectName TEXT,
@@ -109,16 +109,15 @@ class DatabaseManager {
     func insertHistory(_ history: HistoryModel) -> Bool {
         var success = false
         dbQueue.sync {
-            let insertSQL = "INSERT INTO History (Id, Department, Floor, ObjectName, ObjectDescription, ObjectTypeName) VALUES (?, ?, ?, ?, ?, ?);"
+            let insertSQL = "INSERT INTO History (Department, Floor, ObjectName, ObjectDescription, ObjectTypeName) VALUES (?, ?, ?, ?, ?);"
             var statement: OpaquePointer?
 
             if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
-                bind(int: history.id, to: statement, at: 1)
-                bind(text: history.department, to: statement, at: 2)
-                bind(int: history.floor, to: statement, at: 3)
-                bind(text: history.objectTitle, to: statement, at: 4)
-                bind(text: history.objectDescription, to: statement, at: 5)
-                bind(text: history.objectTypeName, to: statement, at: 6)
+                bind(text: history.department, to: statement, at: 1)
+                bind(int: history.floor, to: statement, at: 2)
+                bind(text: history.objectTitle, to: statement, at: 3)
+                bind(text: history.objectDescription, to: statement, at: 4)
+                bind(text: history.objectTypeName, to: statement, at: 5)
 
                 if sqlite3_step(statement) == SQLITE_DONE {
                     success = true
@@ -131,7 +130,7 @@ class DatabaseManager {
         }
         return success
     }
-    
+
     func getAllHistory() -> [HistoryModel] {
         var histories: [HistoryModel] = []
         dbQueue.sync {
@@ -140,7 +139,6 @@ class DatabaseManager {
 
             if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
                 while sqlite3_step(statement) == SQLITE_ROW {
-                    let id = Int(sqlite3_column_int(statement, 0))
                     let department = String(cString: sqlite3_column_text(statement, 1))
                     let floor = Int(sqlite3_column_int(statement, 2))
                     let objectTitle = String(cString: sqlite3_column_text(statement, 3))
@@ -148,7 +146,6 @@ class DatabaseManager {
                     let objectTypeName = String(cString: sqlite3_column_text(statement, 5))
 
                     let history = HistoryModel(
-                        id: id,
                         floor: floor,
                         department: department,
                         objectTitle: objectTitle,
@@ -200,7 +197,7 @@ class DatabaseManager {
         }
         return success
     }
-    
+
     // ИЗМЕНЕНИЕ: Добавлен метод для очистки истории.
     func clearAllHistory() -> Bool {
         var success = false

@@ -9,25 +9,23 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var showWelcomeScreen = true
-    
-    // ИЗМЕНЕНИЕ: Изначально нижний sheet НЕ должен быть показан.
-    @State private var isBottomSheetPresented = false
-
+    @State private var isBottomSheetPresented = true
     @StateObject private var mapViewModel = MapViewModel()
 
-    private let detents: Set<PresentationDetent> = [.height(85), .medium, .large]
+    // Basic set of detents for the Bottom sheet.
+    private let searchSheetDetents: Set<PresentationDetent> = [.height(50), .medium, .large]
+    @State private var selectedDetent: PresentationDetent = .height(50)
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            // ... (индикатор загрузки и SVGMapView остаются без изменений) ...
-             if mapViewModel.isLoading {
+            if mapViewModel.isLoading {
                 ProgressView()
                     .scaleEffect(1.5)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.black.opacity(0.1))
                     .zIndex(10)
             }
-            if (mapViewModel.currentMapDescription != nil) {
+            if mapViewModel.currentMapDescription != nil {
                 SVGMapView(
                     floor: mapViewModel.selectedFloor,
                     department: mapViewModel.selectedDepartment,
@@ -35,32 +33,27 @@ struct ContentView: View {
                     mapDescription: mapViewModel.currentMapDescription!
                 )
                 .edgesIgnoringSafeArea(.all)
+
                 FloorSelectionView(
                     selectedFloor: $mapViewModel.selectedFloor,
                     onFloorChange: { floor in
                         mapViewModel.changeFloor(floor)
                     }, availableFloors: mapViewModel.availableFloors
                 )
-            } else {
-         
-                                Color(.systemGroupedBackground) // Фоновый цвет, чтобы не было черного экрана
-                                    .edgesIgnoringSafeArea(.all)
-                                    .onAppear {
-                                        // Если по какой-то причине мы оказались здесь без WelcomeScreen,
-                                        // можно добавить защитную логику.
-                                        if !showWelcomeScreen {
-                                            Task {
-                                                await mapViewModel.loadMapData()
-                                            }
-                                        }
-                                    }
-                            
-            }
-            
-            
 
+            } else {
+                Color(.systemGroupedBackground) // Фоновый цвет, чтобы не было черного экрана
+                    .edgesIgnoringSafeArea(.all)
+                    .onAppear {
+                        if !showWelcomeScreen {
+                            Task {
+                                await mapViewModel.loadMapData()
+                            }
+                        }
+                    }
+            }
         }
-       
+
         .sheet(isPresented: $showWelcomeScreen) {
             Task {
                 await mapViewModel.loadMapData()
@@ -72,11 +65,9 @@ struct ContentView: View {
                 selectedDepartment: $mapViewModel.selectedDepartment
             )
         }
-        // Этот sheet для BottomSearchSheetView.
-        // Он привязан к isBottomSheetPresented и появится, когда нужно.
         .sheet(isPresented: $isBottomSheetPresented) {
-            BottomSearchSheetView(mapViewModel: mapViewModel)
-                .presentationDetents(detents)
+            BottomSearchSheetView(mapViewModel: mapViewModel, detent: $selectedDetent)
+                .presentationDetents(searchSheetDetents, selection: $selectedDetent)
                 .presentationCornerRadius(20)
                 .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled()
@@ -84,10 +75,9 @@ struct ContentView: View {
                 .presentationBackground(.clear)
         }
         .onAppear {
-                Task {
-                    await mapViewModel.loadMapData()
-                }
-
+            Task {
+                await mapViewModel.loadMapData()
+            }
         }
         .onChange(of: mapViewModel.selectedDepartment) { _ in
             if !showWelcomeScreen {

@@ -8,7 +8,8 @@
 import SVGView
 import SwiftUI
 
-// Simple cached modification of the default SVGView.
+/// Simple cached modification of the default SVGView.
+/// As a cache - it uses simple getNode call, by guaranteeing that map was alreadu parsed when initialised.
 
 public struct CachedSVGView: View {
     public let svg: SVGNode?
