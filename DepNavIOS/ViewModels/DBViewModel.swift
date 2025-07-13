@@ -10,7 +10,8 @@ import Foundation
 @MainActor
 // It guarantees that all the @Published properties are updating safely.
 class DatabaseViewModel: ObservableObject {
-    @Published var historyItems: [HistoryModel] = []
+    @Published var historyItems: [MapObjectModel] = []
+    @Published var favoriteItems: [MapObjectModel] = []
     @Published var DBHandlerItems: [DBHandlerModel] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -39,7 +40,18 @@ class DatabaseViewModel: ObservableObject {
         }
     }
 
-    func addHistoryItem(_ item: HistoryModel) {
+    func loadFavoriteItems() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            let items = await databaseService.getFavoriteItems()
+            // @Published properties updates are happening in the main thread, bc of the @MainActor
+            self.favoriteItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
+            self.isLoading = false
+        }
+    }
+
+    func addHistoryItem(_ item: MapObjectModel) {
         Task {
             let success = await databaseService.addHistoryItem(item)
             if success {
@@ -52,27 +64,27 @@ class DatabaseViewModel: ObservableObject {
 
     func addHistoryItem(_ item: InternalMarkerModel, department: String) {
         Task {
-            let success = await databaseService.addHistoryItem(item.toHistoryModel(currentDepartment: department))
+            let success = await databaseService.addHistoryItem(item.toMapObjectModel(currentDepartment: department))
             if success {
-                self.historyItems.insert(item.toHistoryModel(currentDepartment: department), at: 0)
+                self.historyItems.insert(item.toMapObjectModel(currentDepartment: department), at: 0)
             } else {
                 self.errorMessage = "Не удалось добавить элемент истории"
             }
         }
     }
-    
+
     func addFavoritesItem(_ item: InternalMarkerModel, department: String) {
         Task {
-            let success = await databaseService.addFavoritesItem(item.toHistoryModel(currentDepartment: department))
+            let success = await databaseService.addFavoriteItem(item.toMapObjectModel(currentDepartment: department))
             if success {
-                self.favoriteItems.insert(item.toHistoryModel(currentDepartment: department), at: 0)
+                self.favoriteItems.insert(item.toMapObjectModel(currentDepartment: department), at: 0)
             } else {
                 self.errorMessage = "Не удалось добавить элемент истории"
             }
         }
-   
+    }
 
-    func updateHistoryItem(_ item: HistoryModel) {
+    func updateHistoryItem(_ item: MapObjectModel) {
         Task {
             let success = await databaseService.updateHistoryItem(item)
             if success, let index = historyItems.firstIndex(where: { $0.id == item.id }) {
@@ -94,6 +106,17 @@ class DatabaseViewModel: ObservableObject {
         }
     }
 
+    func deleteFavoriteItem(id: Int) {
+        Task {
+            let success = await databaseService.deleteFavoriteItem(id: id)
+            if success {
+                self.favoriteItems.removeAll { $0.id == id }
+            } else {
+                self.errorMessage = "Не удалось удалить элемент истории"
+            }
+        }
+    }
+
     func clearAllHistory() {
         Task {
             let success = await databaseService.clearHistory()
@@ -105,12 +128,23 @@ class DatabaseViewModel: ObservableObject {
         }
     }
 
+    func clearAllFavorites() {
+        Task {
+            let success = await databaseService.clearFavorites()
+            if success {
+                self.favoriteItems.removeAll()
+            } else {
+                self.errorMessage = "Не удалось очистить историю"
+            }
+        }
+    }
+
     // MARK: - Common Methods
 
     func loadData() {
         Task {
             loadHistoryItems()
-            // loadDBHandlerItems()ь
+            loadFavoriteItems()
         }
     }
 

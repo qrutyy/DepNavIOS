@@ -20,7 +20,8 @@ class MapViewModel: ObservableObject {
     @Published var searchQuery: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    @Published var selectedMarker: String = ""
+    @Published var selectedSearchResult: InternalMarkerModel?
+    @Published var selectedMarker: String = "" // from map choose
 
     @Published var dbViewModel = DatabaseViewModel()
 
@@ -103,7 +104,7 @@ class MapViewModel: ObservableObject {
         if let topResult = searchResults.first {
             selectSearchResult(topResult)
         } else {
-            let failedSearchItem = HistoryModel(
+            let failedSearchItem = MapObjectModel(
                 id: nil,
                 floor: nil,
                 department: selectedDepartment,
@@ -119,15 +120,23 @@ class MapViewModel: ObservableObject {
     func selectSearchResult(_ marker: InternalMarkerModel) {
         selectedFloor = marker.floor
         markerCoordinate = marker.coordinate
-
+        selectedSearchResult = marker
         searchQuery = ""
         searchResults = []
 
         dbViewModel.addHistoryItem(marker, department: selectedDepartment)
     }
 
+    func clearSelectedSearchResult() {
+        selectedSearchResult = nil
+        // Возможно, вы захотите сбросить и маркер на карте
+        // markerCoordinate = nil
+    }
+
     func selectMarkerOnMap(markerID: String) {
         searchQuery = markerID
+        updateSearchResults()
+
         if let topResult = searchResults.first { // we are sure that this marker is present
             selectedFloor = topResult.floor
             markerCoordinate = topResult.coordinate
@@ -138,16 +147,35 @@ class MapViewModel: ObservableObject {
         }
     }
 
-    func addSelectedMarkerToDB() {
-        if let selectedMarker = searchResults.first {
-            dbViewModel.addFavoritesItem(selectedMarker, department: selectedDepartment)
-            dbViewModel.addHistoryItem(selectedMarker, department: selectedDepartment)
-        } else {
-            print("addSelectedMarkerToDB: Marker not found")
+    func getSelectedMarker() -> InternalMarkerModel? {
+        guard !selectedMarker.isEmpty, let mapDescription = currentMapDescription else {
+            return nil
         }
+
+        for floorData in mapDescription.floors {
+            if let markerData = floorData.markers.first(where: { $0.en.title == selectedMarker }) {
+                return InternalMarkerModel(
+                    id: markerData.id,
+                    title: markerData.ru.title ?? "",
+                    description: markerData.ru.description,
+                    floor: floorData.floor,
+                    coordinate: markerData.coordinate,
+                    type: markerData.type,
+                    marker: markerData
+                )
+            }
+        }
+
+        print("Warning: getSelectedMarker() could not find a marker with ID '\(selectedMarker)'.")
+        return nil
     }
 
-    func selectHistoryItem(_ item: HistoryModel) {
+    func addSelectedMarkerToDB(marker: InternalMarkerModel) {
+        dbViewModel.addFavoritesItem(marker, department: selectedDepartment)
+        // dbViewModel.addHistoryItem(selectedMarker, department: selectedDepartment)
+    }
+
+    func selectHistoryItem(_ item: MapObjectModel) {
         let fullMarker = item.toInternalMarkerModel(mapDescription: loadedMapDescriptions[selectedDepartment])
         if fullMarker == nil {
             print("MapViewModel: Internal error...")
@@ -164,6 +192,10 @@ class MapViewModel: ObservableObject {
         return description.floors.map { $0.floor }.sorted()
     }
 
+    func removeFavoriteItem(_ item: MapObjectModel) {
+        dbViewModel.deleteFavoriteItem(id: item.id)
+    }
+
     var currentMapDescription: MapDescription? {
         loadedMapDescriptions[selectedDepartment]
     }
@@ -172,6 +204,12 @@ class MapViewModel: ObservableObject {
         markerCoordinate = nil
         searchQuery = ""
         searchResults = []
+    }
+
+    func clearSelectedMarker() {
+        selectedMarker = ""
+        // Опционально: если вы хотите также убрать пин с карты
+        // self.markerCoordinate = nil
     }
 
     private func getAllMarkersForCurrentDepartment() -> [InternalMarkerModel] {
