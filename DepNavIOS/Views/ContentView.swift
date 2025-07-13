@@ -30,7 +30,7 @@ struct ContentView: View {
                     floor: mapViewModel.selectedFloor,
                     department: mapViewModel.selectedDepartment,
                     markerCoordinate: $mapViewModel.markerCoordinate,
-                    mapDescription: mapViewModel.currentMapDescription!
+                    mapDescription: mapViewModel.currentMapDescription!, selectedMarker: $mapViewModel.selectedMarker
                 )
                 .edgesIgnoringSafeArea(.all)
 
@@ -42,7 +42,7 @@ struct ContentView: View {
                 )
 
             } else {
-                Color(.systemGroupedBackground) // Фоновый цвет, чтобы не было черного экрана
+                Color(.systemGroupedBackground)
                     .edgesIgnoringSafeArea(.all)
                     .onAppear {
                         if !showWelcomeScreen {

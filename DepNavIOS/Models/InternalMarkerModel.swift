@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct InternalMarkerModel: Identifiable, Equatable {
-    let id: String 
+    let id: String
     let title: String
     let description: String?
     let floor: Int

@@ -5,10 +5,10 @@
 //  Created by Michael Gavrilenko on 23.06.2025.
 //
 
+import Combine
 import CoreGraphics
 import Foundation
 import SwiftUI
-import Combine
 
 @MainActor
 class MapViewModel: ObservableObject {
@@ -20,6 +20,7 @@ class MapViewModel: ObservableObject {
     @Published var searchQuery: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var selectedMarker: String = ""
 
     @Published var dbViewModel = DatabaseViewModel()
 
@@ -30,16 +31,16 @@ class MapViewModel: ObservableObject {
     private let mapDataService: MapDataService
 
     private var loadedMapDescriptions: [String: MapDescription] = [:]
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     init(mapDataService: MapDataService = MapDataService()) {
         self.mapDataService = mapDataService
         dbViewModel.objectWillChange
-                    .sink { [weak self] _ in
-                        self?.objectWillChange.send()
-                    }
-                    .store(in: &cancellables)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Map Management
@@ -123,6 +124,27 @@ class MapViewModel: ObservableObject {
         searchResults = []
 
         dbViewModel.addHistoryItem(marker, department: selectedDepartment)
+    }
+
+    func selectMarkerOnMap(markerID: String) {
+        searchQuery = markerID
+        if let topResult = searchResults.first { // we are sure that this marker is present
+            selectedFloor = topResult.floor
+            markerCoordinate = topResult.coordinate
+            searchQuery = ""
+            searchResults = []
+        } else {
+            print("selectMarkerOnMap: Marker not found")
+        }
+    }
+
+    func addSelectedMarkerToDB() {
+        if let selectedMarker = searchResults.first {
+            dbViewModel.addFavoritesItem(selectedMarker, department: selectedDepartment)
+            dbViewModel.addHistoryItem(selectedMarker, department: selectedDepartment)
+        } else {
+            print("addSelectedMarkerToDB: Marker not found")
+        }
     }
 
     func selectHistoryItem(_ item: HistoryModel) {

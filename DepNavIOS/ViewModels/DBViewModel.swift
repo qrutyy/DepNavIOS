@@ -60,6 +60,17 @@ class DatabaseViewModel: ObservableObject {
             }
         }
     }
+    
+    func addFavoritesItem(_ item: InternalMarkerModel, department: String) {
+        Task {
+            let success = await databaseService.addFavoritesItem(item.toHistoryModel(currentDepartment: department))
+            if success {
+                self.favoriteItems.insert(item.toHistoryModel(currentDepartment: department), at: 0)
+            } else {
+                self.errorMessage = "Не удалось добавить элемент истории"
+            }
+        }
+   
 
     func updateHistoryItem(_ item: HistoryModel) {
         Task {

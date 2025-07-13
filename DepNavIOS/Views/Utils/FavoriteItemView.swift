@@ -1,5 +1,5 @@
 //
-//  FavouriteItemView.swift
+//  FavoriteItemView.swift
 //  DepNavIOS
 //
 //  Created by Michael Gavrilenko on 11.07.2025.

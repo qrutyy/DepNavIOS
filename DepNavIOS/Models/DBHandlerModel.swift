@@ -18,7 +18,7 @@ class HistoryModel: Codable, Identifiable {
     init() {}
 
     init(id: Int?, floor: Int?, department: String? = nil, objectTitle: String?, objectDescription: String?, objectTypeName: String?) {
-        if (id != nil) {
+        if id != nil {
             self.id = id!
         }
         self.department = department ?? ""

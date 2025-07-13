@@ -10,11 +10,17 @@ import SwiftUI
 struct GenericMarkerView: View {
     let type: MarkerType
     let title: String
+    @Binding var selectedMarker: String
 
     var body: some View {
         iconForType(type)
             .font(.title)
-            .frame(width: 40, alignment: .center)
+            .frame(width: 45, height: 45, alignment: .center)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                print("updated selectedMarker to: \(title)")
+                selectedMarker = title
+            }
     }
 
     @ViewBuilder

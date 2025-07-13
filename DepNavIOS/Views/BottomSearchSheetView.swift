@@ -11,7 +11,7 @@ struct BottomSearchSheetView: View {
     @ObservedObject var mapViewModel: MapViewModel
 
     @Binding var detent: PresentationDetent
-    
+
     // MARK: - Main Body
 
     var body: some View {
@@ -22,11 +22,13 @@ struct BottomSearchSheetView: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    if mapViewModel.searchQuery.isEmpty {
+                    if !mapViewModel.searchQuery.isEmpty {
+                        resultsSection
+                    } else if mapViewModel.selectedMarker != "" {
+                        markerSection
+                    } else {
                         favoritesSection
                         recentsSection
-                    } else {
-                        resultsSection
                     }
                 }
             }
@@ -44,6 +46,14 @@ struct BottomSearchSheetView: View {
                 hideKeyboard()
                 withAnimation {
                     self.detent = .height(50)
+                }
+            }
+        }
+
+        .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
+            if newSelectedMarker != "" {
+                withAnimation(.spring()) {
+                    self.detent = .medium // или .large, как вам нужно
                 }
             }
         }
@@ -66,7 +76,7 @@ struct BottomSearchSheetView: View {
             .submitLabel(.search)
             .onSubmit {
                 mapViewModel.commitSearch()
-                if (mapViewModel.searchResults != []) {
+                if mapViewModel.searchResults != [] {
                     withAnimation(.spring()) {
                         self.detent = .height(50)
                     }
@@ -142,6 +152,46 @@ struct BottomSearchSheetView: View {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var markerSection: some View {
+        let marker = mapViewModel.selectedMarker
+        if marker != "" {
+            VStack(alignment: .leading, spacing: 0) {
+                // Section Header
+                HStack {
+                    Text("Selected Location")
+                        .font(.title2.bold())
+                    Spacer()
+                    Button("Clear") {}
+                        .font(.subheadline)
+                        .buttonStyle(.borderless)
+                }
+                .padding([.top, .horizontal], 16)
+                .padding(.bottom, 8)
+
+                HStack(spacing: 12) {
+                    Button(action: {
+                        print("Get Directions to \(marker)")
+                    }) {
+                        Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button(action: {
+                        print("Save \(marker) to favorites")
+                        mapViewModel.addSelectedMarkerToDB()
+                    }) {
+                        Label("Save", systemImage: "heart.fill")
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
             }
         }
     }
