@@ -124,7 +124,7 @@ struct AdvSVGView: View {
 
     private func handleDoubleTap(in size: CGSize) {
         withAnimation(.spring()) {
-            if self.scale > 3.0 { // Use a slightly lower threshold than 4
+            if self.scale > 4.0 {
                 self.scale = 1.0
                 self.offset = .zero
             } else {

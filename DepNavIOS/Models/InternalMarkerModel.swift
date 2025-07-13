@@ -18,8 +18,8 @@ struct InternalMarkerModel: Identifiable, Equatable {
 }
 
 extension InternalMarkerModel {
-    func toHistoryModel(currentDepartment: String) -> HistoryModel {
-        return HistoryModel(
+    func toMapObjectModel(currentDepartment: String) -> MapObjectModel {
+        return MapObjectModel(
             id: nil,
             floor: floor,
             department: currentDepartment,

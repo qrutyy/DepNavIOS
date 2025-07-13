@@ -12,13 +12,12 @@ struct FavoriteItemView: View {
     let title: String
     let subtitle: String
     let iconColor: Color
-    let backgroundColor: Color
 
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .fill(backgroundColor)
+                    .fill(Color(.systemGray5))
                     .frame(width: 60, height: 60)
 
                 Image(systemName: icon)
@@ -45,5 +44,5 @@ struct FavoriteItemView: View {
 }
 
 #Preview {
-    FavoriteItemView(icon: "star", title: "Starred", subtitle: "123 items", iconColor: .yellow, backgroundColor: .blue)
+    FavoriteItemView(icon: "star", title: "Starred", subtitle: "123 items", iconColor: .yellow)
 }

@@ -8,11 +8,19 @@
 import SwiftUI
 
 struct CloseButton: View {
+    var action: () -> Void
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button(action: action) { // Вызываем переданное действие
+            Image(systemName: "xmark")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.secondary) // .secondary - хороший адаптивный серый
+        }
+        .frame(width: 24, height: 24)
+        .background(Color(.systemGray6)) // .systemGray6 - еще один хороший вариант для фона
+        .clipShape(Circle())
+        .accessibilityLabel("Закрыть") // Важно для доступности (VoiceOver)
     }
 }
 
-#Preview {
-    CloseButton()
-}
+#Preview {}

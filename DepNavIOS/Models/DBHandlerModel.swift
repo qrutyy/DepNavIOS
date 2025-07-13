@@ -7,7 +7,7 @@
 
 class DepartmentMapModel: Codable {}
 
-class HistoryModel: Codable, Identifiable {
+class MapObjectModel: Codable, Identifiable {
     var id: Int = 1
     var department: String = ""
     var floor: Int = -99
@@ -29,7 +29,7 @@ class HistoryModel: Codable, Identifiable {
     }
 }
 
-extension HistoryModel {
+extension MapObjectModel {
     func toInternalMarkerModel(mapDescription: MapDescription?) -> InternalMarkerModel? {
         guard let description = mapDescription else {
             print("Conversion failed: mapDescription is nil.")
@@ -69,16 +69,20 @@ class DBHandlerModel: Codable {
     var result: String = ""
     var availableDepartments: [String]?
     var historyLength: Int = 0
-    var historyList: [HistoryModel]?
+    var historyList: [MapObjectModel]?
+    var favoritesLength: Int = 0
+    var favoritesList: [MapObjectModel]?
 
     init() {}
 
-    init(id: Int, name: String?, result: String, availableDepartments: [String]?, historyLength: Int?, historyList: [HistoryModel]? = nil) {
+    init(id: Int, name: String?, result: String, availableDepartments: [String]?, historyLength: Int?, historyList: [MapObjectModel]? = nil, favoritesLength: Int?, favoriteList: [MapObjectModel]? = nil) {
         self.id = id
         self.name = name ?? "dbHandlerModel"
         self.result = result
         self.availableDepartments = availableDepartments
         self.historyLength = historyLength ?? 0
         self.historyList = historyList
+        self.favoritesLength = favoritesLength ?? 0
+        favoritesList = favoriteList
     }
 }
