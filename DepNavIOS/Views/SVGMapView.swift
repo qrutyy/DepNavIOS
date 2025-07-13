@@ -8,13 +8,16 @@
 import SVGView
 import SwiftUI
 
+/// Just a middle handler for the AdvSVGView.
+/// Incapsulates all in all MapView and handles the loading error.
+/// May be appended with the better error screen (when the custom map loading will be implemented) TODO
 struct SVGMapView: View {
     let floor: Int
     let department: String
 
     @Binding var markerCoordinate: CGPoint?
-
-    let coordinateLoader: CoordinateLoader
+    let mapDescription: MapDescription
+    @Binding var selectedMarker: String
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -26,7 +29,8 @@ struct SVGMapView: View {
                 floor: floor,
                 department: department,
                 markerCoordinate: $markerCoordinate,
-                coordinateLoader: coordinateLoader
+                mapDescription: mapDescription,
+                selectedMarker: $selectedMarker
             )
             .onAppear {
                 print("SVGView: layout for file 'Maps/\(department)/floor\(floor).svg'")

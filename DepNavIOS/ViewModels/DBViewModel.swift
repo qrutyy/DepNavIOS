@@ -7,102 +7,134 @@
 
 import Foundation
 
+@MainActor
+// It guarantees that all the @Published properties are updating safely.
 class DatabaseViewModel: ObservableObject {
-    @Published var historyItems: [HistoryModel] = []
+    @Published var historyItems: [MapObjectModel] = []
+    @Published var favoriteItems: [MapObjectModel] = []
     @Published var DBHandlerItems: [DBHandlerModel] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var historyLength: Int?
 
-    private let databaseManager = DatabaseManager.shared
+    private let databaseService: DatabaseServiceProtocol
 
-    init() {
+    init(databaseService: DatabaseServiceProtocol = DatabaseService()) {
+        self.databaseService = databaseService
         loadData()
+    }
+
+    var historyLength: Int {
+        historyItems.count
     }
 
     // MARK: - History Methods
 
     func loadHistoryItems() {
         isLoading = true
-        DispatchQueue.global(qos: .background).async {
-            let items = self.databaseManager.getAllHistory()
-            DispatchQueue.main.async {
-                self.historyItems = items
-                self.isLoading = false
+        errorMessage = nil
+        Task {
+            let items = await databaseService.getHistoryItems()
+            // @Published properties updates are happening in the main thread, bc of the @MainActor
+            self.historyItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
+            self.isLoading = false
+        }
+    }
+
+    func loadFavoriteItems() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            let items = await databaseService.getFavoriteItems()
+            // @Published properties updates are happening in the main thread, bc of the @MainActor
+            self.favoriteItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
+            self.isLoading = false
+        }
+    }
+
+    func addHistoryItem(_ item: MapObjectModel) {
+        Task {
+            let success = await databaseService.addHistoryItem(item)
+            if success {
+                self.historyItems.insert(item, at: 0)
+            } else {
+                self.errorMessage = "Не удалось добавить элемент истории"
             }
         }
     }
 
-    func addHistoryItem(_ item: HistoryModel) {
-        isLoading = true
-        DispatchQueue.global(qos: .background).async {
-            let success = self.databaseManager.insertHistory(item)
-            DispatchQueue.main.async {
-                if success {
-                    self.loadHistoryItems()
-                    self.historyLength = self.historyItems.count
-                } else {
-                    self.errorMessage = "Не удалось добавить элемент истории"
-                    self.isLoading = false
-                }
+    func addHistoryItem(_ item: InternalMarkerModel, department: String) {
+        Task {
+            let success = await databaseService.addHistoryItem(item.toMapObjectModel(currentDepartment: department))
+            if success {
+                self.historyItems.insert(item.toMapObjectModel(currentDepartment: department), at: 0)
+            } else {
+                self.errorMessage = "Не удалось добавить элемент истории"
             }
         }
     }
 
-    func updateHistoryItem(_ item: HistoryModel) {
-        isLoading = true
-        DispatchQueue.global(qos: .background).async {
-            let success = self.databaseManager.updateHistory(item)
-            DispatchQueue.main.async {
-                if success {
-                    self.loadHistoryItems()
-                } else {
-                    self.errorMessage = "Не удалось обновить элемент истории"
-                    self.isLoading = false
-                }
+    func addFavoritesItem(_ item: InternalMarkerModel, department: String) {
+        Task {
+            let success = await databaseService.addFavoriteItem(item.toMapObjectModel(currentDepartment: department))
+            if success {
+                self.favoriteItems.insert(item.toMapObjectModel(currentDepartment: department), at: 0)
+            } else {
+                self.errorMessage = "Не удалось добавить элемент истории"
+            }
+        }
+    }
+
+    func updateHistoryItem(_ item: MapObjectModel) {
+        Task {
+            let success = await databaseService.updateHistoryItem(item)
+            if success, let index = historyItems.firstIndex(where: { $0.id == item.id }) {
+                self.historyItems[index] = item
+            } else {
+                self.errorMessage = "Не удалось обновить элемент истории"
             }
         }
     }
 
     func deleteHistoryItem(id: Int) {
-        isLoading = true
-        DispatchQueue.global(qos: .background).async {
-            let success = self.databaseManager.deleteHistory(id: id)
-            DispatchQueue.main.async {
-                if success {
-                    self.loadHistoryItems()
-                } else {
-                    self.errorMessage = "Не удалось удалить элемент истории"
-                    self.isLoading = false
-                }
+        Task {
+            let success = await databaseService.deleteHistoryItem(id: id)
+            if success {
+                self.historyItems.removeAll { $0.id == id }
+            } else {
+                self.errorMessage = "Не удалось удалить элемент истории"
             }
         }
     }
 
-    // MARK: - DBHandler Methods
-
-    func loadDBHandlerItems() {
-        isLoading = true
-        DispatchQueue.global(qos: .background).async {
-            let items = self.databaseManager.getAllDBHandlers()
-            DispatchQueue.main.async {
-                self.DBHandlerItems = items
-                self.isLoading = false
+    func deleteFavoriteItem(id: Int) {
+        Task {
+            let success = await databaseService.deleteFavoriteItem(id: id)
+            if success {
+                self.favoriteItems.removeAll { $0.id == id }
+            } else {
+                self.errorMessage = "Не удалось удалить элемент истории"
             }
         }
     }
 
-    func addDBHandlerItem(_ item: DBHandlerModel) {
-        isLoading = true
-        DispatchQueue.global(qos: .background).async {
-            let success = self.databaseManager.insertDBHandler(item)
-            DispatchQueue.main.async {
-                if success {
-                    self.loadDBHandlerItems()
-                } else {
-                    self.errorMessage = "Не удалось добавить элемент DBHandler"
-                    self.isLoading = false
-                }
+    func clearAllHistory() {
+        Task {
+            let success = await databaseService.clearHistory()
+            if success {
+                self.historyItems.removeAll()
+            } else {
+                self.errorMessage = "Не удалось очистить историю"
+            }
+        }
+    }
+
+    func clearAllFavorites() {
+        Task {
+            let success = await databaseService.clearFavorites()
+            if success {
+                self.favoriteItems.removeAll()
+            } else {
+                self.errorMessage = "Не удалось очистить историю"
             }
         }
     }
@@ -110,8 +142,10 @@ class DatabaseViewModel: ObservableObject {
     // MARK: - Common Methods
 
     func loadData() {
-        loadHistoryItems()
-        loadDBHandlerItems()
+        Task {
+            loadHistoryItems()
+            loadFavoriteItems()
+        }
     }
 
     func clearError() {

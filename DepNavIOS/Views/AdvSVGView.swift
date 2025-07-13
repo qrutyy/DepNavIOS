@@ -13,112 +13,157 @@ struct AdvSVGView: View {
     let floor: Int
     let department: String
     @Binding var markerCoordinate: CGPoint?
-
-    // This view now receives the loader from its parent.
-    @ObservedObject var coordinateLoader: CoordinateLoader
+    let mapDescription: MapDescription
+    @Binding var selectedMarker: String
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var startOffset: CGSize = .zero
     @State private var startScale: CGFloat = 2.0
-
-    // REMOVED: No longer needed as we get it from the loader.
-    // let svgSize: CGSize = .init(width: 1024, height: 1024)
-
     var body: some View {
-        if let mapDescription = coordinateLoader.mapDescriptions[department] {
-            let svgNaturalSize = CGSize(width: mapDescription.floorWidth, height: mapDescription.floorHeight)
-
-            GeometryReader { geometry in
-                let magnifyGesture = MagnificationGesture()
-                    .onChanged { value in
-                        self.scale = max(1.0, startScale * value)
-                    }
-                    .onEnded { value in
-                        self.scale = max(1.0, startScale * value)
-                        self.startScale = self.scale
-                        self.offset = clampOffset(offset, for: self.scale, in: geometry.size)
-                        self.startOffset = self.offset
-                    }
-
-                let dragGesture = DragGesture()
-                    .onChanged { value in
-                        let newOffset = CGSize(
-                            width: startOffset.width + value.translation.width,
-                            height: startOffset.height + value.translation.height
-                        )
-                        self.offset = clampOffset(newOffset, for: self.scale, in: geometry.size)
-                    }
-                    .onEnded { _ in
-                        self.startOffset = self.offset
-                    }
-
-                ZStack {
-                    CachedSVGView(contentsOf: url)
-                        .aspectRatio(svgNaturalSize, contentMode: .fit)
-
-                    if let currentFloorData = mapDescription.floors.first(where: { $0.floor == self.floor }) {
-                        ForEach(currentFloorData.markers, id: \.self) { marker in
-                            let markerPosition = calculateMarkerPosition(
-                                svgCoordinate: marker.coordinate,
-                                svgNaturalSize: svgNaturalSize,
-                                containerSize: geometry.size
-                            )
-
-                            let displayTitle = marker.ru.title ?? marker.en.title ?? ""
-                            GenericMarkerView(type: marker.type, title: displayTitle)
-                                .offset(y: -21)
-                                .scaleEffect(1.0 / 7.0)
-                                .position(markerPosition)
-                                .transition(
-                                    .move(edge: .top)
-                                        .combined(with: .opacity)
-                                        .animation(.spring(response: 0.6, dampingFraction: 0.6))
-                                )
-                        }
-                    }
-
-                    if let coord = markerCoordinate {
-                        let markerPosition = calculateMarkerPosition(
-                            svgCoordinate: coord,
-                            svgNaturalSize: svgNaturalSize,
-                            containerSize: geometry.size
-                        )
-
-                        PinMarkerView(color: .red)
-                            .offset(y: -21)
-                            .scaleEffect(1.0 / self.scale)
-                            .position(movePinMarkerUpper(markerPosition))
-                            .transition(
-                                .move(edge: .top)
-                                    .combined(with: .opacity)
-                                    .animation(.spring(response: 0.6, dampingFraction: 0.6))
-                            )
-                    }
-                }
+        GeometryReader { geometry in
+            mapContentView(for: geometry)
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .scaleEffect(self.scale)
                 .offset(self.offset)
                 .clipped()
                 .contentShape(Rectangle())
-                .gesture(dragGesture.simultaneously(with: magnifyGesture))
+                .gesture(combinedGesture(for: geometry)) // Gestures are now combined in a helper
                 .onTapGesture(count: 2) {
-                    // Tap gesture logic remains the same
-                    withAnimation(.spring()) {
-                        if self.scale > 4.0 {
-                            self.scale = 1.0
-                            self.offset = .zero
-                        } else {
-                            self.scale *= 2.0
-                            self.offset = CGSize(width: self.offset.width * 2.0, height: self.offset.height * 2.0)
-                        }
-                        self.startScale = self.scale
-                        self.startOffset = self.offset
-                    }
+                    handleDoubleTap(in: geometry.size)
+                }
+                .onChange(of: markerCoordinate) { newCoord in
+                    guard let coord = newCoord else { return }
+                    centerOnCoordinate(coord, in: geometry.size)
+                }
+        }
+    }
+
+    // MARK: - View Builders & Helpers
+
+    /// Creates the main map content including the SVG and all markers.
+    @ViewBuilder
+    private func mapContentView(for geometry: GeometryProxy) -> some View {
+        let svgNaturalSize = CGSize(width: mapDescription.floorWidth, height: mapDescription.floorHeight)
+
+        ZStack {
+            // 1. The base SVG map
+            CachedSVGView(contentsOf: url)
+                .aspectRatio(svgNaturalSize, contentMode: .fit)
+
+            // 2. The tappable markers for the current floor
+            if let currentFloorData = mapDescription.floors.first(where: { $0.floor == self.floor }) {
+                ForEach(currentFloorData.markers, id: \.self) { marker in
+                    let markerPosition = calculateMarkerPosition(
+                        svgCoordinate: marker.coordinate,
+                        svgNaturalSize: svgNaturalSize,
+                        containerSize: geometry.size
+                    )
+
+                    // Note: Simplified the marker view for this example
+                    let displayTitle = marker.ru.title ?? marker.en.title ?? ""
+                    GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $selectedMarker)
+                        .offset(y: -21)
+                        .scaleEffect(1.0 / 7.0)
+                        .position(markerPosition)
+                        .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
                 }
             }
-        } else {
-            ProgressView()
+
+            // 3. The pin for a selected search result
+            if let coord = markerCoordinate {
+                let markerPosition = calculateMarkerPosition(
+                    svgCoordinate: coord,
+                    svgNaturalSize: svgNaturalSize,
+                    containerSize: geometry.size
+                )
+
+                PinMarkerView(color: .red)
+                    .offset(y: -21)
+                    .scaleEffect(1.0 / self.scale) // Pin should also scale down
+                    .position(markerPosition) // Simplified this call for clarity
+                    .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
+            }
+        }
+    }
+
+    // MARK: - Gestures
+
+    /// Creates and combines the drag and magnification gestures.
+    private func combinedGesture(for geometry: GeometryProxy) -> some Gesture {
+        // Drag Gesture
+        let dragGesture = DragGesture()
+            .onChanged { value in
+                let newOffset = CGSize(
+                    width: startOffset.width + value.translation.width,
+                    height: startOffset.height + value.translation.height
+                )
+                self.offset = clampOffset(newOffset, for: self.scale, in: geometry.size)
+            }
+            .onEnded { _ in
+                self.startOffset = self.offset
+            }
+
+        // Magnification Gesture
+        let magnifyGesture = MagnificationGesture()
+            .onChanged { value in
+                self.scale = max(1.0, startScale * value)
+            }
+            .onEnded { value in
+                // Finalize scale and clamp the offset to the new scale
+                self.scale = max(1.0, startScale * value)
+                self.startScale = self.scale
+                self.offset = clampOffset(offset, for: self.scale, in: geometry.size)
+                self.startOffset = self.offset
+            }
+
+        return dragGesture.simultaneously(with: magnifyGesture)
+    }
+
+    // MARK: - Helper Functions
+
+    private func handleDoubleTap(in size: CGSize) {
+        withAnimation(.spring()) {
+            if self.scale > 4.0 {
+                self.scale = 1.0
+                self.offset = .zero
+            } else {
+                let newScale = self.scale * 2.0
+                // This offset logic might need refinement to zoom into the tap location
+                let newOffset = CGSize(width: self.offset.width * 2.0, height: self.offset.height * 2.0)
+                self.scale = newScale
+                self.offset = clampOffset(newOffset, for: newScale, in: size)
+            }
+            self.startScale = self.scale
+            self.startOffset = self.offset
+        }
+    }
+
+    private func centerOnCoordinate(_ coordinate: CGPoint, in containerSize: CGSize) {
+        let svgNaturalSize = CGSize(width: mapDescription.floorWidth, height: mapDescription.floorHeight)
+
+        let targetScale: CGFloat = 3.0
+
+        let markerPosition = calculateMarkerPosition(
+            svgCoordinate: coordinate,
+            svgNaturalSize: svgNaturalSize,
+            containerSize: containerSize
+        )
+
+        // Calculate the offset needed to move the marker's scaled position to the center of the screen
+        let targetOffsetX = ((containerSize.width / 2) - markerPosition.x) * targetScale
+        let targetOffsetY = ((containerSize.height / 2) - markerPosition.y) * targetScale
+        var targetOffset = CGSize(width: targetOffsetX, height: targetOffsetY)
+
+        // Make sure the calculated offset is within the allowed bounds
+        targetOffset = clampOffset(targetOffset, for: targetScale, in: containerSize)
+
+        withAnimation(.spring(response: 1, dampingFraction: 0.8)) {
+            self.scale = targetScale
+            self.offset = targetOffset
+
+            self.startScale = self.scale
+            self.startOffset = self.offset
         }
     }
 

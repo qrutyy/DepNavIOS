@@ -4,24 +4,62 @@
 //
 //  Created by Michael Gavrilenko on 30.06.2025.
 //
-
 import SwiftUI
 
 struct BottomSearchSheetView: View {
-    let callOnSubmit: () -> Void
-    @Binding var idToFind: String
-    @StateObject var DBModel: DatabaseViewModel
+    // ObservedObaject is used bc lifecycle of ViewModel is managed by the parental ContentView
+    @ObservedObject var mapViewModel: MapViewModel
+
+    @Binding var detent: PresentationDetent
+
+    @State private var showMarkerSection = false
+    @State private var displayDeleteFavoriteButton: Bool = false
 
     // MARK: - Main Body
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
             searchBar
+                .padding(.top, detent != .height(50) ? 15 : 35)
+                .padding(.bottom, 15)
+
             ScrollView {
                 VStack(spacing: 0) {
-                    favoritesSection
-                    mainContentSection
+                    // НОВАЯ, БОЛЕЕ ЧИСТАЯ ЛОГИКА
+                    if let marker = mapViewModel.getSelectedMarker() {
+                        // Если есть выбранный маркер, показываем детали
+                        markerSection(marker: marker)
+                    } else if !mapViewModel.searchQuery.isEmpty {
+                        // Если нет выбранного маркера, но есть текст поиска - показываем результаты
+                        resultsSection
+                    } else {
+                        // Во всех остальных случаях - избранное и недавние
+                        favoritesSection
+                        recentsSection
+                    }
+                }
+            }
+            .onChange(of: mapViewModel.searchQuery) { newValue in
+                Task {
+                    if newValue == mapViewModel.searchQuery {
+                        mapViewModel.updateSearchResults()
+                    }
+                }
+            }
+            .onChange(of: mapViewModel.markerCoordinate) { newCoord in
+                if newCoord != nil {
+                    hideKeyboard()
+                    withAnimation {
+                        self.detent = .height(50)
+                    }
+                }
+            }
+
+            .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
+                if newSelectedMarker != "" {
+                    withAnimation(.spring()) {
+                        self.detent = .medium // или .large, как вам нужно
+                    }
                 }
             }
         }
@@ -30,25 +68,36 @@ struct BottomSearchSheetView: View {
 
     // MARK: - Helper Views
 
-    /// The search bar view at the top of the sheet.
     private var searchBar: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
-                .font(.system(size: 16, weight: .medium))
 
-            TextField("Search Maps", text: $idToFind)
-                .font(.system(size: 16))
-                .onSubmit(callOnSubmit)
+            TextField("Search Objects", text: $mapViewModel.searchQuery, onEditingChanged: { isEditing in
+                withAnimation(.spring()) {
+                    if isEditing {
+                        self.detent = .large
+                    }
+                }
+            })
+            .submitLabel(.search)
+            .onSubmit {
+                mapViewModel.commitSearch()
+                if mapViewModel.searchResults != [] {
+                    withAnimation(.spring()) {
+                        self.detent = .height(50)
+                    }
+                }
+            }
 
-            if !idToFind.isEmpty {
+            if !mapViewModel.searchQuery.isEmpty {
                 Button(action: {
-                    idToFind = ""
+                    mapViewModel.searchQuery = ""
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
-                        .font(.system(size: 16))
                 }
+                // .butt onStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
@@ -56,91 +105,178 @@ struct BottomSearchSheetView: View {
         .background(Color(.systemGray6))
         .cornerRadius(12)
         .padding(.horizontal, 20)
-        .padding(.top, 25)
-        .padding(.bottom, 20)
     }
 
-    /// The section displaying favorite items in a grid.
     private var favoritesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Favourites")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.title2.bold())
+                    
+                Spacer()
+                if (mapViewModel.dbViewModel.favoriteItems.count != 0) {
+                    Button("Clear") {
+                        mapViewModel.dbViewModel.clearAllFavorites()
+                    }
+                    .font(.subheadline)
+                    .buttonStyle(.borderless)
+                }
             }
             .padding(.horizontal, 16)
-
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
-                FavoriteItemView(icon: "house.fill", title: "SE lab", subtitle: "7777", iconColor: .blue, backgroundColor: Color(.systemGray5))
-                FavoriteItemView(icon: "briefcase.fill", title: "Work", subtitle: "Add", iconColor: .blue, backgroundColor: Color(.systemGray5))
-                FavoriteItemView(icon: "location.fill", title: "Auditorium", subtitle: "Main building", iconColor: .white, backgroundColor: .red)
-                FavoriteItemView(icon: "plus", title: "Add", subtitle: "", iconColor: .blue, backgroundColor: Color(.systemGray5))
+            if (mapViewModel.dbViewModel.favoriteItems.count == 0) {
+                VStack {
+                    HStack {
+                        Text("No objects in favorites")
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+                }
+            } else {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
+                    ForEach(mapViewModel.dbViewModel.favoriteItems) { mapObject in
+                        ZStack {
+                            
+                            FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, iconColor: .blue)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    // Telling ViewModel that user has selected the marker
+                                    mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!)
+                                }
+                                .onLongPressGesture(minimumDuration: 0.2, perform: {withAnimation { displayDeleteFavoriteButton = true}})
+                            
+                            if displayDeleteFavoriteButton {
+                                CloseButton {
+                                    mapViewModel.removeFavoriteItem(mapObject)
+                                }
+                                .offset(x: 22, y: -31)
+                            }
+                            
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
         }
-        .padding(.top, 10)
+        .padding(.vertical, 10)
     }
 
-    /// The main content area, showing either search results or recent searches.
-    @ViewBuilder
-    private var mainContentSection: some View {
-        if !idToFind.isEmpty {
-            resultsSection
-        } else {
-            recentsSection
-        }
-    }
-
-    /// The view for displaying search results.
     private var resultsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Results")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.title2.bold())
                 Spacer()
             }
-            .padding(.top, 16)
+            .padding([.top, .horizontal], 16)
+            .padding(.bottom, 8)
 
-            LazyVStack(spacing: 0) {
-                SearchResultRow(icon: "building.2.fill", title: "Room \(idToFind)", subtitle: "Main Building, Floor 2")
-                SearchResultRow(icon: "person.fill", title: "Professor \(idToFind)", subtitle: "Mathematics Department")
+            if mapViewModel.isLoading {
+                ProgressView().frame(maxWidth: .infinity, alignment: .center)
+            } else if mapViewModel.searchResults.isEmpty {
+                    HStack {
+                        Text("No objects were found")
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+            } else {
+                LazyVStack(spacing: 0) {
+                    ForEach(mapViewModel.searchResults) { marker in
+                        SearchResultRowView(
+                            icon: getMapObjectIconByType(objectTypeName: marker.type.displayName),
+                            title: marker.title,
+                            subtitle: marker.description
+                                ?? ""
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            // Telling ViewModel that user has selected the marker
+                            mapViewModel.selectSearchResult(marker)
+                        }
+                    }
+                }
             }
         }
-        .padding(.horizontal, 16)
     }
 
-    /// The view for displaying recent searches.
-    private var recentsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    @ViewBuilder
+    private func markerSection(marker: InternalMarkerModel) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Recents")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.primary)
+                Text(getFormattedTitle(objectTitle: marker.title, objectTypeName: marker.type.displayName))
+                    .font(.title2.bold())
                 Spacer()
+
+                CloseButton {
+                    mapViewModel.clearSelectedMarker()
+                    self.detent = .medium
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 16)
+            .padding(.bottom, 8)
 
-            LazyVStack(spacing: 0) {
-                if DBModel.isLoading {
-                    ProgressView("Loading data from database...").padding()
-                } else {
-                    let historySize = DBModel.historyLength
-                    if historySize != nil && historySize != 0 {
-                        ForEach(0 ... min(5, historySize!), id: \.self) { (elementNumber: Int) in
-                            let historyItem = DBModel.historyItems[historySize! - elementNumber]
-                            SearchResultRow(
-                                icon: getHistoryIconByType(objectTypeName: historyItem.objectTypeName),
-                                title: getFormattedTitle(objectTitle: historyItem.objectTitle, objectTypeName: historyItem.objectTypeName),
-                                subtitle: historyItem.objectDescription
-                            )
+            HStack(spacing: 12) {
+                Button(action: {
+                    print("Get Directions to \(marker.title)")
+                }) {
+                    Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button(action: {
+                    print("Save \(marker.title) to favorites")
+                    mapViewModel.addSelectedMarkerToDB(marker: marker)
+                }) {
+                    Label("Save", systemImage: "heart.fill")
+                }
+                .buttonStyle(.bordered)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+        }
+    }
+
+    private var recentsSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Recents")
+                    .font(.title2.bold())
+                Spacer()
+                if !mapViewModel.dbViewModel.historyItems.isEmpty {
+                    Button("Clear") {
+                        mapViewModel.dbViewModel.clearAllHistory()
+                    }
+                    .font(.subheadline)
+                    .buttonStyle(.borderless)
+                }
+            }
+            .padding([.top, .horizontal], 16)
+            .padding(.bottom, 8)
+
+            if mapViewModel.dbViewModel.historyItems.isEmpty {
+                Text("History is empty")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else {
+                LazyVStack(spacing: 0) {
+                    ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
+                        SearchResultRowView(
+                            icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName),
+                            title: getFormattedTitle(objectTitle: mapObject.objectTitle, objectTypeName: mapObject.objectTypeName),
+                            subtitle: mapObject.objectDescription
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            mapViewModel.selectHistoryItem(mapObject)
                         }
-                    } else {
-                        Text("No recent searches")
-                            .font(.system(size: 16))
-                            .foregroundColor(.secondary)
-                            .padding()
                     }
                 }
             }
@@ -149,11 +285,13 @@ struct BottomSearchSheetView: View {
 
     // MARK: - Helper Functions
 
-    private func getFormattedTitle(objectTitle: String, objectTypeName: String) -> String {
-        return "\(objectTypeName) \(objectTitle)"
+    private func getFormattedTitle(objectTitle: String?, objectTypeName: String?) -> String {
+        let type = objectTypeName ?? ""
+        let title = objectTitle ?? ""
+        return "\(type) \(title)".trimmingCharacters(in: .whitespaces)
     }
 
-    private func getHistoryIconByType(objectTypeName: String) -> String {
+    private func getMapObjectIconByType(objectTypeName: String?) -> String {
         switch objectTypeName {
         case "Entrance": return "door.french.open"
         case "Room": return "door.left.hand.open"
@@ -161,95 +299,14 @@ struct BottomSearchSheetView: View {
         case "Stairs down": return "arrow.down.square"
         case "Stairs both": return "arrow.up.arrow.down.square"
         case "Elevator": return "arrow.up.and.down.square"
-        case "WC man": return "figure.dress.line.vertical.figure"
-        case "WC woman": return "figure.dress.line.vertical.figure"
-        case "WC": return "toilet"
-        case "Other": return "questionmark.circle"
+        case "WC man", "WC woman", "WC": return "toilet"
         default: return "mappin.circle"
         }
     }
 }
 
-struct FavoriteItemView: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    let iconColor: Color
-    let backgroundColor: Color
-
-    var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(backgroundColor)
-                    .frame(width: 60, height: 60)
-
-                Image(systemName: icon)
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(iconColor)
-            }
-
-            VStack(spacing: 2) {
-                Text(title)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-
-                if !subtitle.isEmpty {
-                    Text(subtitle)
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
+#if canImport(UIKit)
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-}
-
-struct SearchResultRow: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-
-    var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.blue)
-                .frame(width: 24)
-
-            VStack(alignment: .leading, spacing: 2) {
-                if (subtitle == "") {
-                    Text(title)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                } else {
-                    Text(title)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                }
-                
-            }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.secondary)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(.systemBackground))
-        .onTapGesture {
-            print("Tapped on \(title)")
-        }
-    }
-}
-
-#Preview() {
-    SearchResultRow(icon: "person.circle", title: "John Doe", subtitle: "johndoe@example.com")
-}
+#endif
