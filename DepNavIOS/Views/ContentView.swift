@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showWelcomeScreen = true
+    @State private var showWelcomeScreen = false
     @State private var isBottomSheetPresented = true
     @StateObject private var mapViewModel = MapViewModel()
 
     // Basic set of detents for the Bottom sheet.
     private let searchSheetDetents: Set<PresentationDetent> = [.height(50), .medium, .large]
     @State private var selectedDetent: PresentationDetent = .height(50)
+
+    @State private var isCheckingSetup = true
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -57,13 +59,13 @@ struct ContentView: View {
         .sheet(isPresented: $showWelcomeScreen) {
             Task {
                 await mapViewModel.loadMapData()
-                isBottomSheetPresented = true
             }
         } content: {
-            WelcomeScreen(
-                showWelcomeScreen: $showWelcomeScreen,
-                selectedDepartment: $mapViewModel.selectedDepartment
-            )
+                WelcomeScreen(
+                    showWelcomeScreen: $showWelcomeScreen,
+                    selectedDepartment: $mapViewModel.selectedDepartment
+                )
+            
         }
         .sheet(isPresented: $isBottomSheetPresented) {
             BottomSearchSheetView(mapViewModel: mapViewModel, detent: $selectedDetent)
@@ -76,8 +78,18 @@ struct ContentView: View {
         }
         .onAppear {
             Task {
-                await mapViewModel.loadMapData()
-            }
+                            // 1. Проверяем, существуют ли таблицы в базе данных
+                            let tablesExist = await mapViewModel.dbViewModel.checkTablesExist()
+                            
+                            if tablesExist {
+                                // 2a. Если да, то пользователь уже настроен. Загружаем данные карты.
+                                await mapViewModel.loadMapData()
+                            } else {
+                                // 2b. Если нет, это новый пользователь. Показываем экран приветствия.
+                                // Данные карты загрузятся после его закрытия (в блоке onDismiss).
+                                showWelcomeScreen = true
+                            }
+                        }
         }
         .onChange(of: mapViewModel.selectedDepartment) { _ in
             if !showWelcomeScreen {

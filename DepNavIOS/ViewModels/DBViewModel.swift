@@ -151,4 +151,9 @@ class DatabaseViewModel: ObservableObject {
     func clearError() {
         errorMessage = nil
     }
+    
+    func checkTablesExist() async -> Bool {
+            let result = await databaseService.checkTablesExist()
+        return result
+    }
 }

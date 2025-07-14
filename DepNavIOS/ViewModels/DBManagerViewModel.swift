@@ -49,6 +49,38 @@ class DatabaseManager {
             print("Unable to close database.")
         }
     }
+    
+    func checkTablesExist() -> Bool {
+        let requiredTables: Set<String> = ["History", "Favorites", "DBHandler"]
+        var foundTables: Set<String> = []
+
+        let querySQL = "SELECT name FROM sqlite_master WHERE type='table';"
+        var statement: OpaquePointer?
+
+        var result = false
+        dbQueue.sync {
+            if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+                // Loop through all the rows (tables) found
+                while sqlite3_step(statement) == SQLITE_ROW {
+                    if let tableNameCString = sqlite3_column_text(statement, 0) {
+                        let tableName = String(cString: tableNameCString)
+                        foundTables.insert(tableName)
+                    }
+                }
+            } else {
+                let errmsg = String(cString: sqlite3_errmsg(db)!)
+                print("Failed to prepare statement for checking tables: \(errmsg)")
+            }
+            sqlite3_finalize(statement)
+
+            // A set's isSuperset(of:) checks if it contains all elements from another set.
+            // This is a very clean way to verify all required tables were found.
+            result = foundTables.isSuperset(of: requiredTables)
+        }
+
+        print("All required tables exist: \(result)")
+        return result
+    }
 
     private func createTables() {
         createHistoryTable()
