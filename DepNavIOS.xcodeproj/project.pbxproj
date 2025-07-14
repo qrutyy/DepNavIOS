@@ -37,6 +37,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		6A355F752E257E3400B99AF2 /* Sounds */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Sounds;
+			sourceTree = "<group>";
+		};
 		6AD4F8CC2E0D9BAB00201BF5 /* DepNavIOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DepNavIOS;
@@ -90,6 +95,7 @@
 				6AD4F8E72E0D9BAC00201BF5 /* DepNavIOSUITests */,
 				6AD4F9072E0D9C9A00201BF5 /* Frameworks */,
 				6AD4F8CB2E0D9BAB00201BF5 /* Products */,
+				6A355F752E257E3400B99AF2 /* Sounds */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,6 +132,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				6A355F752E257E3400B99AF2 /* Sounds */,
 				6AD4F8CC2E0D9BAB00201BF5 /* DepNavIOS */,
 			);
 			name = DepNavIOS;

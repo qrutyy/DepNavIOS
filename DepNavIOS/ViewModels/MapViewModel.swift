@@ -136,7 +136,7 @@ class MapViewModel: ObservableObject {
     func selectMarkerOnMap(markerID: String) {
         searchQuery = markerID
         updateSearchResults()
-
+        
         if let topResult = searchResults.first { // we are sure that this marker is present
             selectedFloor = topResult.floor
             markerCoordinate = topResult.coordinate

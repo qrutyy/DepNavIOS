@@ -20,6 +20,11 @@ struct GenericMarkerView: View {
             .onTapGesture {
                 print("updated selectedMarker to: \(title)")
                 selectedMarker = title
+                let labRooms = (3241...3251).map { String($0) }
+                if (labRooms.contains(title)) {
+                    print("playing doom easter egg")
+                    SoundManagerViewModel.instance.playSound(sound: SoundOptions.doom)
+                }
             }
     }
 
