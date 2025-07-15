@@ -14,6 +14,9 @@ struct BottomSearchSheetView: View {
 
     @State private var showMarkerSection = false
     @State private var displayDeleteFavoriteButton: Bool = false
+    
+    @Environment(\.openURL) var openURL
+
 
     // MARK: - Main Body
 
@@ -36,6 +39,9 @@ struct BottomSearchSheetView: View {
                         // Во всех остальных случаях - избранное и недавние
                         favoritesSection
                         recentsSection
+                        if detent != .height(50) {
+                                    faqSection
+                        }
                     }
                 }
             }
@@ -279,6 +285,36 @@ struct BottomSearchSheetView: View {
                 }
             }
         }
+    }
+    
+    private var faqSection: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Button(action: {
+                            print("Settings button tapped!")
+                            // SettingsView call
+                        }) {
+                            Image(systemName: "gearshape")
+                                .imageScale(.large)
+                                .foregroundColor(.accentColor)
+                        }
+                        .frame(width: 45, height: 45)
+                        .background(Color(.lightGray).opacity(0.2))
+                        .cornerRadius(12)
+                
+                Button(action: {
+                            print("Reporting an issue!")
+                            // SettingsView call
+                        }) {
+                            Text("Report an issue").frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
+                        }
+                        .frame(width:300, height: 45)
+                        .background(Color(.lightGray).opacity(0.2))
+                        .cornerRadius(12)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 30)
     }
 
     // MARK: - Helper Functions

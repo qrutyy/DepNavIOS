@@ -69,10 +69,10 @@ struct DepartmentSelectionScreen: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .frame(width: 260, height: 30)
+                .frame(width: 260, height: 35)
                 .background(isContinueButtonDisabled ? Color.gray : Color.blue)
                 .cornerRadius(8)
-                .padding(.bottom,10)
+                .padding(.bottom,5)
             }
             .frame(width: 300, height: 220)
             .background(Color(.systemBackground).opacity(0.9))
