@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showWelcomeScreen = true
+    @State private var showWelcomeScreen = false
     @State private var isBottomSheetPresented = true
     @StateObject private var mapViewModel = MapViewModel()
 
