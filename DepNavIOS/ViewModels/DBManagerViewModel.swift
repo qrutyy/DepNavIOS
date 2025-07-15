@@ -49,7 +49,7 @@ class DatabaseManager {
             print("Unable to close database.")
         }
     }
-    
+
     func checkTablesExist() -> Bool {
         let requiredTables: Set<String> = ["History", "Favorites", "DBHandler"]
         var foundTables: Set<String> = []

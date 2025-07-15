@@ -112,9 +112,9 @@ struct BottomSearchSheetView: View {
             HStack {
                 Text("Favourites")
                     .font(.title2.bold())
-                    
+
                 Spacer()
-                if (mapViewModel.dbViewModel.favoriteItems.count != 0) {
+                if mapViewModel.dbViewModel.favoriteItems.count != 0 {
                     Button("Clear") {
                         mapViewModel.dbViewModel.clearAllFavorites()
                     }
@@ -123,7 +123,7 @@ struct BottomSearchSheetView: View {
                 }
             }
             .padding(.horizontal, 16)
-            if (mapViewModel.dbViewModel.favoriteItems.count == 0) {
+            if mapViewModel.dbViewModel.favoriteItems.count == 0 {
                 VStack {
                     HStack {
                         Text("No objects in favorites")
@@ -138,22 +138,20 @@ struct BottomSearchSheetView: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
                     ForEach(mapViewModel.dbViewModel.favoriteItems) { mapObject in
                         ZStack {
-                            
                             FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, iconColor: .blue)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     // Telling ViewModel that user has selected the marker
                                     mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!)
                                 }
-                                .onLongPressGesture(minimumDuration: 0.2, perform: {withAnimation { displayDeleteFavoriteButton = true}})
-                            
+                                .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
+
                             if displayDeleteFavoriteButton {
                                 CloseButton {
                                     mapViewModel.removeFavoriteItem(mapObject)
                                 }
                                 .offset(x: 22, y: -31)
                             }
-                            
                         }
                     }
                 }
@@ -176,14 +174,14 @@ struct BottomSearchSheetView: View {
             if mapViewModel.isLoading {
                 ProgressView().frame(maxWidth: .infinity, alignment: .center)
             } else if mapViewModel.searchResults.isEmpty {
-                    HStack {
-                        Text("No objects were found")
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .multilineTextAlignment(.center)
+                HStack {
+                    Text("No objects were found")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                }
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
             } else {
                 LazyVStack(spacing: 0) {
                     ForEach(mapViewModel.searchResults) { marker in

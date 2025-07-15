@@ -91,7 +91,7 @@ class DatabaseService: DatabaseServiceProtocol {
             self.databaseManager.clearAllFavorites()
         }
     }
-    
+
     func checkTablesExist() async -> Bool {
         return await perform {
             self.databaseManager.checkTablesExist()

@@ -22,6 +22,7 @@ class MapViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var selectedSearchResult: InternalMarkerModel?
     @Published var selectedMarker: String = "" // from map choose
+    @Published var selectedMapType: String = "" // just a plug for now. will be a part of the custom map import system
 
     @Published var dbViewModel = DatabaseViewModel()
 
@@ -136,7 +137,7 @@ class MapViewModel: ObservableObject {
     func selectMarkerOnMap(markerID: String) {
         searchQuery = markerID
         updateSearchResults()
-        
+
         if let topResult = searchResults.first { // we are sure that this marker is present
             selectedFloor = topResult.floor
             markerCoordinate = topResult.coordinate
