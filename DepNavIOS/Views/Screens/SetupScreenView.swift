@@ -7,17 +7,15 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct DepartmentSelectionScreen: View {
     @Binding var showDepartmentSelection: Bool
     @Binding var showWelcomeScreen: Bool
     @Binding var selectedMapType: String
     @Binding var selectedDepartment: String
-    
+
     private var isContinueButtonDisabled: Bool {
-            selectedMapType == "custom"
-        }
+        selectedMapType == "custom"
+    }
 
     var body: some View {
         ZStack {
@@ -37,19 +35,16 @@ struct DepartmentSelectionScreen: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal, 20)
-                
+
                 VStack {
                     if selectedMapType == "custom" {
                         Text("To be implemented")
                             .foregroundColor(.secondary)
-                    }
-                    else {
+                    } else {
                         Picker("Map", selection: $selectedDepartment) {
                             Text("Mathematics and Mechanics").tag("spbu-mm")
                             Text("Faculty of Physics").tag("spbu-pf")
                         }.pickerStyle(.automatic)
-                        
-                        
                     }
 //                    else {
 //                        EmptyView()
@@ -59,7 +54,7 @@ struct DepartmentSelectionScreen: View {
 
                 Button(action: {
                     // Update the selected department and dismiss
-                    if (!isContinueButtonDisabled) {
+                    if !isContinueButtonDisabled {
                         showDepartmentSelection = false
                         showWelcomeScreen = false
                     }
@@ -72,7 +67,7 @@ struct DepartmentSelectionScreen: View {
                 .frame(width: 260, height: 35)
                 .background(isContinueButtonDisabled ? Color.gray : Color.blue)
                 .cornerRadius(8)
-                .padding(.bottom,5)
+                .padding(.bottom, 5)
             }
             .frame(width: 300, height: 220)
             .background(Color(.systemBackground).opacity(0.9))
@@ -82,9 +77,8 @@ struct DepartmentSelectionScreen: View {
         .onAppear {
             self.selectedMapType = "pre-defined"
         }
-}
     }
-        
+}
 
 // BlurView to create the blurred background
 struct BlurView: UIViewRepresentable {

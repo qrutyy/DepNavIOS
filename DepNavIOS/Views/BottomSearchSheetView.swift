@@ -6,6 +6,11 @@
 //
 import SwiftUI
 
+private enum SheetContent {
+    case main
+    case settings
+}
+
 struct BottomSearchSheetView: View {
     // ObservedObaject is used bc lifecycle of ViewModel is managed by the parental ContentView
     @ObservedObject var mapViewModel: MapViewModel
@@ -15,8 +20,10 @@ struct BottomSearchSheetView: View {
     @State private var showMarkerSection = false
     @State private var displayDeleteFavoriteButton: Bool = false
     
-    @Environment(\.openURL) var openURL
+    @State private var currentSheetContent: SheetContent = .main
 
+
+    @Environment(\.openURL) var openURL
 
     // MARK: - Main Body
 
@@ -26,25 +33,38 @@ struct BottomSearchSheetView: View {
                 .padding(.top, detent != .height(50) ? 15 : 35)
                 .padding(.bottom, 15)
 
-            ScrollView {
+            
                 VStack(spacing: 0) {
-                    // НОВАЯ, БОЛЕЕ ЧИСТАЯ ЛОГИКА
-                    if let marker = mapViewModel.getSelectedMarker() {
-                        // Если есть выбранный маркер, показываем детали
-                        markerSection(marker: marker)
-                    } else if !mapViewModel.searchQuery.isEmpty {
-                        // Если нет выбранного маркера, но есть текст поиска - показываем результаты
-                        resultsSection
-                    } else {
-                        // Во всех остальных случаях - избранное и недавние
-                        favoritesSection
-                        recentsSection
-                        if detent != .height(50) {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            switch currentSheetContent {
+                                
+                            case .settings:
+                                settingsSection()
+                            case .main:
+                                
+                                if let marker = mapViewModel.getSelectedMarker() {
+                                    markerSection(marker: marker)
+                                } else if !mapViewModel.searchQuery.isEmpty {
+                                    resultsSection
+                                } else {
+                                    favoritesSection
+                                    recentsSection
+                                }
+                                
+                                // This makes your FAQ/Settings buttons stick to the bottom
+                                Spacer()
+                                
+                                if detent != .height(50) {
                                     faqSection
+                                }
+                            }
                         }
                     }
+                    
+                    
                 }
-            }
+                    
             .onChange(of: mapViewModel.searchQuery) { newValue in
                 Task {
                     if newValue == mapViewModel.searchQuery {
@@ -70,6 +90,30 @@ struct BottomSearchSheetView: View {
             }
         }
         .background(Color(.systemBackground))
+    }
+    
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    if let marker = mapViewModel.getSelectedMarker() {
+                        markerSection(marker: marker)
+                    } else if !mapViewModel.searchQuery.isEmpty {
+                        resultsSection
+                    } else {
+                        favoritesSection
+                        recentsSection
+                    }
+                }
+            }
+            
+            // This makes your FAQ/Settings buttons stick to the bottom
+            Spacer()
+            
+            if detent != .height(50) {
+                faqSection
+            }
+        }
     }
 
     // MARK: - Helper Views
@@ -287,32 +331,58 @@ struct BottomSearchSheetView: View {
         }
     }
     
-    private var faqSection: some View {
+    @ViewBuilder
+    private func settingsSection() -> some View {
+        VStack(alignment: .leading, spacing: 16) { // Added spacing
             HStack {
-                Button(action: {
-                            print("Settings button tapped!")
-                            // SettingsView call
-                        }) {
-                            Image(systemName: "gearshape")
-                                .imageScale(.large)
-                                .foregroundColor(.accentColor)
-                        }
-                        .frame(width: 45, height: 45)
-                        .background(Color(.lightGray).opacity(0.2))
-                        .cornerRadius(12)
-                Spacer().frame(width: 10)
-                Button(action: {
-                    openURL(URL(string: "https://github.com/qrutyy/DepNavIOS")!)
-                        }) {
-                            Text("Report an issue").frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
-                        }
-                        .frame(width:310, height: 45)
-                        .background(Color(.lightGray).opacity(0.2))
-                        .cornerRadius(12)
+                Text("Settings").font(.title2.bold())
+                Spacer()
+
+                CloseButton {
+                    withAnimation {
+                        currentSheetContent = .main
+                    }
+                }
             }
             
-            .padding(.horizontal, 10)
-            .padding(.top, 30)
+            Text("Made with love by @qrutyy")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+    }
+
+    private var faqSection: some View {
+        HStack {
+            Button(action: {
+                print("Settings button tapped!")
+                withAnimation {
+                                currentSheetContent = .settings
+                            }
+            }) {
+                Image(systemName: "gearshape")
+                    .imageScale(.large)
+                    .foregroundColor(.accentColor)
+            }
+            .frame(width: 45, height: 45)
+            .background(Color(.lightGray).opacity(0.2))
+            .cornerRadius(12)
+            Spacer().frame(width: 10)
+            Button(action: {
+                openURL(URL(string: "https://github.com/qrutyy/DepNavIOS")!)
+            }) {
+                Text("Report an issue").frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
+            }
+            .frame(width: 310, height: 45)
+            .background(Color(.lightGray).opacity(0.2))
+            .cornerRadius(12)
+        }
+
+        .padding(.horizontal, 10)
+        .padding(.top, 30)
     }
 
     // MARK: - Helper Functions
