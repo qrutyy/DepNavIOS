@@ -191,7 +191,7 @@ struct BottomSearchSheetView: View {
                                 .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
 
                             if displayDeleteFavoriteButton {
-                                CloseButton {
+                                CloseButtonView {
                                     mapViewModel.removeFavoriteItem(mapObject)
                                 }
                                 .offset(x: 22, y: -31)
@@ -254,7 +254,7 @@ struct BottomSearchSheetView: View {
                     .font(.title2.bold())
                 Spacer()
 
-                CloseButton {
+                CloseButtonView {
                     mapViewModel.clearSelectedMarker()
                     self.detent = .medium
                 }
@@ -332,7 +332,7 @@ struct BottomSearchSheetView: View {
                 Text("Settings").font(.title2.bold())
                 Spacer()
 
-                CloseButton {
+                CloseButtonView {
                     withAnimation {
                         currentSheetContent = .main
                     }

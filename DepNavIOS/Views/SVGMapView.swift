@@ -18,6 +18,8 @@ struct SVGMapView: View {
     @Binding var markerCoordinate: CGPoint?
     let mapDescription: MapDescription
     @Binding var selectedMarker: String
+    @Binding var isCentered: Bool
+    @Binding var isZoomedOut: Bool
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -30,7 +32,9 @@ struct SVGMapView: View {
                 department: department,
                 markerCoordinate: $markerCoordinate,
                 mapDescription: mapDescription,
-                selectedMarker: $selectedMarker
+                selectedMarker: $selectedMarker,
+                isCentered: $isCentered,
+                isZoomedOut: $isZoomedOut
             )
             .onAppear {
                 print("SVGView: layout for file 'Maps/\(department)/floor\(floor).svg'")

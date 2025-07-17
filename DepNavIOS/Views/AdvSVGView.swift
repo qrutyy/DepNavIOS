@@ -15,6 +15,8 @@ struct AdvSVGView: View {
     @Binding var markerCoordinate: CGPoint?
     let mapDescription: MapDescription
     @Binding var selectedMarker: String
+    @Binding var isCentered: Bool
+    @Binding var isZoomedOut: Bool
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -40,6 +42,30 @@ struct AdvSVGView: View {
                 .onChange(of: markerCoordinate) { newCoord in
                     guard let coord = newCoord else { return }
                     centerOnCoordinate(coord, in: geometry.size)
+                }
+                .onChange(of: isCentered) { newValue in
+                    if newValue {
+                        withAnimation(.spring()) {
+                            self.offset = .zero
+                            self.startOffset = .zero
+                        }
+                        isCentered = false
+                    }
+                }
+                .onChange(of: isZoomedOut) { newValue in
+                    if newValue {
+                        withAnimation(.spring()) {
+                            let newOffset = CGSize(
+                                width: self.offset.width / self.scale,
+                                height: self.offset.height / self.scale
+                            )
+                            self.offset = newOffset
+                            self.startOffset = newOffset
+                            self.scale = 1.0
+                            self.startScale = 1.0
+                        }
+                        isZoomedOut = false
+                    }
                 }
         }
     }

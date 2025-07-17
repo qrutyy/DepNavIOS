@@ -23,6 +23,7 @@ class MapViewModel: ObservableObject {
     @Published var selectedSearchResult: InternalMarkerModel?
     @Published var selectedMarker: String = "" // from map choose
     @Published var selectedMapType: String = "" // just a plug for now. will be a part of the custom map import system
+    @Published var mapControl: MapControlModel = .init()
 
     @Published var dbViewModel = DatabaseViewModel()
 

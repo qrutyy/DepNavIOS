@@ -34,7 +34,10 @@ struct ContentView: View {
                     floor: mapViewModel.selectedFloor,
                     department: mapViewModel.selectedDepartment,
                     markerCoordinate: $mapViewModel.markerCoordinate,
-                    mapDescription: mapViewModel.currentMapDescription!, selectedMarker: $mapViewModel.selectedMarker
+                    mapDescription: mapViewModel.currentMapDescription!,
+                    selectedMarker: $mapViewModel.selectedMarker,
+                    isCentered: $mapViewModel.mapControl.isCentered,
+                    isZoomedOut: $mapViewModel.mapControl.isZoomedOut
                 )
                 .edgesIgnoringSafeArea(.all)
 
@@ -44,6 +47,8 @@ struct ContentView: View {
                         mapViewModel.changeFloor(floor)
                     }, availableFloors: mapViewModel.availableFloors
                 )
+
+                MapControlView(isCentered: $mapViewModel.mapControl.isCentered, isZoomedOut: $mapViewModel.mapControl.isZoomedOut)
 
             } else {
                 Color(.systemGroupedBackground)
