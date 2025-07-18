@@ -8,13 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showWelcomeScreen = true
+    @State private var showWelcomeScreen = false
     @State private var isBottomSheetPresented = true
     @StateObject private var mapViewModel = MapViewModel()
 
     // Basic set of detents for the Bottom sheet.
     private let searchSheetDetents: Set<PresentationDetent> = [.height(50), .medium, .large]
     @State private var selectedDetent: PresentationDetent = .height(50)
+
+    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore: Bool = false
+
+    @State private var isCheckingSetup = true
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -30,7 +34,10 @@ struct ContentView: View {
                     floor: mapViewModel.selectedFloor,
                     department: mapViewModel.selectedDepartment,
                     markerCoordinate: $mapViewModel.markerCoordinate,
-                    mapDescription: mapViewModel.currentMapDescription!, selectedMarker: $mapViewModel.selectedMarker
+                    mapDescription: mapViewModel.currentMapDescription!,
+                    selectedMarker: $mapViewModel.selectedMarker,
+                    isCentered: $mapViewModel.mapControl.isCentered,
+                    isZoomedOut: $mapViewModel.mapControl.isZoomedOut
                 )
                 .edgesIgnoringSafeArea(.all)
 
@@ -40,6 +47,8 @@ struct ContentView: View {
                         mapViewModel.changeFloor(floor)
                     }, availableFloors: mapViewModel.availableFloors
                 )
+
+                MapControlView(isCentered: $mapViewModel.mapControl.isCentered, isZoomedOut: $mapViewModel.mapControl.isZoomedOut)
 
             } else {
                 Color(.systemGroupedBackground)
@@ -57,12 +66,11 @@ struct ContentView: View {
         .sheet(isPresented: $showWelcomeScreen) {
             Task {
                 await mapViewModel.loadMapData()
-                isBottomSheetPresented = true
             }
         } content: {
             WelcomeScreen(
                 showWelcomeScreen: $showWelcomeScreen,
-                selectedDepartment: $mapViewModel.selectedDepartment
+                selectedDepartment: $mapViewModel.selectedDepartment, selectedMapType: $mapViewModel.selectedMapType
             )
         }
         .sheet(isPresented: $isBottomSheetPresented) {
@@ -76,7 +84,12 @@ struct ContentView: View {
         }
         .onAppear {
             Task {
-                await mapViewModel.loadMapData()
+                if !hasLaunchedBefore {
+                    showWelcomeScreen = true
+                    hasLaunchedBefore = true
+                } else {
+                    await mapViewModel.loadMapData()
+                }
             }
         }
         .onChange(of: mapViewModel.selectedDepartment) { _ in

@@ -18,6 +18,7 @@ protocol DatabaseServiceProtocol {
     func updateFavoriteItem(_ item: MapObjectModel) async -> Bool
     func deleteFavoriteItem(id: Int) async -> Bool
     func clearFavorites() async -> Bool
+    func checkTablesExist() async -> Bool
 }
 
 class DatabaseService: DatabaseServiceProtocol {
@@ -88,6 +89,12 @@ class DatabaseService: DatabaseServiceProtocol {
     func clearFavorites() async -> Bool {
         await perform {
             self.databaseManager.clearAllFavorites()
+        }
+    }
+
+    func checkTablesExist() async -> Bool {
+        return await perform {
+            self.databaseManager.checkTablesExist()
         }
     }
 }

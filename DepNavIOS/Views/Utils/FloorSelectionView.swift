@@ -31,9 +31,9 @@ struct FloorSelectionView: View {
             .padding(6)
             .background(.thinMaterial)
             .cornerRadius(16)
-            .shadow(radius: 3)
+            .shadow(radius: 2)
             .padding(.top, 50)
-            .padding(.trailing, 16)
+            .padding(.trailing, 14)
         } else {
             Text("No floors available")
         }

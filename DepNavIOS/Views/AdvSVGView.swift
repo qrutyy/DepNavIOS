@@ -15,16 +15,23 @@ struct AdvSVGView: View {
     @Binding var markerCoordinate: CGPoint?
     let mapDescription: MapDescription
     @Binding var selectedMarker: String
+    @Binding var isCentered: Bool
+    @Binding var isZoomedOut: Bool
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var startOffset: CGSize = .zero
     @State private var startScale: CGFloat = 2.0
+
+    @State private var latestGestureScale: CGFloat = 1.0
+    @GestureState private var gestureScale: CGFloat = 1.0
+    @State private var liveScale: CGFloat = 1.0
+
     var body: some View {
         GeometryReader { geometry in
             mapContentView(for: geometry)
                 .frame(width: geometry.size.width, height: geometry.size.height)
-                .scaleEffect(self.scale)
+                .scaleEffect(gestureScale * self.scale)
                 .offset(self.offset)
                 .clipped()
                 .contentShape(Rectangle())
@@ -35,6 +42,30 @@ struct AdvSVGView: View {
                 .onChange(of: markerCoordinate) { newCoord in
                     guard let coord = newCoord else { return }
                     centerOnCoordinate(coord, in: geometry.size)
+                }
+                .onChange(of: isCentered) { newValue in
+                    if newValue {
+                        withAnimation(.spring()) {
+                            self.offset = .zero
+                            self.startOffset = .zero
+                        }
+                        isCentered = false
+                    }
+                }
+                .onChange(of: isZoomedOut) { newValue in
+                    if newValue {
+                        withAnimation(.spring()) {
+                            let newOffset = CGSize(
+                                width: self.offset.width / self.scale,
+                                height: self.offset.height / self.scale
+                            )
+                            self.offset = newOffset
+                            self.startOffset = newOffset
+                            self.scale = 1.0
+                            self.startScale = 1.0
+                        }
+                        isZoomedOut = false
+                    }
                 }
         }
     }
@@ -89,9 +120,7 @@ struct AdvSVGView: View {
 
     // MARK: - Gestures
 
-    /// Creates and combines the drag and magnification gestures.
     private func combinedGesture(for geometry: GeometryProxy) -> some Gesture {
-        // Drag Gesture
         let dragGesture = DragGesture()
             .onChanged { value in
                 let newOffset = CGSize(
@@ -100,20 +129,20 @@ struct AdvSVGView: View {
                 )
                 self.offset = clampOffset(newOffset, for: self.scale, in: geometry.size)
             }
+
             .onEnded { _ in
                 self.startOffset = self.offset
             }
 
-        // Magnification Gesture
         let magnifyGesture = MagnificationGesture()
-            .onChanged { value in
-                self.scale = max(1.0, startScale * value)
+            .updating($gestureScale) { value, state, _ in
+                state = value
             }
             .onEnded { value in
-                // Finalize scale and clamp the offset to the new scale
-                self.scale = max(1.0, startScale * value)
-                self.startScale = self.scale
-                self.offset = clampOffset(offset, for: self.scale, in: geometry.size)
+                // Исправляем логику: используем latestGestureScale вместо прямого умножения
+                let newScale = max(1.0, self.scale * value)
+                self.scale = newScale
+                self.startScale = newScale
                 self.startOffset = self.offset
             }
 

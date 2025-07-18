@@ -6,6 +6,11 @@
 //
 import SwiftUI
 
+private enum SheetContent {
+    case main
+    case settings
+}
+
 struct BottomSearchSheetView: View {
     // ObservedObaject is used bc lifecycle of ViewModel is managed by the parental ContentView
     @ObservedObject var mapViewModel: MapViewModel
@@ -15,6 +20,10 @@ struct BottomSearchSheetView: View {
     @State private var showMarkerSection = false
     @State private var displayDeleteFavoriteButton: Bool = false
 
+    @State private var currentSheetContent: SheetContent = .main
+
+    @Environment(\.openURL) var openURL
+
     // MARK: - Main Body
 
     var body: some View {
@@ -23,22 +32,33 @@ struct BottomSearchSheetView: View {
                 .padding(.top, detent != .height(50) ? 15 : 35)
                 .padding(.bottom, 15)
 
-            ScrollView {
-                VStack(spacing: 0) {
-                    // НОВАЯ, БОЛЕЕ ЧИСТАЯ ЛОГИКА
-                    if let marker = mapViewModel.getSelectedMarker() {
-                        // Если есть выбранный маркер, показываем детали
-                        markerSection(marker: marker)
-                    } else if !mapViewModel.searchQuery.isEmpty {
-                        // Если нет выбранного маркера, но есть текст поиска - показываем результаты
-                        resultsSection
-                    } else {
-                        // Во всех остальных случаях - избранное и недавние
-                        favoritesSection
-                        recentsSection
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        switch currentSheetContent {
+                        case .settings:
+                            settingsSection()
+                        case .main:
+                            if let marker = mapViewModel.getSelectedMarker() {
+                                markerSection(marker: marker)
+                            } else if !mapViewModel.searchQuery.isEmpty {
+                                resultsSection
+                            } else {
+                                favoritesSection
+                                recentsSection
+                            }
+
+                            // This makes your FAQ/Settings buttons stick to the bottom
+                            Spacer()
+
+                            if detent != .height(50) {
+                                faqSection
+                            }
+                        }
                     }
                 }
             }
+
             .onChange(of: mapViewModel.searchQuery) { newValue in
                 Task {
                     if newValue == mapViewModel.searchQuery {
@@ -64,6 +84,30 @@ struct BottomSearchSheetView: View {
             }
         }
         .background(Color(.systemBackground))
+    }
+
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    if let marker = mapViewModel.getSelectedMarker() {
+                        markerSection(marker: marker)
+                    } else if !mapViewModel.searchQuery.isEmpty {
+                        resultsSection
+                    } else {
+                        favoritesSection
+                        recentsSection
+                    }
+                }
+            }
+
+            // This makes your FAQ/Settings buttons stick to the bottom
+            Spacer()
+
+            if detent != .height(50) {
+                faqSection
+            }
+        }
     }
 
     // MARK: - Helper Views
@@ -112,9 +156,9 @@ struct BottomSearchSheetView: View {
             HStack {
                 Text("Favourites")
                     .font(.title2.bold())
-                    
+
                 Spacer()
-                if (mapViewModel.dbViewModel.favoriteItems.count != 0) {
+                if mapViewModel.dbViewModel.favoriteItems.count != 0 {
                     Button("Clear") {
                         mapViewModel.dbViewModel.clearAllFavorites()
                     }
@@ -123,7 +167,7 @@ struct BottomSearchSheetView: View {
                 }
             }
             .padding(.horizontal, 16)
-            if (mapViewModel.dbViewModel.favoriteItems.count == 0) {
+            if mapViewModel.dbViewModel.favoriteItems.count == 0 {
                 VStack {
                     HStack {
                         Text("No objects in favorites")
@@ -138,22 +182,20 @@ struct BottomSearchSheetView: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
                     ForEach(mapViewModel.dbViewModel.favoriteItems) { mapObject in
                         ZStack {
-                            
                             FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, iconColor: .blue)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     // Telling ViewModel that user has selected the marker
                                     mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!)
                                 }
-                                .onLongPressGesture(minimumDuration: 0.2, perform: {withAnimation { displayDeleteFavoriteButton = true}})
-                            
+                                .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
+
                             if displayDeleteFavoriteButton {
-                                CloseButton {
+                                CloseButtonView {
                                     mapViewModel.removeFavoriteItem(mapObject)
                                 }
                                 .offset(x: 22, y: -31)
                             }
-                            
                         }
                     }
                 }
@@ -176,14 +218,14 @@ struct BottomSearchSheetView: View {
             if mapViewModel.isLoading {
                 ProgressView().frame(maxWidth: .infinity, alignment: .center)
             } else if mapViewModel.searchResults.isEmpty {
-                    HStack {
-                        Text("No objects were found")
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .multilineTextAlignment(.center)
+                HStack {
+                    Text("No objects were found")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                }
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
             } else {
                 LazyVStack(spacing: 0) {
                     ForEach(mapViewModel.searchResults) { marker in
@@ -212,7 +254,7 @@ struct BottomSearchSheetView: View {
                     .font(.title2.bold())
                 Spacer()
 
-                CloseButton {
+                CloseButtonView {
                     mapViewModel.clearSelectedMarker()
                     self.detent = .medium
                 }
@@ -281,6 +323,60 @@ struct BottomSearchSheetView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func settingsSection() -> some View {
+        VStack(alignment: .leading, spacing: 16) { // Added spacing
+            HStack {
+                Text("Settings").font(.title2.bold())
+                Spacer()
+
+                CloseButtonView {
+                    withAnimation {
+                        currentSheetContent = .main
+                    }
+                }
+            }
+
+            Text("Made with love by @qrutyy")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+    }
+
+    private var faqSection: some View {
+        HStack {
+            Button(action: {
+                print("Settings button tapped!")
+                withAnimation {
+                    currentSheetContent = .settings
+                }
+            }) {
+                Image(systemName: "gearshape")
+                    .imageScale(.large)
+                    .foregroundColor(.accentColor)
+            }
+            .frame(width: 45, height: 45)
+            .background(Color(.lightGray).opacity(0.2))
+            .cornerRadius(12)
+            Spacer().frame(width: 10)
+            Button(action: {
+                openURL(URL(string: "https://github.com/qrutyy/DepNavIOS")!)
+            }) {
+                Text("Report an issue").frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
+            }
+            .frame(width: 310, height: 45)
+            .background(Color(.lightGray).opacity(0.2))
+            .cornerRadius(12)
+        }
+
+        .padding(.horizontal, 10)
+        .padding(.top, 30)
     }
 
     // MARK: - Helper Functions

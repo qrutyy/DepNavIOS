@@ -1,5 +1,5 @@
 //
-//  CloseButton.swift
+//  CloseButtonView.swift
 //  DepNavIOS
 //
 //  Created by Michael Gavrilenko on 13.07.2025.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CloseButton: View {
+struct CloseButtonView: View {
     var action: () -> Void
 
     var body: some View {
