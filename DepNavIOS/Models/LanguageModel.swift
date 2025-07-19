@@ -5,8 +5,8 @@
 //  Created by Michael Gavrilenko on 19.07.2025.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 enum Language: String, CaseIterable, Identifiable {
     case ru
@@ -14,11 +14,12 @@ enum Language: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var displayName: String {
-            switch self {
-            case .ru: return "EN"
-            case .en: return "RU"
-            }
+        switch self {
+        case .ru: return "EN"
+        case .en: return "RU"
         }
+    }
+
     var localeIdentifier: String {
         switch self {
         case .ru: return "ru"
@@ -53,7 +54,8 @@ extension Bundle {
 
     static func setLanguage(_ language: String) {
         guard let path = Bundle.main.path(forResource: language, ofType: "lproj"),
-              let bundle = Bundle(path: path) else {
+              let bundle = Bundle(path: path)
+        else {
             object_setClass(Bundle.main, Bundle.self)
             return
         }
@@ -68,6 +70,6 @@ extension Bundle {
     }
 }
 
-func LocalizedString(_ key: String, comment: String = "") -> String {
+func LocalizedString(_ key: String, comment _: String = "") -> String {
     return Bundle.localized.localizedString(forKey: key, value: nil, table: nil)
 }

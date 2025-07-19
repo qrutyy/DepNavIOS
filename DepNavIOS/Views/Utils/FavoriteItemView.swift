@@ -17,7 +17,8 @@ struct FavoriteItemView: View {
         VStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .fill(Color(.systemGray5))
+                    .fill(        Color(red: 244/255, green: 244/255, blue: 246/255))
+
                     .frame(width: 60, height: 60)
 
                 Image(systemName: icon)
@@ -35,6 +36,10 @@ struct FavoriteItemView: View {
                     Text(subtitle)
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(subtitle)
+                        .foregroundColor(Color(.white))
                         .lineLimit(1)
                 }
             }

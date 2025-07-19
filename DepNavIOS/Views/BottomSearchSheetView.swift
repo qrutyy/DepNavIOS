@@ -21,7 +21,7 @@ struct BottomSearchSheetView: View {
     @State private var displayDeleteFavoriteButton: Bool = false
 
     @State private var currentSheetContent: SheetContent = .main
-    
+
     @ObservedObject var languageManager = LanguageManager.shared
 
     @Environment(\.openURL) var openURL
@@ -85,7 +85,7 @@ struct BottomSearchSheetView: View {
                 }
             }
         }
-        .background(Color(.systemBackground))
+        .background(Color(red: 250/255, green: 250/255, blue: 249/255))
     }
 
     private var mainContent: some View {
@@ -148,16 +148,19 @@ struct BottomSearchSheetView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(Color(.systemGray6))
+        .background(Color(red: 234/255, green: 234/255, blue: 236/255))
         .cornerRadius(12)
         .padding(.horizontal, 20)
     }
 
     private var favoritesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(LocalizedString("favorite_section_title", comment: "Title of the favorites section"))
-                    .font(.title2.bold())
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.leading, 16)
+                    .padding(.top, 10)
 
                 Spacer()
                 if mapViewModel.dbViewModel.favoriteItems.count != 0 {
@@ -166,45 +169,55 @@ struct BottomSearchSheetView: View {
                     }
                     .font(.subheadline)
                     .buttonStyle(.borderless)
+                    .padding(.top, 10)
+                    .padding(.trailing, 16)
                 }
             }
             .padding(.horizontal, 16)
-            if mapViewModel.dbViewModel.favoriteItems.count == 0 {
-                VStack {
-                    HStack {
-                        Text(LocalizedString("empty_favorites_list", comment: "Empty favorites list"))
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding()
+            
+            VStack(alignment: .leading, spacing: 12) {
+                if mapViewModel.dbViewModel.favoriteItems.count == 0 {
+                    VStack {
+                        HStack {
+                            Text(LocalizedString("empty_favorites_list", comment: "Empty favorites list"))
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
                     }
-                    .frame(maxWidth: .infinity)
-                    .multilineTextAlignment(.center)
-                }
-            } else {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
-                    ForEach(mapViewModel.dbViewModel.favoriteItems) { mapObject in
-                        ZStack {
-                            FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, iconColor: .blue)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    // Telling ViewModel that user has selected the marker
-                                    mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!)
-                                }
-                                .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
+                } else {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), alignment: .leading, spacing: 16) {
+                        ForEach(mapViewModel.dbViewModel.favoriteItems) { mapObject in
+                            ZStack {
+                                FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, iconColor: .blue)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        // Telling ViewModel that user has selected the marker
+                                        mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!)
+                                    }
+                                    .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
 
-                            if displayDeleteFavoriteButton {
-                                CloseButtonView {
-                                    mapViewModel.removeFavoriteItem(mapObject)
+                                if displayDeleteFavoriteButton {
+                                    CloseButtonView {
+                                        mapViewModel.removeFavoriteItem(mapObject)
+                                    }
+                                    .offset(x: 22, y: -31)
                                 }
-                                .offset(x: 22, y: -31)
                             }
                         }
                     }
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
             }
+            .padding(.vertical, 16)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
-        .padding(.vertical, 10)
     }
 
     private var resultsSection: some View {
@@ -275,12 +288,12 @@ struct BottomSearchSheetView: View {
                 .buttonStyle(.borderedProminent)
 
                 Button(action: {
-                    if (!mapViewModel.isMarkerInFavorites(markerID: marker.title)) {
+                    if !mapViewModel.isMarkerInFavorites(markerID: marker.title) {
                         print("Save \(marker.title) to favorites")
                         mapViewModel.addSelectedMarkerToDB(marker: marker)
                     }
                 }) {
-                    if (mapViewModel.isMarkerInFavorites(markerID: marker.title)) {
+                    if mapViewModel.isMarkerInFavorites(markerID: marker.title) {
                         Label(LocalizedString("added_to_favorites_button", comment: "Added to favorites button"), systemImage: "heart.fill")
                             .foregroundStyle(Color.gray)
                     } else {
@@ -299,7 +312,10 @@ struct BottomSearchSheetView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(LocalizedString("recents_section_title", comment: "Recents section title"))
-                    .font(.title2.bold())
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.leading, 16)
+                    .padding(.top, 10)
                 Spacer()
                 if !mapViewModel.dbViewModel.historyItems.isEmpty {
                     Button(LocalizedString("generic_clear_button", comment: "Generic clear button")) {
@@ -307,31 +323,40 @@ struct BottomSearchSheetView: View {
                     }
                     .font(.subheadline)
                     .buttonStyle(.borderless)
+                    .padding(.top, 10)
+                    .padding(.trailing, 16)
                 }
             }
-            .padding([.top, .horizontal], 16)
-            .padding(.bottom, 8)
+            .padding(.horizontal, 16)
 
-            if mapViewModel.dbViewModel.historyItems.isEmpty {
-                Text(LocalizedString("empty_history_list", comment: "History is empty"))
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
-            } else {
-                LazyVStack(spacing: 0) {
-                    ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
-                        SearchResultRowView(
-                            icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName),
-                            title: getFormattedTitle(objectTitle: mapObject.objectTitle, objectTypeName: mapObject.objectTypeName),
-                            subtitle: mapObject.objectDescription
-                        )
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            mapViewModel.selectHistoryItem(mapObject)
+            VStack(alignment: .leading, spacing: 0) {
+                if mapViewModel.dbViewModel.historyItems.isEmpty {
+                    Text(LocalizedString("empty_history_list", comment: "History is empty"))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                } else {
+                    LazyVStack(spacing: 0) {
+                        ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
+                            SearchResultRowView(
+                                icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName),
+                                title: getFormattedTitle(objectTitle: mapObject.objectTitle, objectTypeName: mapObject.objectTypeName),
+                                subtitle: mapObject.objectDescription
+                            )
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                mapViewModel.selectHistoryItem(mapObject)
+                            }
                         }
                     }
+                    .padding(.horizontal, 16)
                 }
             }
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
     }
 
@@ -348,28 +373,28 @@ struct BottomSearchSheetView: View {
                     }
                 }
             }
-            
+
             // Language switcher
-                       HStack(spacing: 12) {
-                           Text(LocalizedString("settings_language_title", comment: "Language switch"))
-                           Spacer()
-                           ForEach(Language.allCases) { lang in
-                               Button(action: {
-                                   withAnimation {
-                                       languageManager.setLanguage(lang)
-                                       Bundle.setLanguage(lang.localeIdentifier)
-                                   }
-                               }) {
-                                   Text(lang.displayName)
-                                       .fontWeight(languageManager.currentLanguage == lang ? .bold : .regular)
-                                       .foregroundColor(languageManager.currentLanguage == lang ? .blue : .primary)
-                                       .padding(6)
-                                       .background(languageManager.currentLanguage == lang ? Color.blue.opacity(0.1) : Color.clear)
-                                       .cornerRadius(8)
-                               }
-                           }
-                       }
-                       .padding(.vertical, 8)
+            HStack(spacing: 12) {
+                Text(LocalizedString("settings_language_title", comment: "Language switch"))
+                Spacer()
+                ForEach(Language.allCases) { lang in
+                    Button(action: {
+                        withAnimation {
+                            languageManager.setLanguage(lang)
+                            Bundle.setLanguage(lang.localeIdentifier)
+                        }
+                    }) {
+                        Text(lang.displayName)
+                            .fontWeight(languageManager.currentLanguage == lang ? .bold : .regular)
+                            .foregroundColor(languageManager.currentLanguage == lang ? .blue : .primary)
+                            .padding(6)
+                            .background(languageManager.currentLanguage == lang ? Color.blue.opacity(0.1) : Color.clear)
+                            .cornerRadius(8)
+                    }
+                }
+            }
+            .padding(.vertical, 8)
 
             Text(LocalizedString("faq_section_made_by", comment: "Made with love by @qrutyy"))
                 .font(.subheadline)
@@ -394,7 +419,7 @@ struct BottomSearchSheetView: View {
                     .foregroundColor(.accentColor)
             }
             .frame(width: 45, height: 45)
-            .background(Color(.lightGray).opacity(0.2))
+            .background(Color(red: 238/255, green: 238/255, blue: 240/255))
             .cornerRadius(12)
             Spacer().frame(width: 10)
             Button(action: {
@@ -403,7 +428,7 @@ struct BottomSearchSheetView: View {
                 Text(LocalizedString("faq_section_report", comment: "Report an issue")).frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
             }
             .frame(width: 310, height: 45)
-            .background(Color(.lightGray).opacity(0.2))
+            .background(Color(red: 238/255, green: 238/255, blue: 240/255))
             .cornerRadius(12)
         }
 

@@ -58,7 +58,7 @@ struct WelcomeScreen: View {
                 }) {
                     HStack {
                         Spacer()
-                        Text( LocalizedString("generic_continue_button", comment: "Generic continue button"))
+                        Text(LocalizedString("generic_continue_button", comment: "Generic continue button"))
                             .font(.headline)
                             .foregroundColor(.white)
                         Spacer()

@@ -277,17 +277,20 @@ class DatabaseManager {
 
                 let encoder = JSONEncoder()
                 if let departmentsData = try? encoder.encode(handler.availableDepartments),
-                   let departmentsJSON = String(data: departmentsData, encoding: .utf8) {
+                   let departmentsJSON = String(data: departmentsData, encoding: .utf8)
+                {
                     bind(text: departmentsJSON, to: statement, at: 3)
                 }
 
                 if let historyData = try? encoder.encode(handler.historyList),
-                   let historyJSON = String(data: historyData, encoding: .utf8) {
+                   let historyJSON = String(data: historyData, encoding: .utf8)
+                {
                     bind(text: historyJSON, to: statement, at: 4)
                 }
 
                 if let favoritesData = try? encoder.encode(handler.favoritesList),
-                   let favoritesJSON = String(data: favoritesData, encoding: .utf8) {
+                   let favoritesJSON = String(data: favoritesData, encoding: .utf8)
+                {
                     bind(text: favoritesJSON, to: statement, at: 4)
                 }
 

@@ -21,10 +21,10 @@ struct MapControlView: View {
                 ) {
                     Image(systemName: "map.fill")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.secondary) // .secondary - хороший адаптивный серый
+                        .foregroundStyle(Color(red: 210/255, green: 210/255, blue: 212/255))
                 }
                 .frame(width: 50, height: 50)
-                .background(Color(.systemGray6)) // .systemGray6 - еще один хороший вариант для фона
+                .background(Color(red: 250/255, green: 250/255, blue: 249/255))
                 .clipShape(Rectangle())
                 .cornerRadius(16)
                 .shadow(radius: 2)
@@ -40,10 +40,13 @@ struct MapControlView: View {
                 ) {
                     Image(systemName: "location.fill")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.secondary) // .secondary - хороший адаптивный серый
+                        .foregroundStyle(Color(red: 210/255, green: 210/255, blue: 212/255))
+
                 }
                 .frame(width: 50, height: 50)
-                .background(Color(.systemGray6)) // .systemGray6 - еще один хороший вариант для фона
+                
+                .background(Color(red: 250/255, green: 250/255, blue: 249/255))
+
                 .clipShape(Rectangle())
                 .cornerRadius(16)
                 .shadow(radius: 2)
