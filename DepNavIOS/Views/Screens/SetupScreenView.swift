@@ -25,25 +25,25 @@ struct DepartmentSelectionScreen: View {
 
             // Centered selection window
             VStack(spacing: 20) {
-                Text("Select map type")
+                Text(LocalizedString("map_type_title", comment: "Select Map Type"))
                     .font(.headline)
                     .foregroundColor(.primary)
 
-                Picker("Map type", selection: $selectedMapType) {
-                    Text("Pre-defined").tag("pre-defined")
-                    Text("Custom").tag("custom")
+                Picker(LocalizedString("map_type_subtitle", comment: "Map Type"), selection: $selectedMapType) {
+                    Text(LocalizedString("map_type_pre_defined", comment: "Pre-defined")).tag("pre-defined")
+                    Text(LocalizedString("map_type_custom", comment: "Custom")).tag("custom")
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal, 20)
 
                 VStack {
                     if selectedMapType == "custom" {
-                        Text("To be implemented")
+                        Text(LocalizedString("generic_to_be_implemented", comment: "To be implemented"))
                             .foregroundColor(.secondary)
                     } else {
-                        Picker("Map", selection: $selectedDepartment) {
-                            Text("Mathematics and Mechanics").tag("spbu-mm")
-                            Text("Faculty of Physics").tag("spbu-pf")
+                        Picker(LocalizedString("generic_map_department_selection_title", comment: "Map"), selection: $selectedDepartment) {
+                            Text(LocalizedString("department_name_mm", comment: "Mathematics and Mechanics")).tag("spbu-mm")
+                            Text(LocalizedString("department_name_ph", comment: "Faculty of Phisics")).tag("spbu-pf")
                         }.pickerStyle(.automatic)
                     }
 //                    else {
@@ -59,7 +59,7 @@ struct DepartmentSelectionScreen: View {
                         showWelcomeScreen = false
                     }
                 }) {
-                    Text("Continue")
+                    Text(LocalizedString("generic_continue_button", comment: "Generic continue button"))
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)

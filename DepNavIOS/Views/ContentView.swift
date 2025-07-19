@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject var languageManager = LanguageManager.shared
     @State private var showWelcomeScreen = false
     @State private var isBottomSheetPresented = true
     @StateObject private var mapViewModel = MapViewModel()
@@ -84,6 +85,7 @@ struct ContentView: View {
         }
         .onAppear {
             Task {
+                Bundle.setLanguage(languageManager.currentLanguage.localeIdentifier)
                 if !hasLaunchedBefore {
                     showWelcomeScreen = true
                     hasLaunchedBefore = true

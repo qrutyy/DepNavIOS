@@ -35,7 +35,7 @@ struct FloorSelectionView: View {
             .padding(.top, 50)
             .padding(.trailing, 14)
         } else {
-            Text("No floors available")
+            Text(LocalizedString("no_available_floors_message", comment: "Message to describe emptiness of available floors"))
         }
     }
 }

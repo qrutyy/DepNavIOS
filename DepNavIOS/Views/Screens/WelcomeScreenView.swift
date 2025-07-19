@@ -18,7 +18,7 @@ struct WelcomeScreen: View {
             VStack {
                 Spacer()
                 Spacer()
-                Text("Welcome to DepNav")
+                Text(LocalizedString("welcome_screen_title", comment: "Welcome message"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
@@ -29,22 +29,22 @@ struct WelcomeScreen: View {
                 VStack(spacing: 26) {
                     FeatureCell(
                         image: "text.badge.checkmark",
-                        title: "Find Your Way",
-                        subtitle: "Quickly locate rooms and services across your faculty.",
+                        title: LocalizedString("welcome_screen_f1_title", comment: "Find Your Way"),
+                        subtitle: LocalizedString("welcome_screen_f1_subtitle", comment: "Quickly locate rooms and services across your faculty."),
                         color: .green
                     )
 
                     FeatureCell(
                         image: "map.fill",
-                        title: "Explore the Campus",
-                        subtitle: "Discover faculty maps — simple and clear.",
+                        title: LocalizedString("welcome_screen_f2_title", comment: "Explore the Campus"),
+                        subtitle: LocalizedString("welcome_screen_f2_subtitle", comment: "Discover faculty maps — simple and clear."),
                         color: .blue
                     )
 
                     FeatureCell(
                         image: "plus.circle.fill",
-                        title: "Add Your Faculty",
-                        subtitle: "Easily import and use custom maps of your faculty.",
+                        title: LocalizedString("welcome_screen_f3_title", comment: "Add Your Faculty"),
+                        subtitle: LocalizedString("welcome_screen_f3_subtitle", comment: "Easily import and use custom maps of your faculty."),
                         color: .orange
                     )
                 }
@@ -58,7 +58,7 @@ struct WelcomeScreen: View {
                 }) {
                     HStack {
                         Spacer()
-                        Text("Continue")
+                        Text( LocalizedString("generic_continue_button", comment: "Generic continue button"))
                             .font(.headline)
                             .foregroundColor(.white)
                         Spacer()

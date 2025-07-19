@@ -45,11 +45,8 @@ struct SVGMapView: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.largeTitle)
                     .foregroundColor(.red)
-                Text("Map isn't found")
+                Text(LocalizedString("map_not_found_message", comment: "Map isn't found"))
                     .font(.headline)
-                Text("File '\(department)/floor\(floor).svg' doesn't exist.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
             .onAppear {
                 print("SVGView: File '\(department)/floor\(floor).svg' wasn't found.")

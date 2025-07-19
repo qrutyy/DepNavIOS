@@ -21,6 +21,8 @@ struct BottomSearchSheetView: View {
     @State private var displayDeleteFavoriteButton: Bool = false
 
     @State private var currentSheetContent: SheetContent = .main
+    
+    @ObservedObject var languageManager = LanguageManager.shared
 
     @Environment(\.openURL) var openURL
 
@@ -117,7 +119,7 @@ struct BottomSearchSheetView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
 
-            TextField("Search Objects", text: $mapViewModel.searchQuery, onEditingChanged: { isEditing in
+            TextField(LocalizedString("search_section_textfield", comment: "Textfield placeholder"), text: $mapViewModel.searchQuery, onEditingChanged: { isEditing in
                 withAnimation(.spring()) {
                     if isEditing {
                         self.detent = .large
@@ -154,12 +156,12 @@ struct BottomSearchSheetView: View {
     private var favoritesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Favourites")
+                Text(LocalizedString("favorite_section_title", comment: "Title of the favorites section"))
                     .font(.title2.bold())
 
                 Spacer()
                 if mapViewModel.dbViewModel.favoriteItems.count != 0 {
-                    Button("Clear") {
+                    Button(LocalizedString("generic_clear_button", comment: "Generic clear button")) {
                         mapViewModel.dbViewModel.clearAllFavorites()
                     }
                     .font(.subheadline)
@@ -170,7 +172,7 @@ struct BottomSearchSheetView: View {
             if mapViewModel.dbViewModel.favoriteItems.count == 0 {
                 VStack {
                     HStack {
-                        Text("No objects in favorites")
+                        Text(LocalizedString("empty_favorites_list", comment: "Empty favorites list"))
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding()
@@ -208,7 +210,7 @@ struct BottomSearchSheetView: View {
     private var resultsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Results")
+                Text(LocalizedString("results_section_title", comment: "Title of the section showing search results"))
                     .font(.title2.bold())
                 Spacer()
             }
@@ -219,7 +221,7 @@ struct BottomSearchSheetView: View {
                 ProgressView().frame(maxWidth: .infinity, alignment: .center)
             } else if mapViewModel.searchResults.isEmpty {
                 HStack {
-                    Text("No objects were found")
+                    Text(LocalizedString("empty_results_message", comment: "Message to describe empty search results"))
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding()
@@ -267,7 +269,7 @@ struct BottomSearchSheetView: View {
                 Button(action: {
                     print("Get Directions to \(marker.title)")
                 }) {
-                    Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                    Label(LocalizedString("marker_section_direction_button", comment: "Direction button from the marker section"), systemImage: "arrow.triangle.turn.up.right.diamond.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -279,10 +281,10 @@ struct BottomSearchSheetView: View {
                     }
                 }) {
                     if (mapViewModel.isMarkerInFavorites(markerID: marker.title)) {
-                        Label("Added", systemImage: "heart.fill")
+                        Label(LocalizedString("added_to_favorites_button", comment: "Added to favorites button"), systemImage: "heart.fill")
                             .foregroundStyle(Color.gray)
                     } else {
-                        Label("Add", systemImage: "heart.fill")
+                        Label(LocalizedString("add_to_favorites_button", comment: "Add to favorites button"), systemImage: "heart.fill")
                             .foregroundStyle(Color.blue)
                     }
                 }
@@ -296,11 +298,11 @@ struct BottomSearchSheetView: View {
     private var recentsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Recents")
+                Text(LocalizedString("recents_section_title", comment: "Recents section title"))
                     .font(.title2.bold())
                 Spacer()
                 if !mapViewModel.dbViewModel.historyItems.isEmpty {
-                    Button("Clear") {
+                    Button(LocalizedString("generic_clear_button", comment: "Generic clear button")) {
                         mapViewModel.dbViewModel.clearAllHistory()
                     }
                     .font(.subheadline)
@@ -311,7 +313,7 @@ struct BottomSearchSheetView: View {
             .padding(.bottom, 8)
 
             if mapViewModel.dbViewModel.historyItems.isEmpty {
-                Text("History is empty")
+                Text(LocalizedString("empty_history_list", comment: "History is empty"))
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding()
@@ -337,7 +339,7 @@ struct BottomSearchSheetView: View {
     private func settingsSection() -> some View {
         VStack(alignment: .leading, spacing: 16) { // Added spacing
             HStack {
-                Text("Settings").font(.title2.bold())
+                Text(LocalizedString("settings_section_title", comment: "Settings section title")).font(.title2.bold())
                 Spacer()
 
                 CloseButtonView {
@@ -346,8 +348,30 @@ struct BottomSearchSheetView: View {
                     }
                 }
             }
+            
+            // Language switcher
+                       HStack(spacing: 12) {
+                           Text(LocalizedString("settings_language_title", comment: "Language switch"))
+                           Spacer()
+                           ForEach(Language.allCases) { lang in
+                               Button(action: {
+                                   withAnimation {
+                                       languageManager.setLanguage(lang)
+                                       Bundle.setLanguage(lang.localeIdentifier)
+                                   }
+                               }) {
+                                   Text(lang.displayName)
+                                       .fontWeight(languageManager.currentLanguage == lang ? .bold : .regular)
+                                       .foregroundColor(languageManager.currentLanguage == lang ? .blue : .primary)
+                                       .padding(6)
+                                       .background(languageManager.currentLanguage == lang ? Color.blue.opacity(0.1) : Color.clear)
+                                       .cornerRadius(8)
+                               }
+                           }
+                       }
+                       .padding(.vertical, 8)
 
-            Text("Made with love by @qrutyy")
+            Text(LocalizedString("faq_section_made_by", comment: "Made with love by @qrutyy"))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
@@ -376,7 +400,7 @@ struct BottomSearchSheetView: View {
             Button(action: {
                 openURL(URL(string: "https://github.com/qrutyy/DepNavIOS")!)
             }) {
-                Text("Report an issue").frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
+                Text(LocalizedString("faq_section_report", comment: "Report an issue")).frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
             }
             .frame(width: 310, height: 45)
             .background(Color(.lightGray).opacity(0.2))
