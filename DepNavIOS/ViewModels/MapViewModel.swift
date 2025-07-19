@@ -171,6 +171,10 @@ class MapViewModel: ObservableObject {
         print("Warning: getSelectedMarker() could not find a marker with ID '\(selectedMarker)'.")
         return nil
     }
+    
+    func isMarkerInFavorites(markerID: String) -> Bool {
+        return dbViewModel.favoriteItems.contains(where: { $0.objectTitle == markerID })
+    }
 
     func addSelectedMarkerToDB(marker: InternalMarkerModel) {
         dbViewModel.addFavoritesItem(marker, department: selectedDepartment)

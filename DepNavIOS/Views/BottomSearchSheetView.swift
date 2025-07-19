@@ -273,10 +273,18 @@ struct BottomSearchSheetView: View {
                 .buttonStyle(.borderedProminent)
 
                 Button(action: {
-                    print("Save \(marker.title) to favorites")
-                    mapViewModel.addSelectedMarkerToDB(marker: marker)
+                    if (!mapViewModel.isMarkerInFavorites(markerID: marker.title)) {
+                        print("Save \(marker.title) to favorites")
+                        mapViewModel.addSelectedMarkerToDB(marker: marker)
+                    }
                 }) {
-                    Label("Save", systemImage: "heart.fill")
+                    if (mapViewModel.isMarkerInFavorites(markerID: marker.title)) {
+                        Label("Added", systemImage: "heart.fill")
+                            .foregroundStyle(Color.gray)
+                    } else {
+                        Label("Add", systemImage: "heart.fill")
+                            .foregroundStyle(Color.blue)
+                    }
                 }
                 .buttonStyle(.bordered)
             }
