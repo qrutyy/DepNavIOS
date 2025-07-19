@@ -85,7 +85,7 @@ struct BottomSearchSheetView: View {
                 }
             }
         }
-        .background(Color(red: 250/255, green: 250/255, blue: 249/255))
+        .background(Color(red: 250 / 255, green: 250 / 255, blue: 249 / 255))
     }
 
     private var mainContent: some View {
@@ -148,7 +148,7 @@ struct BottomSearchSheetView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(Color(red: 234/255, green: 234/255, blue: 236/255))
+        .background(Color(red: 234 / 255, green: 234 / 255, blue: 236 / 255))
         .cornerRadius(12)
         .padding(.horizontal, 20)
     }
@@ -174,7 +174,7 @@ struct BottomSearchSheetView: View {
                 }
             }
             .padding(.horizontal, 16)
-            
+
             VStack(alignment: .leading, spacing: 12) {
                 if mapViewModel.dbViewModel.favoriteItems.count == 0 {
                     VStack {
@@ -255,6 +255,12 @@ struct BottomSearchSheetView: View {
                             // Telling ViewModel that user has selected the marker
                             mapViewModel.selectSearchResult(marker)
                         }
+                        .overlay(
+                            Rectangle()
+                                .frame(height: 1)
+                                .foregroundColor(Color.gray.opacity(0.2)),
+                            alignment: .bottom
+                        )
                     }
                 }
             }
@@ -347,6 +353,13 @@ struct BottomSearchSheetView: View {
                             .onTapGesture {
                                 mapViewModel.selectHistoryItem(mapObject)
                             }
+
+                            .overlay(
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(Color.gray.opacity(0.2)),
+                                alignment: .bottom
+                            )
                         }
                     }
                     .padding(.horizontal, 16)
@@ -419,7 +432,7 @@ struct BottomSearchSheetView: View {
                     .foregroundColor(.accentColor)
             }
             .frame(width: 45, height: 45)
-            .background(Color(red: 238/255, green: 238/255, blue: 240/255))
+            .background(Color(red: 238 / 255, green: 238 / 255, blue: 240 / 255))
             .cornerRadius(12)
             Spacer().frame(width: 10)
             Button(action: {
@@ -428,7 +441,7 @@ struct BottomSearchSheetView: View {
                 Text(LocalizedString("faq_section_report", comment: "Report an issue")).frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
             }
             .frame(width: 310, height: 45)
-            .background(Color(red: 238/255, green: 238/255, blue: 240/255))
+            .background(Color(red: 238 / 255, green: 238 / 255, blue: 240 / 255))
             .cornerRadius(12)
         }
 
