@@ -11,6 +11,7 @@ struct SearchResultRowView: View {
     let icon: String
     let title: String
     let subtitle: String
+    let type: String
 
     var body: some View {
         HStack(spacing: 16) {
@@ -24,6 +25,9 @@ struct SearchResultRowView: View {
                     Text(title)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
+                    Text(stringFormatType(type))
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
                 } else {
                     Text(title)
                         .font(.system(size: 16, weight: .medium))
@@ -44,8 +48,25 @@ struct SearchResultRowView: View {
         .padding(.vertical, 12)
         .background(Color(.systemBackground))
     }
+    
+    private func stringFormatType(_ objType: String) -> String {
+        switch objType {
+        case "Room":
+            return LocalizedString("marker_type_room")
+        case "Entrance":
+            return LocalizedString("marker_type_entrance")
+        case "Stairs up", "Stairs down", "Stairs both":
+            return LocalizedString("marker_type_stairs")
+        case "Elevator":
+            return LocalizedString("marker_type_elevator")
+        case "WC", "WC man", "WC woman":
+            return LocalizedString("marker_type_wc")
+        default:
+            return LocalizedString("marker_type_unknown")
+        }
+    }
 }
 
 #Preview {
-    SearchResultRowView(icon: "door.french.open", title: "Test", subtitle: "")
+    SearchResultRowView(icon: "door.french.open", title: "Test", subtitle: "", type: "Class")
 }

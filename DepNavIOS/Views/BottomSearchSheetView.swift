@@ -248,7 +248,8 @@ struct BottomSearchSheetView: View {
                             icon: getMapObjectIconByType(objectTypeName: marker.type.displayName),
                             title: marker.title,
                             subtitle: marker.description
-                                ?? ""
+                                ?? "",
+                            type: marker.type.displayName
                         )
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -346,8 +347,9 @@ struct BottomSearchSheetView: View {
                         ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
                             SearchResultRowView(
                                 icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName),
-                                title: getFormattedTitle(objectTitle: mapObject.objectTitle, objectTypeName: mapObject.objectTypeName),
-                                subtitle: mapObject.objectDescription
+                                title: mapObject.objectTitle,
+                                subtitle: mapObject.objectDescription,
+                                type: mapObject.objectTypeName
                             )
                             .contentShape(Rectangle())
                             .onTapGesture {
