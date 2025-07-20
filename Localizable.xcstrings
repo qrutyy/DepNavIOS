@@ -343,6 +343,23 @@
         }
       }
     },
+    "map_vm_floor" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "floor"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этаж"
+          }
+        }
+      }
+    },
     "marker_section_direction_button" : {
       "comment" : "Direction button from the marker section",
       "extractionState" : "manual",

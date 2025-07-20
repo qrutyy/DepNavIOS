@@ -46,8 +46,10 @@ struct GenericMarkerView: View {
             Image(systemName: "arrow.up.and.down.square")
                 .foregroundColor(.orange)
         case .ELEVATOR:
-            Image(systemName: "elevator")
-                .foregroundColor(.purple)
+            HStack(spacing: 0) {
+                Image(systemName: "person.fill")
+                Image(systemName: "arrow.up.and.down")
+            }
         case .WC_MAN:
             Image(systemName: "figure.stand")
                 .foregroundColor(.cyan)

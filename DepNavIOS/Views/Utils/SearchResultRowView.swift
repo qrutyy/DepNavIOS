@@ -21,7 +21,7 @@ struct SearchResultRowView: View {
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                if subtitle == "" {
+                if subtitle == "" || subtitle == title {
                     Text(title)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
