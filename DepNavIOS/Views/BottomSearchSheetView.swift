@@ -34,80 +34,62 @@ struct BottomSearchSheetView: View {
                 .padding(.top, detent != .height(50) ? 15 : 35)
                 .padding(.bottom, 15)
 
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        switch currentSheetContent {
-                        case .settings:
-                            settingsSection()
-                        case .main:
-                            if let marker = mapViewModel.getSelectedMarker() {
-                                markerSection(marker: marker)
-                            } else if !mapViewModel.searchQuery.isEmpty {
-                                resultsSection
-                            } else {
-                                favoritesSection
-                                recentsSection
-                            }
-
-                            // This makes your FAQ/Settings buttons stick to the bottom
-                            Spacer()
-
-                            if detent != .height(50) {
-                                faqSection
-                            }
+            mainContentSheet
+                .onChange(of: mapViewModel.searchQuery) { newValue in
+                    Task {
+                        if newValue == mapViewModel.searchQuery {
+                            mapViewModel.updateSearchResults()
                         }
                     }
                 }
-            }
-
-            .onChange(of: mapViewModel.searchQuery) { newValue in
-                Task {
-                    if newValue == mapViewModel.searchQuery {
-                        mapViewModel.updateSearchResults()
+                .onChange(of: mapViewModel.markerCoordinate) { newCoord in
+                    if newCoord != nil {
+                        hideKeyboard()
+                        withAnimation {
+                            self.detent = .height(50)
+                        }
                     }
                 }
-            }
-            .onChange(of: mapViewModel.markerCoordinate) { newCoord in
-                if newCoord != nil {
-                    hideKeyboard()
-                    withAnimation {
-                        self.detent = .height(50)
+                .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
+                    if newSelectedMarker != "" {
+                        withAnimation(.spring()) {
+                            self.detent = .medium // или .large, как вам нужно
+                        }
                     }
                 }
-            }
-
-            .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
-                if newSelectedMarker != "" {
-                    withAnimation(.spring()) {
-                        self.detent = .medium // или .large, как вам нужно
-                    }
-                }
-            }
         }
         .background(Color(red: 250 / 255, green: 250 / 255, blue: 249 / 255))
     }
 
-    private var mainContent: some View {
+    private var mainContentSheet: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 0) {
-                    if let marker = mapViewModel.getSelectedMarker() {
-                        markerSection(marker: marker)
-                    } else if !mapViewModel.searchQuery.isEmpty {
-                        resultsSection
-                    } else {
-                        favoritesSection
-                        recentsSection
+                    switch currentSheetContent {
+                    case .settings:
+                        settingsSection()
+                    case .main:
+                        if let marker = mapViewModel.getSelectedMarker() {
+                            withAnimation {
+                                markerSection(marker: marker)
+                            }
+                        } else if !mapViewModel.searchQuery.isEmpty {
+                            withAnimation {
+                                resultsSection
+                            }
+                        } else {
+                            favoritesSection
+                            recentsSection
+                        }
+
+                        // This makes your FAQ/Settings buttons stick to the bottom
+                        Spacer()
+
+                        if detent != .height(50) {
+                            faqSection
+                        }
                     }
                 }
-            }
-
-            // This makes your FAQ/Settings buttons stick to the bottom
-            Spacer()
-
-            if detent != .height(50) {
-                faqSection
             }
         }
     }
@@ -191,7 +173,7 @@ struct BottomSearchSheetView: View {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), alignment: .leading, spacing: 16) {
                         ForEach(mapViewModel.dbViewModel.favoriteItems) { mapObject in
                             ZStack {
-                                FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, iconColor: .blue)
+                                FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, type: mapObject.objectTypeName, iconColor: .blue)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         // Telling ViewModel that user has selected the marker
@@ -203,7 +185,7 @@ struct BottomSearchSheetView: View {
                                     CloseButtonView {
                                         mapViewModel.removeFavoriteItem(mapObject)
                                     }
-                                    .offset(x: 22, y: -31)
+                                    .offset(x: 22, y: -45)
                                 }
                             }
                         }
@@ -272,7 +254,7 @@ struct BottomSearchSheetView: View {
     private func markerSection(marker: InternalMarkerModel) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(getFormattedTitle(objectTitle: marker.title, objectTypeName: marker.type.displayName))
+                Text(getFormattedTitle(objectTitle: marker.title, objectTypeName: stringFormatType(marker.type.displayName)))
                     .font(.title2.bold())
                 Spacer()
 
@@ -284,6 +266,19 @@ struct BottomSearchSheetView: View {
             .padding(.horizontal, 16)
             .padding(.top, 16)
             .padding(.bottom, 8)
+
+            if marker.description != nil && marker.description != "" {
+                Text(marker.description!)
+                    .font(.subheadline)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 4)
+            }
+
+            Text(((mapViewModel.selectedDepartment == "spbu-mm") ? LocalizedString("department_name_mm", comment: "Mathematics and Mechanics") : LocalizedString("department_name_ph", comment: "Faculty of Physics")) + ", " + "\(marker.floor) " + LocalizedString("map_vm_floor", comment: "Direction button from the marker section"))
+                .font(.subheadline)
+                .foregroundStyle(Color(.gray))
+                .padding(.horizontal, 16)
+                .padding(.bottom, 4)
 
             HStack(spacing: 12) {
                 Button(action: {

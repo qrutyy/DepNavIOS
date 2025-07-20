@@ -37,6 +37,8 @@ class MapViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    @ObservedObject var languageManager = LanguageManager.shared
+
     init(mapDataService: MapDataService = MapDataService()) {
         self.mapDataService = mapDataService
         dbViewModel.objectWillChange
@@ -158,8 +160,8 @@ class MapViewModel: ObservableObject {
             if let markerData = floorData.markers.first(where: { $0.en.title == selectedMarker }) {
                 return InternalMarkerModel(
                     id: markerData.id,
-                    title: markerData.ru.title ?? "",
-                    description: markerData.ru.description,
+                    title: (languageManager.currentLanguage == .en ? markerData.en.title : markerData.ru.title) ?? "", // depends on the chosen Language
+                    description: (languageManager.currentLanguage == .en ? markerData.en.description : markerData.ru.description) ?? "",
                     floor: floorData.floor,
                     coordinate: markerData.coordinate,
                     type: markerData.type,
@@ -222,7 +224,7 @@ class MapViewModel: ObservableObject {
         guard let mapDescription = currentMapDescription else { return [] }
         return mapDescription.floors.flatMap { floorData in
             floorData.markers.map { marker in
-                InternalMarkerModel(id: marker.id, title: marker.ru.title ?? "", description: marker.ru.description, floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker)
+                InternalMarkerModel(id: marker.id, title: (languageManager.currentLanguage == .en ? marker.en.title : marker.ru.title) ?? "", description: (languageManager.currentLanguage == .en ? marker.en.title : marker.ru.title) ?? "", floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker)
             }
         }
     }

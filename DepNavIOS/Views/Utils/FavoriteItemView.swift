@@ -11,6 +11,7 @@ struct FavoriteItemView: View {
     let icon: String
     let title: String
     let subtitle: String
+    let type: String
     let iconColor: Color
 
     var body: some View {
@@ -36,8 +37,9 @@ struct FavoriteItemView: View {
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 } else {
-                    Text(subtitle)
-                        .foregroundColor(Color(.white))
+                    Text(stringFormatType(type))
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
             }
@@ -47,5 +49,5 @@ struct FavoriteItemView: View {
 }
 
 #Preview {
-    FavoriteItemView(icon: "star", title: "Starred", subtitle: "123 items", iconColor: .yellow)
+    FavoriteItemView(icon: "star", title: "Starred", subtitle: "123 items", type: "Elevator", iconColor: .yellow)
 }

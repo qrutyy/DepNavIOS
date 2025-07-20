@@ -48,23 +48,6 @@ struct SearchResultRowView: View {
         .padding(.vertical, 12)
         .background(Color(.systemBackground))
     }
-    
-    private func stringFormatType(_ objType: String) -> String {
-        switch objType {
-        case "Room":
-            return LocalizedString("marker_type_room")
-        case "Entrance":
-            return LocalizedString("marker_type_entrance")
-        case "Stairs up", "Stairs down", "Stairs both":
-            return LocalizedString("marker_type_stairs")
-        case "Elevator":
-            return LocalizedString("marker_type_elevator")
-        case "WC", "WC man", "WC woman":
-            return LocalizedString("marker_type_wc")
-        default:
-            return LocalizedString("marker_type_unknown")
-        }
-    }
 }
 
 #Preview {
