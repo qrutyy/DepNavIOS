@@ -14,7 +14,8 @@ struct ResultsSectionView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(LocalizedString("results_section_title", comment: "Title of the section showing search results"))
-                    .font(.title2.bold())
+                .font(.headline)
+                    .foregroundColor(.primary)
                 Spacer()
             }
             .padding([.top, .horizontal], 16)
@@ -39,7 +40,9 @@ struct ResultsSectionView: View {
                             title: marker.title,
                             subtitle: marker.description
                                 ?? "",
-                            type: marker.type.displayName
+                            type: marker.type.displayName,
+                            currentDep: mapViewModel.selectedDepartment,
+                            floor: String(marker.floor)
                         )
                         .contentShape(Rectangle())
                         .onTapGesture {

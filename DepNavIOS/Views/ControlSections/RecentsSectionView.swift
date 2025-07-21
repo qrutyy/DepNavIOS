@@ -44,7 +44,9 @@ struct RecentsSectionView: View {
                                 icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName),
                                 title: mapObject.objectTitle,
                                 subtitle: mapObject.objectDescription,
-                                type: mapObject.objectTypeName
+                                type: mapObject.objectTypeName,
+                                currentDep: mapViewModel.selectedDepartment,
+                            floor: String(mapObject.floor)
                             )
                             .contentShape(Rectangle())
                             .onTapGesture {

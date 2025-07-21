@@ -12,6 +12,16 @@ struct SearchResultRowView: View {
     let title: String
     let subtitle: String
     let type: String
+    let currentDep: String
+    let floor: String
+    
+    private var formattedDep: String {
+        if currentDep == "spbu-pf" {
+            return LocalizedString("settings_department_pf", comment: "")
+        } else {
+            return LocalizedString("settings_department_mm", comment: "")
+        }
+    }
 
     var body: some View {
         HStack(spacing: 16) {
@@ -25,14 +35,14 @@ struct SearchResultRowView: View {
                     Text(title)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
-                    Text(stringFormatType(type))
+                    Text("\(stringFormatType(type)), \(floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                 } else {
                     Text(title)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
-                    Text(subtitle)
+                    Text("\(subtitle), \(floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                 }
@@ -50,6 +60,6 @@ struct SearchResultRowView: View {
     }
 }
 
-#Preview {
-    SearchResultRowView(icon: "door.french.open", title: "Test", subtitle: "", type: "Class")
-}
+//#Preview {
+//    SearchResudltRowView(icon: "door.french.open", title: "Test", subtitle: "", type: "Class")
+//}

@@ -73,14 +73,15 @@ struct BottomSearchSheetView: View {
                         } else {
                             FavoriteSectionView(mapViewModel: mapViewModel, displayDeleteFavoriteButton: $displayDeleteFavoriteButton)
                             RecentsSectionView(mapViewModel: mapViewModel)
+                            if detent != .height(50)  {
+                                FaqSectionView(currentSheetContent: $currentSheetContent)
+                            }
                         }
                         
                         // This makes your FAQ/Settings buttons stick to the bottom
                         Spacer()
                         
-                        if detent != .height(50) {
-                            FaqSectionView(currentSheetContent: $currentSheetContent)
-                        }
+                        
                     case .selMarker:
                         if let marker = mapViewModel.getSelectedMarker() {
                             withAnimation {
