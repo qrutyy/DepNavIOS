@@ -15,8 +15,8 @@ enum Language: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var displayName: String {
         switch self {
-        case .ru: return "EN"
-        case .en: return "RU"
+        case .ru: return "RU"
+        case .en: return "EN"
         }
     }
 

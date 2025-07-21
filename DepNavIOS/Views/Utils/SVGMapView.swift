@@ -39,7 +39,6 @@ struct SVGMapView: View {
             .onAppear {
                 print("SVGView: layout for file 'Maps/\(department)/floor\(floor).svg'")
             }
-
         } else {
             VStack {
                 Image(systemName: "exclamationmark.triangle.fill")

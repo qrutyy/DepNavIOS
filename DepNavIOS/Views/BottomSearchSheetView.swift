@@ -60,7 +60,7 @@ struct BottomSearchSheetView: View {
                 VStack(spacing: 0) {
                     switch currentSheetContent {
                     case .settings:
-                        SettingsSectionView(currentSheetContent: $currentSheetContent)
+                        SettingsSectionView(mapViewModel: mapViewModel, currentSheetContent: $currentSheetContent)
                     case .main:
                         if !mapViewModel.searchQuery.isEmpty {
                             withAnimation {

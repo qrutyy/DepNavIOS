@@ -15,7 +15,7 @@ class MapViewModel: ObservableObject {
     // MARK: - Published Properties for UI State
 
     @Published var selectedFloor: Int = 1
-    @Published var selectedDepartment: String = "spbu-mm"
+    @Published var selectedDepartment: String = "spbu-pf"
     @Published var markerCoordinate: CGPoint?
     @Published var searchQuery: String = ""
     @Published var isLoading: Bool = false

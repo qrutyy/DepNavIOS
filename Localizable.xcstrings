@@ -552,6 +552,57 @@
         }
       }
     },
+    "settings_department_mm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mathematics Mechanics"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Математика Механика"
+          }
+        }
+      }
+    },
+    "settings_department_pf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faculty of Physics"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Факультет Физики"
+          }
+        }
+      }
+    },
+    "settings_department_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Department"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Факультет"
+          }
+        }
+      }
+    },
     "settings_language_title" : {
       "comment" : "Language switch",
       "extractionState" : "manual",
