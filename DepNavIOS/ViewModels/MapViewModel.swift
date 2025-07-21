@@ -105,6 +105,7 @@ class MapViewModel: ObservableObject {
     }
 
     func commitSearch() {
+        updateSearchResults() // force
         if let topResult = searchResults.first {
             selectSearchResult(topResult)
         } else {
@@ -127,7 +128,6 @@ class MapViewModel: ObservableObject {
         selectedSearchResult = marker
         searchQuery = ""
         searchResults = []
-
         dbViewModel.addHistoryItem(marker, department: selectedDepartment)
     }
 
