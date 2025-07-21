@@ -126,6 +126,7 @@ class MapViewModel: ObservableObject {
         selectedFloor = marker.floor
         markerCoordinate = marker.coordinate
         selectedSearchResult = marker
+        selectedMarker = marker.title
         searchQuery = ""
         searchResults = []
         dbViewModel.addHistoryItem(marker, department: selectedDepartment)
@@ -152,7 +153,7 @@ class MapViewModel: ObservableObject {
     }
 
     func getSelectedMarker() -> InternalMarkerModel? {
-        guard !selectedMarker.isEmpty, let mapDescription = currentMapDescription else {
+        guard ((selectedSearchResult?.title.isEmpty) == nil), let mapDescription = currentMapDescription else {
             return nil
         }
 

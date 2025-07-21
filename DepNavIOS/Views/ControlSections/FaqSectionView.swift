@@ -10,6 +10,7 @@ import SwiftUI
 enum SheetContent {
     case main
     case settings
+    case selMarker
 }
 
 struct FaqSectionView: View {

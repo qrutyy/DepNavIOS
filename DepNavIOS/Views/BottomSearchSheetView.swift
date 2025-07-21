@@ -30,6 +30,7 @@ struct BottomSearchSheetView: View {
                     Task {
                         if newValue == mapViewModel.searchQuery {
                             mapViewModel.updateSearchResults()
+                            // mapViewModel.selectedMarker = ""
                         }
                     }
                 }
@@ -37,7 +38,8 @@ struct BottomSearchSheetView: View {
                     if newCoord != nil {
                         hideKeyboard()
                         withAnimation {
-                            self.detent = .height(50)
+                            self.currentSheetContent = .selMarker
+                            self.detent = .medium
                         }
                     }
                 }
@@ -60,13 +62,13 @@ struct BottomSearchSheetView: View {
                     case .settings:
                         SettingsSectionView(currentSheetContent: $currentSheetContent)
                     case .main:
-                        if let marker = mapViewModel.getSelectedMarker() {
-                            withAnimation {
-                                MarkerSectionView(marker: marker, mapViewModel: mapViewModel, detent: $detent)
-                            }
-                        } else if !mapViewModel.searchQuery.isEmpty {
+                        if !mapViewModel.searchQuery.isEmpty {
                             withAnimation {
                                 ResultsSectionView(mapViewModel: mapViewModel)
+                            }
+                        } else if let marker = mapViewModel.getSelectedMarker() {
+                            withAnimation {
+                                MarkerSectionView(marker: marker, mapViewModel: mapViewModel, detent: $detent)
                             }
                         } else {
                             FavoriteSectionView(mapViewModel: mapViewModel, displayDeleteFavoriteButton: $displayDeleteFavoriteButton)
@@ -78,6 +80,12 @@ struct BottomSearchSheetView: View {
                         
                         if detent != .height(50) {
                             FaqSectionView(currentSheetContent: $currentSheetContent)
+                        }
+                    case .selMarker:
+                        if let marker = mapViewModel.getSelectedMarker() {
+                            withAnimation {
+                                MarkerSectionView(marker: marker, mapViewModel: mapViewModel, detent: $detent)
+                            }
                         }
                     }
                 }
