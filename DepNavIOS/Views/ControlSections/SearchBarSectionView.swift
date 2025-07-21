@@ -10,7 +10,7 @@ import SwiftUI
 struct SearchBarSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
     @Binding var detent: PresentationDetent
-    
+
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")

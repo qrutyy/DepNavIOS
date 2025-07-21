@@ -70,7 +70,7 @@ class DatabaseViewModel: ObservableObject {
             let success = await databaseService.addHistoryItem(item.toMapObjectModel(currentDepartment: department))
             if success {
                 let localHistoryItem = item.toMapObjectModel(currentDepartment: department)
-                localHistoryItem.id = Int.random(in: 1...1000000)
+                localHistoryItem.id = Int.random(in: 1 ... 1_000_000)
                 self.historyItems.insert(localHistoryItem, at: 0)
             } else {
                 self.errorMessage = "Не удалось добавить элемент истории"

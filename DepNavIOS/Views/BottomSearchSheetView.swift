@@ -9,22 +9,24 @@ import SwiftUI
 struct BottomSearchSheetView: View {
     // ObservedObaject is used bc lifecycle of ViewModel is managed by the parental ContentView
     @ObservedObject var mapViewModel: MapViewModel
-    
+
     @Binding var detent: PresentationDetent
-    
+
     @State private var showMarkerSection = false
     @State private var displayDeleteFavoriteButton: Bool = false
-    
+
     @State private var currentSheetContent: SheetContent = .main
-    
+
     @ObservedObject var languageManager = LanguageManager.shared
-    
+
+    @State private var markerToDisplay: InternalMarkerModel?
+
     var body: some View {
         VStack(spacing: 0) {
             SearchBarSectionView(mapViewModel: mapViewModel, detent: $detent)
                 .padding(.top, detent != .height(50) ? 15 : 35)
                 .padding(.bottom, 15)
-            
+
             mainContentSheet
                 .onChange(of: mapViewModel.searchQuery) { newValue in
                     Task {
@@ -34,26 +36,18 @@ struct BottomSearchSheetView: View {
                         }
                     }
                 }
-                .onChange(of: mapViewModel.markerCoordinate) { newCoord in
-                    if newCoord != nil {
-                        hideKeyboard()
-                        withAnimation {
-                            self.currentSheetContent = .selMarker
-                            self.detent = .medium
-                        }
-                    }
-                }
+
                 .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
                     if newSelectedMarker != "" {
                         withAnimation(.spring()) {
-                            self.detent = .medium // или .large, как вам нужно
+                            self.detent = .height(200) // или .large, как вам нужно
                         }
                     }
                 }
         }
         .background(Color(red: 250 / 255, green: 250 / 255, blue: 249 / 255))
     }
-    
+
     private var mainContentSheet: some View {
         VStack(spacing: 0) {
             ScrollView {
@@ -61,6 +55,7 @@ struct BottomSearchSheetView: View {
                     switch currentSheetContent {
                     case .settings:
                         SettingsSectionView(mapViewModel: mapViewModel, currentSheetContent: $currentSheetContent)
+
                     case .main:
                         if !mapViewModel.searchQuery.isEmpty {
                             withAnimation {
@@ -73,15 +68,14 @@ struct BottomSearchSheetView: View {
                         } else {
                             FavoriteSectionView(mapViewModel: mapViewModel, displayDeleteFavoriteButton: $displayDeleteFavoriteButton)
                             RecentsSectionView(mapViewModel: mapViewModel)
-                            if detent != .height(50)  {
+                            if detent != .height(50) {
                                 FaqSectionView(currentSheetContent: $currentSheetContent)
                             }
                         }
-                        
+
                         // This makes your FAQ/Settings buttons stick to the bottom
                         Spacer()
-                        
-                        
+
                     case .selMarker:
                         if let marker = mapViewModel.getSelectedMarker() {
                             withAnimation {

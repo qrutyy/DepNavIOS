@@ -14,7 +14,7 @@ struct SearchResultRowView: View {
     let type: String
     let currentDep: String
     let floor: String
-    
+
     private var formattedDep: String {
         if currentDep == "spbu-pf" {
             return LocalizedString("settings_department_pf", comment: "")
@@ -60,6 +60,6 @@ struct SearchResultRowView: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    SearchResudltRowView(icon: "door.french.open", title: "Test", subtitle: "", type: "Class")
-//}
+// }

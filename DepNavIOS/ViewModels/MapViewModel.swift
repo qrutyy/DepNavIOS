@@ -153,15 +153,17 @@ class MapViewModel: ObservableObject {
     }
 
     func getSelectedMarker() -> InternalMarkerModel? {
-        guard ((selectedSearchResult?.title.isEmpty) == nil), let mapDescription = currentMapDescription else {
+        guard (selectedSearchResult?.title.isEmpty) != nil, let mapDescription = currentMapDescription else {
             return nil
         }
 
         for floorData in mapDescription.floors {
-            if let markerData = floorData.markers.first(where: { $0.en.title == selectedMarker }) {
+            if let markerData = floorData.markers.first(where: {
+                $0.en.title == selectedMarker || $0.ru.title == selectedMarker
+            }) {
                 return InternalMarkerModel(
                     id: markerData.id,
-                    title: (languageManager.currentLanguage == .en ? markerData.en.title : markerData.ru.title) ?? "", // depends on the chosen Language
+                    title: (languageManager.currentLanguage == .en ? markerData.en.title : markerData.ru.title) ?? "",
                     description: (languageManager.currentLanguage == .en ? markerData.en.description : markerData.ru.description) ?? "",
                     floor: floorData.floor,
                     coordinate: markerData.coordinate,

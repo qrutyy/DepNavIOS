@@ -19,7 +19,6 @@ struct GenericMarkerView: View {
             .frame(width: 45, height: 45, alignment: .center)
             .contentShape(Rectangle())
             .onTapGesture {
-                
                 print("updated selectedMarker to: \(title), \(coords), \(type)")
                 selectedMarker = title
                 let labRooms = (3241 ... 3251).map { String($0) }

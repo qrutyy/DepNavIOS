@@ -10,7 +10,7 @@ import SwiftUI
 struct FavoriteSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
     @Binding var displayDeleteFavoriteButton: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {

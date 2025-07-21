@@ -14,7 +14,7 @@ struct ResultsSectionView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(LocalizedString("results_section_title", comment: "Title of the section showing search results"))
-                .font(.headline)
+                    .font(.headline)
                     .foregroundColor(.primary)
                 Spacer()
             }
@@ -48,6 +48,7 @@ struct ResultsSectionView: View {
                         .onTapGesture {
                             // Telling ViewModel that user has selected the marker
                             mapViewModel.selectSearchResult(marker)
+                            mapViewModel.selectedSearchResult = marker
                         }
                         .overlay(
                             Rectangle()

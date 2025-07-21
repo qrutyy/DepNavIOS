@@ -59,6 +59,7 @@ struct SettingsSectionView: View {
         }
         .padding(.vertical, 8)
     }
+
     private var departmentSection: some View {
         let departments: [(id: String, display: String)] = [
             ("spbu-mm", LocalizedString("settings_department_mm", comment: "MM department")),

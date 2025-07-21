@@ -14,7 +14,12 @@ struct ContentView: View {
     @StateObject private var mapViewModel = MapViewModel()
 
     // Basic set of detents for the Bottom sheet.
-    private let searchSheetDetents: Set<PresentationDetent> = [.height(50), .medium, .large]
+    private let searchSheetDetents: Set<PresentationDetent> = [
+        .height(50), // only searchbar visible
+        .height(200), // marker section
+        .medium, // medium
+        .large // full screen
+    ]
     @State private var selectedDetent: PresentationDetent = .height(50)
 
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore: Bool = false
@@ -32,13 +37,7 @@ struct ContentView: View {
             }
             if mapViewModel.currentMapDescription != nil {
                 SVGMapView(
-                    floor: mapViewModel.selectedFloor,
-                    department: mapViewModel.selectedDepartment,
-                    markerCoordinate: $mapViewModel.markerCoordinate,
-                    mapDescription: mapViewModel.currentMapDescription!,
-                    selectedMarker: $mapViewModel.selectedMarker,
-                    isCentered: $mapViewModel.mapControl.isCentered,
-                    isZoomedOut: $mapViewModel.mapControl.isZoomedOut
+                    mapViewModel: mapViewModel
                 )
                 .edgesIgnoringSafeArea(.all)
 

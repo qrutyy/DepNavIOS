@@ -12,32 +12,19 @@ import SwiftUI
 /// Incapsulates all in all MapView and handles the loading error.
 /// May be appended with the better error screen (when the custom map loading will be implemented) TODO
 struct SVGMapView: View {
-    let floor: Int
-    let department: String
-
-    @Binding var markerCoordinate: CGPoint?
-    let mapDescription: MapDescription
-    @Binding var selectedMarker: String
-    @Binding var isCentered: Bool
-    @Binding var isZoomedOut: Bool
+    @ObservedObject var mapViewModel: MapViewModel
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
 
     var body: some View {
-        if let url = Bundle.main.url(forResource: "floor\(floor)", withExtension: "svg", subdirectory: "Maps/\(department)") {
+        if let url = Bundle.main.url(forResource: "floor\(mapViewModel.selectedFloor)", withExtension: "svg", subdirectory: "Maps/\(mapViewModel.selectedDepartment)") {
             AdvSVGView(
                 url: url,
-                floor: floor,
-                department: department,
-                markerCoordinate: $markerCoordinate,
-                mapDescription: mapDescription,
-                selectedMarker: $selectedMarker,
-                isCentered: $isCentered,
-                isZoomedOut: $isZoomedOut
+                mapViewModel: mapViewModel
             )
             .onAppear {
-                print("SVGView: layout for file 'Maps/\(department)/floor\(floor).svg'")
+                print("SVGView: layout for file 'Maps/\(mapViewModel.selectedDepartment)/floor\(mapViewModel.selectedFloor).svg'")
             }
         } else {
             VStack {
@@ -48,7 +35,7 @@ struct SVGMapView: View {
                     .font(.headline)
             }
             .onAppear {
-                print("SVGView: File '\(department)/floor\(floor).svg' wasn't found.")
+                print("SVGView: File '\(mapViewModel.selectedDepartment)/floor\(mapViewModel.selectedFloor).svg' wasn't found.")
             }
         }
     }

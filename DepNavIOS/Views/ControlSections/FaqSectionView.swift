@@ -15,10 +15,10 @@ enum SheetContent {
 
 struct FaqSectionView: View {
     @Binding var currentSheetContent: SheetContent
-   
+
     @Environment(\.openURL) var openURL
     var body: some View {
-             HStack {
+        HStack {
             Button(action: {
                 print("Settings button tapped!")
                 withAnimation {
@@ -46,7 +46,4 @@ struct FaqSectionView: View {
         .padding(.horizontal, 10)
         .padding(.top, 30)
     }
-
-    }
-
-
+}

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RecentsSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
@@ -30,7 +30,7 @@ struct RecentsSectionView: View {
                 }
             }
             .padding(.horizontal, 16)
-            
+
             VStack(alignment: .leading, spacing: 0) {
                 if mapViewModel.dbViewModel.historyItems.isEmpty {
                     Text(LocalizedString("empty_history_list", comment: "History is empty"))
@@ -46,13 +46,13 @@ struct RecentsSectionView: View {
                                 subtitle: mapObject.objectDescription,
                                 type: mapObject.objectTypeName,
                                 currentDep: mapViewModel.selectedDepartment,
-                            floor: String(mapObject.floor)
+                                floor: String(mapObject.floor)
                             )
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 mapViewModel.selectHistoryItem(mapObject)
                             }
-                            
+
                             .overlay(
                                 Rectangle()
                                     .frame(height: 1)

@@ -1,5 +1,5 @@
 //
-//  MapObjectUtils.swift
+//  MapObjectViewModel.swift
 //  DepNavIOS
 //
 //  Created by Michael Gavrilenko on 20.07.2025.

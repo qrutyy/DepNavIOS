@@ -10,13 +10,7 @@ import SwiftUI
 
 struct AdvSVGView: View {
     let url: URL
-    let floor: Int
-    let department: String
-    @Binding var markerCoordinate: CGPoint?
-    let mapDescription: MapDescription
-    @Binding var selectedMarker: String
-    @Binding var isCentered: Bool
-    @Binding var isZoomedOut: Bool
+    @ObservedObject var mapViewModel: MapViewModel
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -39,20 +33,20 @@ struct AdvSVGView: View {
                 .onTapGesture(count: 2) {
                     handleDoubleTap(in: geometry.size)
                 }
-                .onChange(of: markerCoordinate) { newCoord in
+                .onChange(of: mapViewModel.markerCoordinate) { newCoord in
                     guard let coord = newCoord else { return }
                     centerOnCoordinate(coord, in: geometry.size)
                 }
-                .onChange(of: isCentered) { newValue in
+                .onChange(of: mapViewModel.mapControl.isCentered) { newValue in
                     if newValue {
                         withAnimation(.spring()) {
                             self.offset = .zero
                             self.startOffset = .zero
                         }
-                        isCentered = false
+                        mapViewModel.mapControl.isCentered = false
                     }
                 }
-                .onChange(of: isZoomedOut) { newValue in
+                .onChange(of: mapViewModel.mapControl.isZoomedOut) { newValue in
                     if newValue {
                         withAnimation(.spring()) {
                             let newOffset = CGSize(
@@ -64,7 +58,7 @@ struct AdvSVGView: View {
                             self.scale = 1.0
                             self.startScale = 1.0
                         }
-                        isZoomedOut = false
+                        mapViewModel.mapControl.isZoomedOut = false
                     }
                 }
         }
@@ -75,7 +69,7 @@ struct AdvSVGView: View {
     /// Creates the main map content including the SVG and all markers.
     @ViewBuilder
     private func mapContentView(for geometry: GeometryProxy) -> some View {
-        let svgNaturalSize = CGSize(width: mapDescription.floorWidth, height: mapDescription.floorHeight)
+        let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription!.floorWidth, height: mapViewModel.currentMapDescription!.floorHeight)
 
         ZStack {
             // 1. The base SVG map
@@ -83,7 +77,7 @@ struct AdvSVGView: View {
                 .aspectRatio(svgNaturalSize, contentMode: .fit)
 
             // 2. The tappable markers for the current floor
-            if let currentFloorData = mapDescription.floors.first(where: { $0.floor == self.floor }) {
+            if let currentFloorData = mapViewModel.currentMapDescription!.floors.first(where: { $0.floor == mapViewModel.selectedFloor }) {
                 ForEach(currentFloorData.markers, id: \.self) { marker in
                     let markerPosition = calculateMarkerPosition(
                         svgCoordinate: marker.coordinate,
@@ -93,7 +87,7 @@ struct AdvSVGView: View {
 
                     // Note: Simplified the marker view for this example
                     let displayTitle = marker.ru.title ?? marker.en.title ?? ""
-                    GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $selectedMarker, coords: marker.coordinate)
+                    GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $mapViewModel.selectedMarker, coords: marker.coordinate)
                         .offset(y: -21)
                         .scaleEffect(1.0 / 7.0)
                         .position(markerPosition)
@@ -102,13 +96,12 @@ struct AdvSVGView: View {
             }
 
             // 3. The pin for a selected search result
-            if let coord = markerCoordinate {
+            if let coord = mapViewModel.markerCoordinate {
                 let markerPosition = calculateMarkerPosition(
                     svgCoordinate: coord,
                     svgNaturalSize: svgNaturalSize,
                     containerSize: geometry.size
                 )
-
                 PinMarkerView(color: .red)
                     .offset(y: -21)
                     .scaleEffect(1.0 / self.scale) // Pin should also scale down
@@ -169,7 +162,7 @@ struct AdvSVGView: View {
     }
 
     private func centerOnCoordinate(_ coordinate: CGPoint, in containerSize: CGSize) {
-        let svgNaturalSize = CGSize(width: mapDescription.floorWidth, height: mapDescription.floorHeight)
+        let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription!.floorWidth, height: mapViewModel.currentMapDescription!.floorHeight)
 
         let targetScale: CGFloat = 3.0
 
