@@ -15,7 +15,7 @@ class MapViewModel: ObservableObject {
     // MARK: - Published Properties for UI State
 
     @Published var selectedFloor: Int = 1
-    @Published var selectedDepartment: String = "spbu-mm"
+    @Published var selectedDepartment: String = "spbu-pf"
     @Published var markerCoordinate: CGPoint?
     @Published var searchQuery: String = ""
     @Published var isLoading: Bool = false
@@ -36,6 +36,8 @@ class MapViewModel: ObservableObject {
     private var loadedMapDescriptions: [String: MapDescription] = [:]
 
     private var cancellables = Set<AnyCancellable>()
+
+    @ObservedObject var languageManager = LanguageManager.shared
 
     init(mapDataService: MapDataService = MapDataService()) {
         self.mapDataService = mapDataService
@@ -103,6 +105,7 @@ class MapViewModel: ObservableObject {
     }
 
     func commitSearch() {
+        updateSearchResults() // force
         if let topResult = searchResults.first {
             selectSearchResult(topResult)
         } else {
@@ -112,7 +115,8 @@ class MapViewModel: ObservableObject {
                 department: selectedDepartment,
                 objectTitle: searchQuery,
                 objectDescription: "Not found",
-                objectTypeName: nil
+                objectTypeName: nil,
+                objectLocation: "Not found"
             )
             dbViewModel.addHistoryItem(failedSearchItem)
             errorMessage = "Object with id '\(searchQuery)' wasn't found."
@@ -123,9 +127,9 @@ class MapViewModel: ObservableObject {
         selectedFloor = marker.floor
         markerCoordinate = marker.coordinate
         selectedSearchResult = marker
+        selectedMarker = marker.title
         searchQuery = ""
         searchResults = []
-
         dbViewModel.addHistoryItem(marker, department: selectedDepartment)
     }
 
@@ -150,16 +154,19 @@ class MapViewModel: ObservableObject {
     }
 
     func getSelectedMarker() -> InternalMarkerModel? {
-        guard !selectedMarker.isEmpty, let mapDescription = currentMapDescription else {
+        guard (selectedSearchResult?.title.isEmpty) != nil, let mapDescription = currentMapDescription else {
             return nil
         }
 
         for floorData in mapDescription.floors {
-            if let markerData = floorData.markers.first(where: { $0.en.title == selectedMarker }) {
+            if let markerData = floorData.markers.first(where: {
+                $0.en.title == selectedMarker || $0.ru.title == selectedMarker
+            }) {
                 return InternalMarkerModel(
                     id: markerData.id,
-                    title: markerData.ru.title ?? "",
-                    description: markerData.ru.description,
+                    title: (languageManager.currentLanguage == .en ? markerData.en.title : markerData.ru.title) ?? "",
+                    description: (languageManager.currentLanguage == .en ? markerData.en.description : markerData.ru.description) ?? "",
+                    location: (languageManager.currentLanguage == .en ? markerData.en.location : markerData.ru.location) ?? "",
                     floor: floorData.floor,
                     coordinate: markerData.coordinate,
                     type: markerData.type,
@@ -170,6 +177,10 @@ class MapViewModel: ObservableObject {
 
         print("Warning: getSelectedMarker() could not find a marker with ID '\(selectedMarker)'.")
         return nil
+    }
+
+    func isMarkerInFavorites(markerID: String) -> Bool {
+        return dbViewModel.favoriteItems.contains(where: { $0.objectTitle == markerID })
     }
 
     func addSelectedMarkerToDB(marker: InternalMarkerModel) {
@@ -218,7 +229,10 @@ class MapViewModel: ObservableObject {
         guard let mapDescription = currentMapDescription else { return [] }
         return mapDescription.floors.flatMap { floorData in
             floorData.markers.map { marker in
-                InternalMarkerModel(id: marker.id, title: marker.ru.title ?? "", description: marker.ru.description, floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker)
+                InternalMarkerModel(id: marker.id, title: (languageManager.currentLanguage == .en ? marker.en.title : marker.ru.title) ?? "",
+                                    description: (languageManager.currentLanguage == .en ? marker.en.description : marker.ru.description) ?? "",
+                    location: (languageManager.currentLanguage == .en ? marker.en.location : marker.ru.location) ?? "",
+                    floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker)
             }
         }
     }

@@ -11,6 +11,7 @@ struct InternalMarkerModel: Identifiable, Equatable {
     let id: String
     let title: String
     let description: String?
+    let location: String?
     let floor: Int
     let coordinate: CGPoint
     let type: MarkerType
@@ -25,7 +26,8 @@ extension InternalMarkerModel {
             department: currentDepartment,
             objectTitle: title,
             objectDescription: description,
-            objectTypeName: type.displayName
+            objectTypeName: type.displayName,
+            objectLocation: location
         )
     }
 }

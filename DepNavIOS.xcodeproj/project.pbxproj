@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6A355FC82E2BF89A00B99AF2 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6A355FC72E2BF89A00B99AF2 /* Localizable.xcstrings */; };
 		6A3A255B2E0DDDAA00C3249A /* Maps in Resources */ = {isa = PBXBuildFile; fileRef = 6A3A255A2E0DDDAA00C3249A /* Maps */; };
 		6A59DB522E117F1900174334 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 6A59DB512E117F1900174334 /* SVGView */; };
 		6A7031452E12933300CD9E38 /* BottomSheet in Frameworks */ = {isa = PBXBuildFile; productRef = 6A7031442E12933300CD9E38 /* BottomSheet */; };
@@ -30,6 +31,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6A355FC72E2BF89A00B99AF2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6A3A255A2E0DDDAA00C3249A /* Maps */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Maps; sourceTree = "<group>"; };
 		6AD4F8CA2E0D9BAB00201BF5 /* DepNavIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DepNavIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AD4F8DA2E0D9BAC00201BF5 /* DepNavIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DepNavIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +91,7 @@
 		6AD4F8C12E0D9BAB00201BF5 = {
 			isa = PBXGroup;
 			children = (
+				6A355FC72E2BF89A00B99AF2 /* Localizable.xcstrings */,
 				6A3A255A2E0DDDAA00C3249A /* Maps */,
 				6AD4F8CC2E0D9BAB00201BF5 /* DepNavIOS */,
 				6AD4F8DD2E0D9BAC00201BF5 /* DepNavIOSTests */,
@@ -219,6 +222,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ru,
 			);
 			mainGroup = 6AD4F8C12E0D9BAB00201BF5;
 			minimizedProjectReferenceProxies = 1;
@@ -244,6 +248,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6A3A255B2E0DDDAA00C3249A /* Maps in Resources */,
+				6A355FC82E2BF89A00B99AF2 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +365,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -416,6 +422,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

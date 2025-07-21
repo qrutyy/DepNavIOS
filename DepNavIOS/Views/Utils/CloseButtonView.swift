@@ -19,7 +19,6 @@ struct CloseButtonView: View {
         .frame(width: 24, height: 24)
         .background(Color(.systemGray6)) // .systemGray6 - еще один хороший вариант для фона
         .clipShape(Circle())
-        .accessibilityLabel("Закрыть") // Важно для доступности (VoiceOver)
     }
 }
 

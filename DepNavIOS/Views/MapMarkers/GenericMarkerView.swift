@@ -11,6 +11,7 @@ struct GenericMarkerView: View {
     let type: MarkerType
     let title: String
     @Binding var selectedMarker: String
+    let coords: CGPoint
 
     var body: some View {
         iconForType(type)
@@ -18,7 +19,7 @@ struct GenericMarkerView: View {
             .frame(width: 45, height: 45, alignment: .center)
             .contentShape(Rectangle())
             .onTapGesture {
-                print("updated selectedMarker to: \(title)")
+                print("updated selectedMarker to: \(title), \(coords), \(type)")
                 selectedMarker = title
                 let labRooms = (3241 ... 3251).map { String($0) }
                 if labRooms.contains(title) {
@@ -46,17 +47,22 @@ struct GenericMarkerView: View {
             Image(systemName: "arrow.up.and.down.square")
                 .foregroundColor(.orange)
         case .ELEVATOR:
-            Image(systemName: "elevator")
-                .foregroundColor(.purple)
+            HStack(spacing: 0) {
+                Image(systemName: "person.fill")
+                Image(systemName: "arrow.up.and.down")
+            }.font(.system(size: 20))
         case .WC_MAN:
             Image(systemName: "figure.stand")
                 .foregroundColor(.cyan)
+                .font(.system(size: 20))
         case .WC_WOMAN:
             Image(systemName: "figure.dress.line.vertical.figure")
                 .foregroundColor(.pink)
+                .font(.system(size: 20))
         case .WC:
             Image(systemName: "toilet")
                 .foregroundColor(.gray)
+                .font(.system(size: 20))
         case .OTHER:
             Image(systemName: "mappin.and.ellipse")
                 .foregroundColor(.brown)

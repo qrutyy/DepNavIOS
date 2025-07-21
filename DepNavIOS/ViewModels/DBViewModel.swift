@@ -7,6 +7,9 @@
 
 import Foundation
 
+// This VM stores the local cache of the DB, to provide easier and faster access to the data. (FavoriteItems + HistoryItems)
+// The actual DB data handling occures by calling the DatabaseService.
+
 @MainActor
 // It guarantees that all the @Published properties are updating safely.
 class DatabaseViewModel: ObservableObject {
@@ -66,7 +69,9 @@ class DatabaseViewModel: ObservableObject {
         Task {
             let success = await databaseService.addHistoryItem(item.toMapObjectModel(currentDepartment: department))
             if success {
-                self.historyItems.insert(item.toMapObjectModel(currentDepartment: department), at: 0)
+                let localHistoryItem = item.toMapObjectModel(currentDepartment: department)
+                localHistoryItem.id = Int.random(in: 1 ... 1_000_000)
+                self.historyItems.insert(localHistoryItem, at: 0)
             } else {
                 self.errorMessage = "Не удалось добавить элемент истории"
             }

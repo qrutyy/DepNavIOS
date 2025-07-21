@@ -111,7 +111,8 @@ class DatabaseManager {
             Floor INT,
             ObjectName TEXT,
             ObjectDescription TEXT,
-            ObjectTypeName TEXT);
+            ObjectTypeName TEXT,
+            ObjectLocation TEXT);
         """
         if sqlite3_exec(db, createTableString, nil, nil, nil) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
@@ -127,7 +128,8 @@ class DatabaseManager {
             Floor INT,
             ObjectName TEXT,
             ObjectDescription TEXT,
-            ObjectTypeName TEXT);
+            ObjectTypeName TEXT,
+            ObjectLocation TEXT);
         """
         if sqlite3_exec(db, createTableString, nil, nil, nil) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
@@ -156,7 +158,7 @@ class DatabaseManager {
     func insertHistory(_ history: MapObjectModel) -> Bool {
         var success = false
         dbQueue.sync {
-            let insertSQL = "INSERT INTO History (Department, Floor, ObjectName, ObjectDescription, ObjectTypeName) VALUES (?, ?, ?, ?, ?);"
+            let insertSQL = "INSERT INTO History (Department, Floor, ObjectName, ObjectDescription, ObjectTypeName, ObjectLocation) VALUES (?, ?, ?, ?, ?, ?);"
             var statement: OpaquePointer?
 
             if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
@@ -165,6 +167,7 @@ class DatabaseManager {
                 bind(text: history.objectTitle, to: statement, at: 3)
                 bind(text: history.objectDescription, to: statement, at: 4)
                 bind(text: history.objectTypeName, to: statement, at: 5)
+                bind(text: history.objectLocation, to: statement, at: 6)
 
                 if sqlite3_step(statement) == SQLITE_DONE {
                     success = true
@@ -181,7 +184,7 @@ class DatabaseManager {
     func getAllHistory() -> [MapObjectModel] {
         var histories: [MapObjectModel] = []
         dbQueue.sync {
-            let querySQL = "SELECT Id, Department, Floor, ObjectName, ObjectDescription, ObjectTypeName FROM History;"
+            let querySQL = "SELECT Id, Department, Floor, ObjectName, ObjectDescription, ObjectTypeName, ObjectLocation FROM History;"
             var statement: OpaquePointer?
 
             if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
@@ -192,6 +195,7 @@ class DatabaseManager {
                     let objectTitle = String(cString: sqlite3_column_text(statement, 3))
                     let objectDescription = String(cString: sqlite3_column_text(statement, 4))
                     let objectTypeName = String(cString: sqlite3_column_text(statement, 5))
+                    let location = String(cString: sqlite3_column_text(statement, 6))
 
                     let history = MapObjectModel(
                         id: id,
@@ -199,7 +203,8 @@ class DatabaseManager {
                         department: department,
                         objectTitle: objectTitle,
                         objectDescription: objectDescription,
-                        objectTypeName: objectTypeName
+                        objectTypeName: objectTypeName,
+                        objectLocation: location
                     )
                     histories.append(history)
                 }
@@ -215,7 +220,7 @@ class DatabaseManager {
     func updateHistory(_ history: MapObjectModel) -> Bool {
         var success = false
         dbQueue.sync {
-            let updateSQL = "UPDATE History SET Department = ?, Floor = ?, ObjectName = ?, ObjectDescription = ?, ObjectTypeName = ? WHERE Id = ?;"
+            let updateSQL = "UPDATE History SET Department = ?, Floor = ?, ObjectName = ?, ObjectDescription = ?, ObjectTypeName = ?, ObjectLocation = ? WHERE Id = ?;"
             var statement: OpaquePointer?
 
             if sqlite3_prepare_v2(db, updateSQL, -1, &statement, nil) == SQLITE_OK {
@@ -224,7 +229,8 @@ class DatabaseManager {
                 bind(text: history.objectTitle, to: statement, at: 3)
                 bind(text: history.objectDescription, to: statement, at: 4)
                 bind(text: history.objectTypeName, to: statement, at: 5)
-                bind(int: history.id, to: statement, at: 6)
+                bind(text: history.objectLocation, to: statement, at: 6)
+                bind(int: history.id, to: statement, at: 7)
 
                 if sqlite3_step(statement) == SQLITE_DONE { success = true }
             }
@@ -373,7 +379,7 @@ class DatabaseManager {
             // i thought that even though another (almost the same) table as History - will be a better way to support favorite item than making another flag
             var success = false
             dbQueue.sync {
-                let insertSQL = "INSERT INTO Favorites (Department, Floor, ObjectName, ObjectDescription, ObjectTypeName) VALUES (?, ?, ?, ?, ?);"
+                let insertSQL = "INSERT INTO Favorites (Department, Floor, ObjectName, ObjectDescription, ObjectTypeName, ObjectLocation) VALUES (?, ?, ?, ?, ?, ?);"
                 var statement: OpaquePointer?
 
                 if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
@@ -382,6 +388,7 @@ class DatabaseManager {
                     bind(text: history.objectTitle, to: statement, at: 3)
                     bind(text: history.objectDescription, to: statement, at: 4)
                     bind(text: history.objectTypeName, to: statement, at: 5)
+                    bind(text: history.objectLocation, to: statement, at: 6)
 
                     if sqlite3_step(statement) == SQLITE_DONE {
                         success = true
@@ -402,7 +409,7 @@ class DatabaseManager {
     func getAllFavorites() -> [MapObjectModel] {
         var histories: [MapObjectModel] = []
         dbQueue.sync {
-            let querySQL = "SELECT Id, Department, Floor, ObjectName, ObjectDescription, ObjectTypeName FROM Favorites ORDER BY Id ASC;"
+            let querySQL = "SELECT Id, Department, Floor, ObjectName, ObjectDescription, ObjectTypeName, ObjectLocation FROM Favorites ORDER BY Id ASC;"
             var statement: OpaquePointer?
 
             if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
@@ -413,6 +420,7 @@ class DatabaseManager {
                     let objectTitle = String(cString: sqlite3_column_text(statement, 3))
                     let objectDescription = String(cString: sqlite3_column_text(statement, 4))
                     let objectTypeName = String(cString: sqlite3_column_text(statement, 5))
+                    let objectLocation = String(cString: sqlite3_column_text(statement, 6))
 
                     let history = MapObjectModel(
                         id: id,
@@ -420,7 +428,8 @@ class DatabaseManager {
                         department: department,
                         objectTitle: objectTitle,
                         objectDescription: objectDescription,
-                        objectTypeName: objectTypeName
+                        objectTypeName: objectTypeName,
+                        objectLocation: objectLocation
                     )
                     histories.append(history)
                 }
@@ -436,7 +445,7 @@ class DatabaseManager {
     func updateFavorite(_ history: MapObjectModel) -> Bool {
         var success = false
         dbQueue.sync {
-            let updateSQL = "UPDATE Favourites SET Department = ?, Floor = ?, ObjectName = ?, ObjectDescription = ?, ObjectTypeName = ? WHERE Id = ?;"
+            let updateSQL = "UPDATE Favourites SET Department = ?, Floor = ?, ObjectName = ?, ObjectDescription = ?, ObjectTypeName = ?, ObjectLocation = ? WHERE Id = ?;"
             var statement: OpaquePointer?
 
             if sqlite3_prepare_v2(db, updateSQL, -1, &statement, nil) == SQLITE_OK {
@@ -445,7 +454,8 @@ class DatabaseManager {
                 bind(text: history.objectTitle, to: statement, at: 3)
                 bind(text: history.objectDescription, to: statement, at: 4)
                 bind(text: history.objectTypeName, to: statement, at: 5)
-                bind(int: history.id, to: statement, at: 6)
+                bind(text: history.objectLocation, to: statement, at: 6)
+                bind(int: history.id, to: statement, at: 7)
 
                 if sqlite3_step(statement) == SQLITE_DONE { success = true }
             }

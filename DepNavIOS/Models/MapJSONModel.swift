@@ -1,5 +1,5 @@
 //
-//  ParsedMarkerModel.swift
+//  MapJSONModel.swift
 //  DepNavIOS
 //
 //  Created based on the JSON schema

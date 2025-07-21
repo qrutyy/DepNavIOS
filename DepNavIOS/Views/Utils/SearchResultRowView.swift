@@ -8,30 +8,49 @@
 import SwiftUI
 
 struct SearchResultRowView: View {
-    let icon: String
-    let title: String
-    let subtitle: String
+    let mapObject: InternalMarkerModel
+    let currentDep: String
+
+    private var iconName: String {
+        getMapObjectIconByType(objectTypeName: mapObject.type.displayName)
+    }
+
+    private var formattedDep: String {
+        if currentDep == "spbu-pf" {
+            return LocalizedString("settings_department_pf", comment: "")
+        } else {
+            return LocalizedString("settings_department_mm", comment: "")
+        }
+    }
+    
+    @ViewBuilder
+    private var detailsView: some View {
+        if mapObject.description == "" || mapObject.description == mapObject.title {
+            Text(mapObject.title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+            Text("\(mapObject.type.displayName), \(mapObject.floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+        } else {
+            Text(mapObject.title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+            Text("\(mapObject.description!), \(mapObject.location!), \(String(mapObject.floor)) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+        }
+    }
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: icon)
+            Image(systemName: iconName)
                 .font(.system(size: 20, weight: .medium))
                 .foregroundColor(.blue)
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                if subtitle == "" {
-                    Text(title)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                } else {
-                    Text(title)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                }
+                detailsView
             }
 
             Spacer()
@@ -46,6 +65,6 @@ struct SearchResultRowView: View {
     }
 }
 
-#Preview {
-    SearchResultRowView(icon: "door.french.open", title: "Test", subtitle: "")
-}
+// #Preview {
+//    SearchResudltRowView(icon: "door.french.open", title: "Test", subtitle: "", type: "Class")
+// }
