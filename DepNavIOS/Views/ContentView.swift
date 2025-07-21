@@ -48,8 +48,7 @@ struct ContentView: View {
                     }, availableFloors: mapViewModel.availableFloors
                 )
 
-                MapControlView(isCentered: $mapViewModel.mapControl.isCentered, isZoomedOut: $mapViewModel.mapControl.isZoomedOut)
-
+                MapControlView(isCentered: $mapViewModel.mapControl.isCentered, isZoomedOut: $mapViewModel.mapControl.isZoomedOut, markerCoordinate: $mapViewModel.markerCoordinate)
             } else {
                 Color(.systemGroupedBackground)
                     .edgesIgnoringSafeArea(.all)
