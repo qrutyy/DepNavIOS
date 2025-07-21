@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct SearchResultRowView: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    let type: String
+    let mapObject: InternalMarkerModel
     let currentDep: String
-    let floor: String
+
+    private var iconName: String {
+        getMapObjectIconByType(objectTypeName: mapObject.type.displayName)
+    }
 
     private var formattedDep: String {
         if currentDep == "spbu-pf" {
@@ -22,30 +22,35 @@ struct SearchResultRowView: View {
             return LocalizedString("settings_department_mm", comment: "")
         }
     }
+    
+    @ViewBuilder
+    private var detailsView: some View {
+        if mapObject.description == "" || mapObject.description == mapObject.title {
+            Text(mapObject.title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+            Text("\(mapObject.type.displayName), \(mapObject.floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+        } else {
+            Text(mapObject.title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+            Text("\(mapObject.description!), \(mapObject.location!), \(String(mapObject.floor)) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+        }
+    }
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: icon)
+            Image(systemName: iconName)
                 .font(.system(size: 20, weight: .medium))
                 .foregroundColor(.blue)
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                if subtitle == "" || subtitle == title {
-                    Text(title)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    Text("\(stringFormatType(type)), \(floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                } else {
-                    Text(title)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    Text("\(subtitle), \(floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                }
+                detailsView
             }
 
             Spacer()

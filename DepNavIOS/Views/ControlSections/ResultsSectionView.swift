@@ -36,13 +36,8 @@ struct ResultsSectionView: View {
                 LazyVStack(spacing: 0) {
                     ForEach(mapViewModel.searchResults) { marker in
                         SearchResultRowView(
-                            icon: getMapObjectIconByType(objectTypeName: marker.type.displayName),
-                            title: marker.title,
-                            subtitle: marker.description
-                                ?? "",
-                            type: marker.type.displayName,
-                            currentDep: mapViewModel.selectedDepartment,
-                            floor: String(marker.floor)
+                            mapObject: marker,
+                            currentDep: mapViewModel.selectedDepartment
                         )
                         .contentShape(Rectangle())
                         .onTapGesture {

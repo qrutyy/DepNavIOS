@@ -14,10 +14,11 @@ class MapObjectModel: Codable, Identifiable {
     var objectTitle: String = ""
     var objectDescription: String = ""
     var objectTypeName: String = ""
+    var objectLocation: String = ""
 
     init() {}
 
-    init(id: Int?, floor: Int?, department: String? = nil, objectTitle: String?, objectDescription: String?, objectTypeName: String?) {
+    init(id: Int?, floor: Int?, department: String? = nil, objectTitle: String?, objectDescription: String?, objectTypeName: String?, objectLocation: String?) {
         if id != nil {
             self.id = id!
         }
@@ -26,6 +27,7 @@ class MapObjectModel: Codable, Identifiable {
         self.objectTitle = objectTitle ?? ""
         self.objectDescription = objectDescription ?? ""
         self.objectTypeName = objectTypeName ?? ""
+        self.objectLocation = objectLocation ?? ""
     }
 }
 
@@ -54,6 +56,7 @@ extension MapObjectModel {
             id: uniqueID,
             title: objectTitle,
             description: objectDescription,
+            location: objectLocation,
             floor: floor,
             coordinate: originalMarker.coordinate,
             type: originalMarker.type,

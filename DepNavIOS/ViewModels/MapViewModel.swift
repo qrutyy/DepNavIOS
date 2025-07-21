@@ -115,7 +115,8 @@ class MapViewModel: ObservableObject {
                 department: selectedDepartment,
                 objectTitle: searchQuery,
                 objectDescription: "Not found",
-                objectTypeName: nil
+                objectTypeName: nil,
+                objectLocation: "Not found"
             )
             dbViewModel.addHistoryItem(failedSearchItem)
             errorMessage = "Object with id '\(searchQuery)' wasn't found."
@@ -165,6 +166,7 @@ class MapViewModel: ObservableObject {
                     id: markerData.id,
                     title: (languageManager.currentLanguage == .en ? markerData.en.title : markerData.ru.title) ?? "",
                     description: (languageManager.currentLanguage == .en ? markerData.en.description : markerData.ru.description) ?? "",
+                    location: (languageManager.currentLanguage == .en ? markerData.en.location : markerData.ru.location) ?? "",
                     floor: floorData.floor,
                     coordinate: markerData.coordinate,
                     type: markerData.type,
@@ -227,7 +229,10 @@ class MapViewModel: ObservableObject {
         guard let mapDescription = currentMapDescription else { return [] }
         return mapDescription.floors.flatMap { floorData in
             floorData.markers.map { marker in
-                InternalMarkerModel(id: marker.id, title: (languageManager.currentLanguage == .en ? marker.en.title : marker.ru.title) ?? "", description: (languageManager.currentLanguage == .en ? marker.en.title : marker.ru.title) ?? "", floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker)
+                InternalMarkerModel(id: marker.id, title: (languageManager.currentLanguage == .en ? marker.en.title : marker.ru.title) ?? "",
+                                    description: (languageManager.currentLanguage == .en ? marker.en.description : marker.ru.description) ?? "",
+                    location: (languageManager.currentLanguage == .en ? marker.en.location : marker.ru.location) ?? "",
+                    floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker)
             }
         }
     }

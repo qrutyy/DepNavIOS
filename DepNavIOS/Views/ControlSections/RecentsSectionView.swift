@@ -41,12 +41,8 @@ struct RecentsSectionView: View {
                     LazyVStack(spacing: 0) {
                         ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
                             SearchResultRowView(
-                                icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName),
-                                title: mapObject.objectTitle,
-                                subtitle: mapObject.objectDescription,
-                                type: mapObject.objectTypeName,
-                                currentDep: mapViewModel.selectedDepartment,
-                                floor: String(mapObject.floor)
+                                mapObject: mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!,
+                                currentDep: mapViewModel.selectedDepartment
                             )
                             .contentShape(Rectangle())
                             .onTapGesture {
