@@ -13,7 +13,7 @@
       "markers": [
         {
           "type": "Elevator",
-          "x": 7656,
+          "x": 7685,
           "y": 3378,
           "ru": {
             "title": null,
@@ -28,23 +28,8 @@
         },
         {
           "type": "Elevator",
-          "x": 7714,
-          "y": 3378,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 7704,
-          "y": 2567,
+          "x": 7720,
+          "y": 2572,
           "ru": {
             "title": null,
             "location": null,
@@ -88,22 +73,7 @@
         },
         {
           "type": "Elevator",
-          "x": 3723,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 3668,
+          "x": 3695,
           "y": 785,
           "ru": {
             "title": null,
@@ -133,22 +103,7 @@
         },
         {
           "type": "Elevator",
-          "x": 2962,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 2906,
+          "x": 2928,
           "y": 785,
           "ru": {
             "title": null,
@@ -179,37 +134,7 @@
         {
           "type": "Elevator",
           "x": 740,
-          "y": 2391,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 740,
           "y": 2514,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 740,
-          "y": 3703,
           "ru": {
             "title": null,
             "location": null,
@@ -614,7 +539,7 @@
         {
           "type": "Other",
           "x": 7673,
-          "y": 3248,
+          "y": 3210,
           "ru": {
             "title": "Банкомат",
             "location": null,
@@ -644,7 +569,7 @@
         {
           "type": "Other",
           "x": 7911,
-          "y": 2687,
+          "y": 2730,
           "ru": {
             "title": "Вендинговые автоматы",
             "location": "У студ. входа",
@@ -703,7 +628,7 @@
         },
         {
           "type": "Other",
-          "x": 6060,
+          "x": 6080,
           "y": 2848,
           "ru": {
             "title": "Питьевой фонтанчик",
@@ -794,7 +719,7 @@
         {
           "type": "Other",
           "x": 7143,
-          "y": 2839,
+          "y": 2825,
           "ru": {
             "title": "Гардероб",
             "location": null,
@@ -1378,7 +1303,7 @@
         },
         {
           "type": "WC woman",
-          "x": 3776,
+          "x": 3790,
           "y": 785,
           "ru": {
             "title": null,
@@ -1408,7 +1333,7 @@
         },
         {
           "type": "Other",
-          "x": 3090,
+          "x": 3100,
           "y": 785,
           "ru": {
             "title": "Вендинговые автоматы",
@@ -2268,7 +2193,7 @@
       "markers": [
         {
           "type": "Elevator",
-          "x": 7656,
+          "x": 7685,
           "y": 3378,
           "ru": {
             "title": null,
@@ -2283,38 +2208,8 @@
         },
         {
           "type": "Elevator",
-          "x": 7714,
-          "y": 3378,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 7704,
+          "x": 7724,
           "y": 2567,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 7279,
-          "y": 782,
           "ru": {
             "title": null,
             "location": null,
@@ -2343,22 +2238,7 @@
         },
         {
           "type": "Elevator",
-          "x": 3723,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 3668,
+          "x": 3690,
           "y": 785,
           "ru": {
             "title": null,
@@ -2388,22 +2268,7 @@
         },
         {
           "type": "Elevator",
-          "x": 2962,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 2906,
+          "x": 2928,
           "y": 785,
           "ru": {
             "title": null,
@@ -2420,21 +2285,6 @@
           "type": "Elevator",
           "x": 740,
           "y": 1322,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 740,
-          "y": 2391,
           "ru": {
             "title": null,
             "location": null,
@@ -5498,7 +5348,7 @@
       "markers": [
         {
           "type": "Elevator",
-          "x": 7656,
+          "x": 7685,
           "y": 3378,
           "ru": {
             "title": null,
@@ -5513,22 +5363,7 @@
         },
         {
           "type": "Elevator",
-          "x": 7714,
-          "y": 3378,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 7704,
+          "x": 7724,
           "y": 2567,
           "ru": {
             "title": null,
@@ -5573,7 +5408,7 @@
         },
         {
           "type": "Elevator",
-          "x": 3723,
+          "x": 3690,
           "y": 785,
           "ru": {
             "title": null,
@@ -5588,37 +5423,7 @@
         },
         {
           "type": "Elevator",
-          "x": 3668,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 2962,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 2906,
+          "x": 2928,
           "y": 785,
           "ru": {
             "title": null,
@@ -5635,21 +5440,6 @@
           "type": "Elevator",
           "x": 740,
           "y": 1322,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 740,
-          "y": 2391,
           "ru": {
             "title": null,
             "location": null,
@@ -8518,7 +8308,7 @@
       "markers": [
         {
           "type": "Elevator",
-          "x": 7656,
+          "x": 7685,
           "y": 3378,
           "ru": {
             "title": null,
@@ -8533,22 +8323,7 @@
         },
         {
           "type": "Elevator",
-          "x": 7714,
-          "y": 3378,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 7704,
+          "x": 7724,
           "y": 2567,
           "ru": {
             "title": null,
@@ -8593,7 +8368,7 @@
         },
         {
           "type": "Elevator",
-          "x": 3723,
+          "x": 3690,
           "y": 785,
           "ru": {
             "title": null,
@@ -8608,37 +8383,7 @@
         },
         {
           "type": "Elevator",
-          "x": 3668,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 2962,
-          "y": 785,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 2906,
+          "x": 2928,
           "y": 785,
           "ru": {
             "title": null,
@@ -8670,21 +8415,6 @@
           "type": "Elevator",
           "x": 740,
           "y": 2391,
-          "ru": {
-            "title": null,
-            "location": null,
-            "description": null
-          },
-          "en": {
-            "title": null,
-            "location": null,
-            "description": null
-          }
-        },
-        {
-          "type": "Elevator",
-          "x": 740,
-          "y": 2514,
           "ru": {
             "title": null,
             "location": null,

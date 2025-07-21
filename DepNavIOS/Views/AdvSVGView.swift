@@ -93,7 +93,7 @@ struct AdvSVGView: View {
 
                     // Note: Simplified the marker view for this example
                     let displayTitle = marker.ru.title ?? marker.en.title ?? ""
-                    GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $selectedMarker)
+                    GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $selectedMarker, coords: marker.coordinate)
                         .offset(y: -21)
                         .scaleEffect(1.0 / 7.0)
                         .position(markerPosition)
