@@ -41,13 +41,13 @@ enum MapDataError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case let .fileNotFound(department):
-            return "File fot the \(department) wasn't found"
+            "File fot the \(department) wasn't found"
         case let .decodingError(error):
-            return "Decoding error at loading map data: \(error.localizedDescription)"
+            "Decoding error at loading map data: \(error.localizedDescription)"
         case let .departmentNotFound(department):
-            return "\(department) map wasn't found"
+            "\(department) map wasn't found"
         case let .markerNotFound(query):
-            return "Marker with id '\(query)' wasn't found"
+            "Marker with id '\(query)' wasn't found"
         }
     }
 }

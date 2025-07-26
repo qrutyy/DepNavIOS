@@ -53,7 +53,7 @@ struct FavoriteSectionView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         // Telling ViewModel that user has selected the marker
-                                        mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!)
+                                        mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))!)
                                     }
                                     .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
 

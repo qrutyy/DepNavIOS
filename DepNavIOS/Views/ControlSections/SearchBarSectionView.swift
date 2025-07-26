@@ -19,7 +19,7 @@ struct SearchBarSectionView: View {
             TextField(LocalizedString("search_section_textfield", comment: "Textfield placeholder"), text: $mapViewModel.searchQuery, onEditingChanged: { isEditing in
                 withAnimation(.spring()) {
                     if isEditing {
-                        self.detent = .large
+                        detent = .large
                     }
                 }
             })
@@ -28,7 +28,7 @@ struct SearchBarSectionView: View {
                 mapViewModel.commitSearch()
                 if mapViewModel.searchResults != [] {
                     withAnimation(.spring()) {
-                        self.detent = .height(50)
+                        detent = .height(50)
                     }
                 }
             }

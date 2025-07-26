@@ -15,13 +15,13 @@ func getFormattedTitle(objectTitle: String?, objectTypeName: String?) -> String 
 
 func getMapObjectIconByType(objectTypeName: String?) -> String {
     switch objectTypeName {
-    case "Entrance": return "door.french.open"
-    case "Room": return "door.left.hand.open"
-    case "Stairs up": return "arrow.up.square"
-    case "Stairs down": return "arrow.down.square"
-    case "Stairs both": return "arrow.up.arrow.down.square"
-    case "Elevator": return "arrow.up.and.down.square"
-    case "WC man", "WC woman", "WC": return "toilet"
-    default: return "mappin.circle"
+    case "Entrance": "door.french.open"
+    case "Room": "door.left.hand.open"
+    case "Stairs up": "arrow.up.square"
+    case "Stairs down": "arrow.down.square"
+    case "Stairs both": "arrow.up.arrow.down.square"
+    case "Elevator": "arrow.up.and.down.square"
+    case "WC man", "WC woman", "WC": "toilet"
+    default: "mappin.circle"
     }
 }

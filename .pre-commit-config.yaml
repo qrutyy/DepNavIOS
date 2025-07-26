@@ -5,7 +5,7 @@ repos:
       - id: end-of-file-fixer
         name: Fix End of Files
         files: \.(sh|swift|ya?ml)$
-  
+
       - id: trailing-whitespace
         name: Trim Trailing Whitespace
         files: \.(sh|swift|ya?ml)$
@@ -18,12 +18,22 @@ repos:
     hooks:
       - id: swiftformat
         name: Swift Formatter
-        entry: swiftformat .
-        language: swift
+        entry: swiftformat . --swiftversion 6.0.3
+        language: system
         always_run: true
-      
+        files: \.(swift)$
+        pass_filenames: false
+        require_serial: true
+        fail_fast: true
+        stages: [pre-commit]
+
       - id: swiftlint
         name: Swift Linter
-        entry: swiftlint --fix
-        language: swift
+        entry: swiftlint
+        language: system
         always_run: true
+        files: \.(swift)$
+        pass_filenames: false
+        require_serial: true
+        fail_fast: true
+        stages: [pre-commit]

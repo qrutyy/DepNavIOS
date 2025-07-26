@@ -79,12 +79,12 @@ enum MarkerType: String, Codable, CaseIterable, Hashable {
     // you can add a computed property:
     var displayName: String {
         switch self {
-        case .ENTRANCE: return "Entrance"
-        case .ROOM: return "Room"
-        case .STAIRS_UP: return "Stairs Up"
-        case .STAIRS_DOWN: return "Stairs Down"
+        case .ENTRANCE: "Entrance"
+        case .ROOM: "Room"
+        case .STAIRS_UP: "Stairs Up"
+        case .STAIRS_DOWN: "Stairs Down"
         // ... and so on for all cases
-        default: return "Object"
+        default: "Object"
         }
     }
 }

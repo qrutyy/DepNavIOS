@@ -93,7 +93,7 @@ class DatabaseService: DatabaseServiceProtocol {
     }
 
     func checkTablesExist() async -> Bool {
-        return await perform {
+        await perform {
             self.databaseManager.checkTablesExist()
         }
     }
