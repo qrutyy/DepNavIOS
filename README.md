@@ -35,3 +35,11 @@ Will be announced soon if we get this baaaaags.
 * Telegram (Preferred): [@mequefenrt](https://t.me/mequefenrt)
 
 Questions about DepNavIOS in general? Make sure to read the [FAQ (WIP)](https://github.com/qrutyy/DepNavIOS/wiki)
+
+## License
+
+This code is currently not licensed for reuse.
+
+It is shared for demonstration or evaluation purposes only. Commercial use, redistribution, or modification is not permitted.
+
+A full open-source license (e.g., MIT or Apache 2.0) may be added in the future.
