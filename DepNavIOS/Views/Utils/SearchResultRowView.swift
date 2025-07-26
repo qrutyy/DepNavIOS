@@ -17,19 +17,19 @@ struct SearchResultRowView: View {
 
     private var formattedDep: String {
         if currentDep == "spbu-pf" {
-            return LocalizedString("settings_department_pf", comment: "")
+            LocalizedString("settings_department_pf", comment: "")
         } else {
-            return LocalizedString("settings_department_mm", comment: "")
+            LocalizedString("settings_department_mm", comment: "")
         }
     }
-    
+
     @ViewBuilder
     private var detailsView: some View {
         if mapObject.description == "" || mapObject.description == mapObject.title {
             Text(mapObject.title)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.primary)
-            Text("\(mapObject.type.displayName), \(mapObject.floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
+            Text("\(stringFormatType(mapObject.type.displayName)), \(mapObject.floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
         } else {

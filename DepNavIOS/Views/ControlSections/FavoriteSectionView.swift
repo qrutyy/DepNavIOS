@@ -47,13 +47,13 @@ struct FavoriteSectionView: View {
                     }
                 } else {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), alignment: .leading, spacing: 16) {
-                        ForEach(mapViewModel.dbViewModel.favoriteItems) { mapObject in
+                        ForEach(mapViewModel.dbViewModel.favoriteItems, id: \.id) { mapObject in
                             ZStack {
                                 FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, type: mapObject.objectTypeName, iconColor: .blue)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         // Telling ViewModel that user has selected the marker
-                                        mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.currentMapDescription)!)
+                                        mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))!)
                                     }
                                     .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
 

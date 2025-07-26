@@ -25,8 +25,8 @@ struct AdvSVGView: View {
         GeometryReader { geometry in
             mapContentView(for: geometry)
                 .frame(width: geometry.size.width, height: geometry.size.height)
-                .scaleEffect(gestureScale * self.scale)
-                .offset(self.offset)
+                .scaleEffect(gestureScale * scale)
+                .offset(offset)
                 .clipped()
                 .contentShape(Rectangle())
                 .gesture(combinedGesture(for: geometry)) // Gestures are now combined in a helper
@@ -40,8 +40,8 @@ struct AdvSVGView: View {
                 .onChange(of: mapViewModel.mapControl.isCentered) { newValue in
                     if newValue {
                         withAnimation(.spring()) {
-                            self.offset = .zero
-                            self.startOffset = .zero
+                            offset = .zero
+                            startOffset = .zero
                         }
                         mapViewModel.mapControl.isCentered = false
                     }
@@ -50,13 +50,13 @@ struct AdvSVGView: View {
                     if newValue {
                         withAnimation(.spring()) {
                             let newOffset = CGSize(
-                                width: self.offset.width / self.scale,
-                                height: self.offset.height / self.scale
+                                width: offset.width / scale,
+                                height: offset.height / scale
                             )
-                            self.offset = newOffset
-                            self.startOffset = newOffset
-                            self.scale = 1.0
-                            self.startScale = 1.0
+                            offset = newOffset
+                            startOffset = newOffset
+                            scale = 1.0
+                            startScale = 1.0
                         }
                         mapViewModel.mapControl.isZoomedOut = false
                     }
@@ -69,44 +69,46 @@ struct AdvSVGView: View {
     /// Creates the main map content including the SVG and all markers.
     @ViewBuilder
     private func mapContentView(for geometry: GeometryProxy) -> some View {
-        let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription!.floorWidth, height: mapViewModel.currentMapDescription!.floorHeight)
+        if let description = mapViewModel.currentMapDescription {
+            let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription!.floorWidth, height: mapViewModel.currentMapDescription!.floorHeight)
 
-        ZStack {
-            // 1. The base SVG map
-            CachedSVGView(contentsOf: url)
-                .aspectRatio(svgNaturalSize, contentMode: .fit)
+            ZStack {
+                // 1. The base SVG map
+                CachedSVGView(contentsOf: url)
+                    .aspectRatio(svgNaturalSize, contentMode: .fit)
 
-            // 2. The tappable markers for the current floor
-            if let currentFloorData = mapViewModel.currentMapDescription!.floors.first(where: { $0.floor == mapViewModel.selectedFloor }) {
-                ForEach(currentFloorData.markers, id: \.self) { marker in
+                // 2. The tappable markers for the current floor
+                if let currentFloorData = mapViewModel.currentMapDescription!.floors.first(where: { $0.floor == mapViewModel.selectedFloor }) {
+                    ForEach(currentFloorData.markers, id: \.self) { marker in
+                        let markerPosition = calculateMarkerPosition(
+                            svgCoordinate: marker.coordinate,
+                            svgNaturalSize: svgNaturalSize,
+                            containerSize: geometry.size
+                        )
+
+                        // Note: Simplified the marker view for this example
+                        let displayTitle = marker.ru.title ?? marker.en.title ?? ""
+                        GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $mapViewModel.selectedMarker, coords: marker.coordinate)
+                            .offset(y: -21)
+                            .scaleEffect(1.0 / 7.0)
+                            .position(markerPosition)
+                            .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
+                    }
+                }
+
+                // 3. The pin for a selected search result
+                if let coord = mapViewModel.markerCoordinate {
                     let markerPosition = calculateMarkerPosition(
-                        svgCoordinate: marker.coordinate,
+                        svgCoordinate: coord,
                         svgNaturalSize: svgNaturalSize,
                         containerSize: geometry.size
                     )
-
-                    // Note: Simplified the marker view for this example
-                    let displayTitle = marker.ru.title ?? marker.en.title ?? ""
-                    GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $mapViewModel.selectedMarker, coords: marker.coordinate)
+                    PinMarkerView(color: .red)
                         .offset(y: -21)
-                        .scaleEffect(1.0 / 7.0)
-                        .position(markerPosition)
+                        .scaleEffect(1.0 / scale) // Pin should also scale down
+                        .position(markerPosition) // Simplified this call for clarity
                         .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
                 }
-            }
-
-            // 3. The pin for a selected search result
-            if let coord = mapViewModel.markerCoordinate {
-                let markerPosition = calculateMarkerPosition(
-                    svgCoordinate: coord,
-                    svgNaturalSize: svgNaturalSize,
-                    containerSize: geometry.size
-                )
-                PinMarkerView(color: .red)
-                    .offset(y: -21)
-                    .scaleEffect(1.0 / self.scale) // Pin should also scale down
-                    .position(markerPosition) // Simplified this call for clarity
-                    .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
             }
         }
     }
@@ -120,11 +122,11 @@ struct AdvSVGView: View {
                     width: startOffset.width + value.translation.width,
                     height: startOffset.height + value.translation.height
                 )
-                self.offset = clampOffset(newOffset, for: self.scale, in: geometry.size)
+                offset = clampOffset(newOffset, for: scale, in: geometry.size)
             }
 
             .onEnded { _ in
-                self.startOffset = self.offset
+                startOffset = offset
             }
 
         let magnifyGesture = MagnificationGesture()
@@ -133,10 +135,10 @@ struct AdvSVGView: View {
             }
             .onEnded { value in
                 // Исправляем логику: используем latestGestureScale вместо прямого умножения
-                let newScale = max(1.0, self.scale * value)
-                self.scale = newScale
-                self.startScale = newScale
-                self.startOffset = self.offset
+                let newScale = max(1.0, scale * value)
+                scale = newScale
+                startScale = newScale
+                startOffset = offset
             }
 
         return dragGesture.simultaneously(with: magnifyGesture)
@@ -146,18 +148,18 @@ struct AdvSVGView: View {
 
     private func handleDoubleTap(in size: CGSize) {
         withAnimation(.spring()) {
-            if self.scale > 4.0 {
-                self.scale = 1.0
-                self.offset = .zero
+            if scale > 4.0 {
+                scale = 1.0
+                offset = .zero
             } else {
-                let newScale = self.scale * 2.0
+                let newScale = scale * 2.0
                 // This offset logic might need refinement to zoom into the tap location
-                let newOffset = CGSize(width: self.offset.width * 2.0, height: self.offset.height * 2.0)
-                self.scale = newScale
-                self.offset = clampOffset(newOffset, for: newScale, in: size)
+                let newOffset = CGSize(width: offset.width * 2.0, height: offset.height * 2.0)
+                scale = newScale
+                offset = clampOffset(newOffset, for: newScale, in: size)
             }
-            self.startScale = self.scale
-            self.startOffset = self.offset
+            startScale = scale
+            startOffset = offset
         }
     }
 
@@ -181,18 +183,18 @@ struct AdvSVGView: View {
         targetOffset = clampOffset(targetOffset, for: targetScale, in: containerSize)
 
         withAnimation(.spring(response: 1, dampingFraction: 0.8)) {
-            self.scale = targetScale
-            self.offset = targetOffset
+            scale = targetScale
+            offset = targetOffset
 
-            self.startScale = self.scale
-            self.startOffset = self.offset
+            startScale = scale
+            startOffset = offset
         }
     }
 
     private func movePinMarkerUpper(_ position: CGPoint) -> CGPoint {
         // either way it also can be moved backwards in terms of layers
         // (mb this one will affect as better UX)
-        return CGPoint(x: position.x, y: position.y - 4)
+        CGPoint(x: position.x, y: position.y - 4)
     }
 
     private func clampOffset(_ offset: CGSize, for scale: CGFloat, in containerSize: CGSize) -> CGSize {

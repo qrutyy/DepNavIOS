@@ -138,7 +138,7 @@ class DatabaseManager {
     }
 
     private func bind(text: String?, to statement: OpaquePointer?, at index: Int32) {
-        guard let text = text else {
+        guard let text else {
             sqlite3_bind_null(statement, index)
             return
         }
@@ -146,7 +146,7 @@ class DatabaseManager {
     }
 
     private func bind(int: Int?, to statement: OpaquePointer?, at index: Int32) {
-        guard let int = int else {
+        guard let int else {
             sqlite3_bind_null(statement, index)
             return
         }
@@ -283,17 +283,20 @@ class DatabaseManager {
 
                 let encoder = JSONEncoder()
                 if let departmentsData = try? encoder.encode(handler.availableDepartments),
-                   let departmentsJSON = String(data: departmentsData, encoding: .utf8) {
+                   let departmentsJSON = String(data: departmentsData, encoding: .utf8)
+                {
                     bind(text: departmentsJSON, to: statement, at: 3)
                 }
 
                 if let historyData = try? encoder.encode(handler.historyList),
-                   let historyJSON = String(data: historyData, encoding: .utf8) {
+                   let historyJSON = String(data: historyData, encoding: .utf8)
+                {
                     bind(text: historyJSON, to: statement, at: 4)
                 }
 
                 if let favoritesData = try? encoder.encode(handler.favoritesList),
-                   let favoritesJSON = String(data: favoritesData, encoding: .utf8) {
+                   let favoritesJSON = String(data: favoritesData, encoding: .utf8)
+                {
                     bind(text: favoritesJSON, to: statement, at: 4)
                 }
 

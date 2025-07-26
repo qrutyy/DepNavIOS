@@ -28,7 +28,7 @@ struct MarkerSectionView: View {
             .padding(.top, 4)
             .padding(.bottom, 8)
 
-            if marker.description != nil && marker.description != "" {
+            if marker.description != nil, marker.description != "" {
                 Text(marker.description!)
                     .font(.subheadline)
                     .padding(.horizontal, 16)

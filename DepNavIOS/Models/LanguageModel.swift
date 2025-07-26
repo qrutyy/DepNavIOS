@@ -15,15 +15,15 @@ enum Language: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var displayName: String {
         switch self {
-        case .ru: return "RU"
-        case .en: return "EN"
+        case .ru: "RU"
+        case .en: "EN"
         }
     }
 
     var localeIdentifier: String {
         switch self {
-        case .ru: return "ru"
-        case .en: return "en"
+        case .ru: "ru"
+        case .en: "en"
         }
     }
 }
@@ -71,5 +71,5 @@ extension Bundle {
 }
 
 func LocalizedString(_ key: String, comment _: String = "") -> String {
-    return Bundle.localized.localizedString(forKey: key, value: nil, table: nil)
+    Bundle.localized.localizedString(forKey: key, value: nil, table: nil)
 }

@@ -17,8 +17,9 @@ struct ContentView: View {
     private let searchSheetDetents: Set<PresentationDetent> = [
         .height(50), // only searchbar visible
         .height(200), // marker section
+        .height(300), // for settings
         .medium, // medium
-        .large // full screen
+        .large, // full screen
     ]
     @State private var selectedDetent: PresentationDetent = .height(50)
 
@@ -55,6 +56,7 @@ struct ContentView: View {
                     .onAppear {
                         if !showWelcomeScreen {
                             Task {
+                                await mapViewModel.preloadAllDepartments()
                                 await mapViewModel.loadMapData()
                             }
                         }

@@ -47,7 +47,7 @@ public struct CachedSVGView: View {
     }
 
     public func getNode(byId id: String) -> SVGNode? {
-        return svg?.getNode(byId: id)
+        svg?.getNode(byId: id)
     }
 
     public var body: some View {

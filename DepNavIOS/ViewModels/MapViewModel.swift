@@ -41,6 +41,16 @@ class MapViewModel: ObservableObject {
 
     init(mapDataService: MapDataService = MapDataService()) {
         self.mapDataService = mapDataService
+
+        $selectedDepartment
+            .dropFirst() // чтобы не сработало на дефолтном значении
+            .sink { [weak self] _ in
+                Task {
+                    await self?.loadMapData()
+                }
+            }
+            .store(in: &cancellables)
+
         dbViewModel.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
@@ -67,6 +77,20 @@ class MapViewModel: ObservableObject {
         }
 
         isLoading = false
+    }
+
+    func preloadAllDepartments() async {
+        let departments = ["spbu-mm", "spbu-pf"]
+        for dep in departments {
+            if loadedMapDescriptions[dep] == nil {
+                do {
+                    let mapDescription = try await mapDataService.loadMapData(for: dep)
+                    loadedMapDescriptions[dep] = mapDescription
+                } catch {
+                    print("Failed to load map for \(dep): \(error)")
+                }
+            }
+        }
     }
 
     func changeFloor(_ floor: Int) {
@@ -128,6 +152,7 @@ class MapViewModel: ObservableObject {
         markerCoordinate = marker.coordinate
         selectedSearchResult = marker
         selectedMarker = marker.title
+        selectedDepartment = marker.department
         searchQuery = ""
         searchResults = []
         dbViewModel.addHistoryItem(marker, department: selectedDepartment)
@@ -170,7 +195,7 @@ class MapViewModel: ObservableObject {
                     floor: floorData.floor,
                     coordinate: markerData.coordinate,
                     type: markerData.type,
-                    marker: markerData
+                    marker: markerData, department: selectedDepartment
                 )
             }
         }
@@ -180,7 +205,7 @@ class MapViewModel: ObservableObject {
     }
 
     func isMarkerInFavorites(markerID: String) -> Bool {
-        return dbViewModel.favoriteItems.contains(where: { $0.objectTitle == markerID })
+        dbViewModel.favoriteItems.contains(where: { $0.objectTitle == markerID })
     }
 
     func addSelectedMarkerToDB(marker: InternalMarkerModel) {
@@ -189,10 +214,13 @@ class MapViewModel: ObservableObject {
     }
 
     func selectHistoryItem(_ item: MapObjectModel) {
-        let fullMarker = item.toInternalMarkerModel(mapDescription: loadedMapDescriptions[selectedDepartment])
+        let fullMarker = item.toInternalMarkerModel(mapDescription: getMapDescriptionByDepartment(department: item.department))
         if fullMarker == nil {
             print("MapViewModel: Internal error...")
         } else {
+            if (item.department != selectedDepartment) {
+                selectedDepartment = item.department
+            }
             selectSearchResult(fullMarker!)
         }
     }
@@ -202,7 +230,7 @@ class MapViewModel: ObservableObject {
             return []
         }
 
-        return description.floors.map { $0.floor }.sorted()
+        return description.floors.map(\.floor).sorted()
     }
 
     func removeFavoriteItem(_ item: MapObjectModel) {
@@ -213,6 +241,10 @@ class MapViewModel: ObservableObject {
         loadedMapDescriptions[selectedDepartment]
     }
 
+    func getMapDescriptionByDepartment(department: String) -> MapDescription? {
+        loadedMapDescriptions[department] ?? nil
+    }
+
     func clearMarker() {
         markerCoordinate = nil
         searchQuery = ""
@@ -221,8 +253,7 @@ class MapViewModel: ObservableObject {
 
     func clearSelectedMarker() {
         selectedMarker = ""
-        // Опционально: если вы хотите также убрать пин с карты
-        // self.markerCoordinate = nil
+        markerCoordinate = nil
     }
 
     private func getAllMarkersForCurrentDepartment() -> [InternalMarkerModel] {
@@ -231,8 +262,8 @@ class MapViewModel: ObservableObject {
             floorData.markers.map { marker in
                 InternalMarkerModel(id: marker.id, title: (languageManager.currentLanguage == .en ? marker.en.title : marker.ru.title) ?? "",
                                     description: (languageManager.currentLanguage == .en ? marker.en.description : marker.ru.description) ?? "",
-                    location: (languageManager.currentLanguage == .en ? marker.en.location : marker.ru.location) ?? "",
-                    floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker)
+                                    location: (languageManager.currentLanguage == .en ? marker.en.location : marker.ru.location) ?? "",
+                                    floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker, department: selectedDepartment)
             }
         }
     }

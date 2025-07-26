@@ -75,7 +75,7 @@ struct DepartmentSelectionScreen: View {
             .shadow(radius: 10)
         }
         .onAppear {
-            self.selectedMapType = "pre-defined"
+            selectedMapType = "pre-defined"
         }
     }
 }
@@ -85,7 +85,7 @@ struct BlurView: UIViewRepresentable {
     let style: UIBlurEffect.Style
 
     func makeUIView(context _: Context) -> UIVisualEffectView {
-        return UIVisualEffectView(effect: UIBlurEffect(style: style))
+        UIVisualEffectView(effect: UIBlurEffect(style: style))
     }
 
     func updateUIView(_ uiView: UIVisualEffectView, context _: Context) {

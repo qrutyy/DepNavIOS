@@ -16,14 +16,15 @@ struct InternalMarkerModel: Identifiable, Equatable {
     let coordinate: CGPoint
     let type: MarkerType
     let marker: Marker
+    let department: String
 }
 
 extension InternalMarkerModel {
-    func toMapObjectModel(currentDepartment: String) -> MapObjectModel {
-        return MapObjectModel(
+    func toMapObjectModel(currentDepartment _: String) -> MapObjectModel {
+        MapObjectModel(
             id: nil,
             floor: floor,
-            department: currentDepartment,
+            department: department,
             objectTitle: title,
             objectDescription: description,
             objectTypeName: type.displayName,

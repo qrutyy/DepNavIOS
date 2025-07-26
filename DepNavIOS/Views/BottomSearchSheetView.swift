@@ -40,7 +40,7 @@ struct BottomSearchSheetView: View {
                 .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
                     if newSelectedMarker != "" {
                         withAnimation(.spring()) {
-                            self.detent = .height(200) // или .large, как вам нужно
+                            detent = .height(200) // или .large, как вам нужно
                         }
                     }
                 }
@@ -54,7 +54,12 @@ struct BottomSearchSheetView: View {
                 VStack(spacing: 0) {
                     switch currentSheetContent {
                     case .settings:
-                        SettingsSectionView(mapViewModel: mapViewModel, currentSheetContent: $currentSheetContent)
+                            SettingsSectionView(mapViewModel: mapViewModel, currentSheetContent: $currentSheetContent)
+                                .onAppear {
+                                        withAnimation {
+                                            detent = .medium
+                                        }
+                                    }
 
                     case .main:
                         if !mapViewModel.searchQuery.isEmpty {

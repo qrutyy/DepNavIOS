@@ -63,7 +63,7 @@ struct SettingsSectionView: View {
     private var departmentSection: some View {
         let departments: [(id: String, display: String)] = [
             ("spbu-mm", LocalizedString("settings_department_mm", comment: "MM department")),
-            ("spbu-pf", LocalizedString("settings_department_pf", comment: "PF department"))
+            ("spbu-pf", LocalizedString("settings_department_pf", comment: "PF department")),
         ]
 
         return HStack(spacing: 12) {
