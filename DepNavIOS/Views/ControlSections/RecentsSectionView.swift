@@ -40,21 +40,25 @@ struct RecentsSectionView: View {
                 } else {
                     LazyVStack(spacing: 0) {
                         ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
-                            SearchResultRowView(
-                                mapObject: mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))!,
-                                currentDep: mapViewModel.selectedDepartment
-                            )
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                mapViewModel.selectHistoryItem(mapObject)
+                            let internalObject = mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))
+                            if internalObject != nil {
+                                SearchResultRowView(
+                                    mapObject: internalObject!,
+                                    currentDep: mapObject.department
+                                )
+                                
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    mapViewModel.selectHistoryItem(mapObject)
+                                }
+                                
+                                .overlay(
+                                    Rectangle()
+                                        .frame(height: 1)
+                                        .foregroundColor(Color.gray.opacity(0.2)),
+                                    alignment: .bottom
+                                )
                             }
-
-                            .overlay(
-                                Rectangle()
-                                    .frame(height: 1)
-                                    .foregroundColor(Color.gray.opacity(0.2)),
-                                alignment: .bottom
-                            )
                         }
                     }
                     .padding(.horizontal, 16)

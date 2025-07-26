@@ -213,10 +213,13 @@ class MapViewModel: ObservableObject {
     }
 
     func selectHistoryItem(_ item: MapObjectModel) {
-        let fullMarker = item.toInternalMarkerModel(mapDescription: currentMapDescription)
+        let fullMarker = item.toInternalMarkerModel(mapDescription: getMapDescriptionByDepartment(department: item.department))
         if fullMarker == nil {
             print("MapViewModel: Internal error...")
         } else {
+            if (item.department != selectedDepartment) {
+                selectedDepartment = item.department
+            }
             selectSearchResult(fullMarker!)
         }
     }
