@@ -1,15 +1,6 @@
 {
-  "originHash" : "460785d977aa6371ce4e7c5113c96c04bfb69596d4958d388b3a0b8e60fd7994",
+  "originHash" : "fad38d66cdb363921d5711ab43423bba53b43e67c545c7aacf4be56f9ddee1e2",
   "pins" : [
-    {
-      "identity" : "bottomsheet",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/lucaszischka/BottomSheet",
-      "state" : {
-        "revision" : "720ddbd1371fef2a09cc1ab65fc503df37767f9c",
-        "version" : "3.1.1"
-      }
-    },
     {
       "identity" : "svgview",
       "kind" : "remoteSourceControl",
