@@ -152,6 +152,7 @@ class MapViewModel: ObservableObject {
         markerCoordinate = marker.coordinate
         selectedSearchResult = marker
         selectedMarker = marker.title
+        selectedDepartment = marker.department
         searchQuery = ""
         searchResults = []
         dbViewModel.addHistoryItem(marker, department: selectedDepartment)
