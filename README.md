@@ -36,6 +36,10 @@ Will be announced soon if we get this baaaaags.
 
 Questions about DepNavIOS in general? Make sure to read the [FAQ (WIP)](https://github.com/qrutyy/DepNavIOS/wiki)
 
+## Credits
+
+Based on the original [Android project](https://github.com/timPushkin/DepNav/) made by **Timofei Pushkin**.  
+
 ## License
 
 This code is currently not licensed for reuse.
