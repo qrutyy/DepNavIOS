@@ -1,0 +1,56 @@
+{
+    "name": "qrutyy source",
+    "subtitle": "All my apps in one place.",
+    "description": "Here you'll find DepNav app.",
+    "tintColor": "#4185A9",
+    "featuredApps": [
+        "qrutyy.DepNavIOS"
+    ],
+    "apps": [
+        {
+            "name": "DepNav",
+            "bundleIdentifier": "qrutyy.DepNavIOS",
+            "developerName": "Mikhail Gavrilenko",
+            "subtitle": "Department navigation.",
+            "localizedDescription": "App for department navigation.",
+            "iconURL": "https://qrutyy.github.io/DepNavIOS/Assets.xcassets/AppIcon.appiconset/image-1024x1024.jpg",
+            "tintColor": "#5CA399",
+            "screenshots": [
+                "https://example.com/myapp_portrait_screenshot1.png",
+                "https://example.com/myapp_portrait_screenshot2.png",
+                {
+                    "imageURL": "https://example.com/myapp_landscape_screenshot.png",
+                    "width": 2556,
+                    "height": 1179
+                }
+            ],
+            "versions": [
+                {
+                    "version": "0.2",
+                    "date": "2025-27-07T09:00:00-08:00",
+                    "size": 120,
+                    "downloadURL": "https://qrutyy.github.io/DepNavIOS/PubResources/v0.2-alpha/Payload.ipa",
+                    "localizedDescription": "Alpha v0.2 release.",
+                    "minOSVersion": "16.0"
+                }
+            ],
+            "appPermissions": {
+                "entitlements": [
+                ],
+                "privacy": {
+                }
+            }
+        }
+    ],
+    "news": [
+        {
+            "title": "Alpha release is published",
+            "identifier": "alpha_pub",
+            "caption": "Introduced a ready-to-use MVP of DepNav",
+            "date": "2025-07-27",
+            "tintColor": "#5CA399",
+            "notify": true,
+            "appID": "qrutyy.DepNavIOS"
+        }
+    ]
+}
