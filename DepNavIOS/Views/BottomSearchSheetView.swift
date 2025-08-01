@@ -57,7 +57,7 @@ struct BottomSearchSheetView: View {
                             SettingsSectionView(mapViewModel: mapViewModel, currentSheetContent: $currentSheetContent)
                                 .onAppear {
                                         withAnimation {
-                                            detent = .medium
+                                            detent = .height(300)
                                         }
                                     }
 

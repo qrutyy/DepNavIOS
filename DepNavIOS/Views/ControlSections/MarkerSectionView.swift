@@ -34,8 +34,10 @@ struct MarkerSectionView: View {
                     .padding(.horizontal, 16)
                     .padding(.bottom, 4)
             }
+            
+            let locationFormatted = (marker.location == nil || marker.location == "") ? ", " : ", \(marker.location!), "
 
-            Text(((mapViewModel.selectedDepartment == "spbu-mm") ? LocalizedString("department_name_mm", comment: "Mathematics and Mechanics") : LocalizedString("department_name_ph", comment: "Faculty of Physics")) + ", \(marker.location!), " + "\(marker.floor) " + LocalizedString("map_vm_floor", comment: "Direction button from the marker section"))
+            Text(((mapViewModel.selectedDepartment == "spbu-mm") ? LocalizedString("department_name_mm", comment: "Mathematics and Mechanics") : LocalizedString("department_name_ph", comment: "Faculty of Physics")) + "\(locationFormatted)" + "\(marker.floor) " + LocalizedString("map_vm_floor", comment: "Direction button from the marker section"))
                 .font(.subheadline)
                 .foregroundStyle(Color(.gray))
                 .padding(.horizontal, 16)

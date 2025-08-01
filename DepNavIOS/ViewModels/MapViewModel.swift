@@ -15,7 +15,7 @@ class MapViewModel: ObservableObject {
     // MARK: - Published Properties for UI State
 
     @Published var selectedFloor: Int = 1
-    @Published var selectedDepartment: String = "spbu-pf"
+    @Published var selectedDepartment: String = "spbu-mm"
     @Published var markerCoordinate: CGPoint?
     @Published var searchQuery: String = ""
     @Published var isLoading: Bool = false
@@ -169,10 +169,7 @@ class MapViewModel: ObservableObject {
         updateSearchResults()
 
         if let topResult = searchResults.first { // we are sure that this marker is present
-            selectedFloor = topResult.floor
-            markerCoordinate = topResult.coordinate
-            searchQuery = ""
-            searchResults = []
+            selectSearchResult(topResult)
         } else {
             print("selectMarkerOnMap: Marker not found")
         }
@@ -212,6 +209,18 @@ class MapViewModel: ObservableObject {
         dbViewModel.addFavoritesItem(marker, department: selectedDepartment)
         // dbViewModel.addHistoryItem(selectedMarker, department: selectedDepartment)
     }
+    
+    func selectObjectOnMap(_ item: MapObjectModel) {
+        
+        let fullMarker = item.toInternalMarkerModel(mapDescription: getMapDescriptionByDepartment(department: item.department))
+        if fullMarker == nil {
+            print("MapViewModel: Internal error...")
+        } else {
+            selectSearchResult(fullMarker!)
+        }
+    }
+
+
 
     func selectHistoryItem(_ item: MapObjectModel) {
         let fullMarker = item.toInternalMarkerModel(mapDescription: getMapDescriptionByDepartment(department: item.department))

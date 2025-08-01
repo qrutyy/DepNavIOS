@@ -32,7 +32,9 @@ struct FaqSectionView: View {
             .frame(width: 45, height: 45)
             .background(Color(red: 238 / 255, green: 238 / 255, blue: 240 / 255))
             .cornerRadius(12)
+            
             Spacer().frame(width: 10)
+            
             Button(action: {
                 openURL(URL(string: "https://github.com/qrutyy/DepNavIOS")!)
             }) {
