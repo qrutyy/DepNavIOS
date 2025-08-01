@@ -92,7 +92,7 @@ struct AdvSVGView: View {
                             .offset(y: -21)
                             .scaleEffect(1.0 / 7.0)
                             .position(markerPosition)
-                            .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
+                            
                     }
                 }
 
@@ -110,6 +110,8 @@ struct AdvSVGView: View {
                         .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
                 }
             }
+            .id(mapViewModel.selectedDepartment)
+
         }
     }
 
