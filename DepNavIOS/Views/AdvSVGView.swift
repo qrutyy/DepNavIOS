@@ -72,7 +72,7 @@ struct AdvSVGView: View {
     /// Creates the main map content including the SVG and all markers.
     @ViewBuilder
     private func mapContentView(for geometry: GeometryProxy) -> some View {
-        if let description = mapViewModel.currentMapDescription {
+        if mapViewModel.currentMapDescription != nil {
             let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription!.floorWidth, height: mapViewModel.currentMapDescription!.floorHeight)
 
             ZStack {

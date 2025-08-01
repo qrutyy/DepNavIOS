@@ -15,7 +15,7 @@ struct BottomSearchSheetView: View {
     @State private var showMarkerSection = false
     @State private var displayDeleteFavoriteButton: Bool = false
 
-    @State private var currentSheetContent: SheetContent = .main
+    @State private var currentSheetContent: SheetContent = .main // to remove, idk what this shit is
 
     @ObservedObject var languageManager = LanguageManager.shared
 
@@ -40,7 +40,7 @@ struct BottomSearchSheetView: View {
                 .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
                     if newSelectedMarker != "" {
                         withAnimation(.spring()) {
-                            detent = .height(200) // или .large, как вам нужно
+                            detent = .height(200)
                         }
                     }
                 }
@@ -64,7 +64,7 @@ struct BottomSearchSheetView: View {
                     case .main:
                         if !mapViewModel.searchQuery.isEmpty {
                             withAnimation {
-                                ResultsSectionView(mapViewModel: mapViewModel)
+                                ResultsSectionView(mapViewModel: mapViewModel, detent: $detent)
                             }
                         } else if let marker = mapViewModel.getSelectedMarker() {
                             withAnimation {
