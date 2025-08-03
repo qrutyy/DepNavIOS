@@ -179,10 +179,13 @@ class MapViewModel: ObservableObject {
         guard (selectedSearchResult?.title.isEmpty) != nil, let mapDescription = currentMapDescription else {
             return nil
         }
+        
+        let markerLocation = selectedSearchResult?.location
+        let markerTitle = selectedSearchResult?.title
 
         for floorData in mapDescription.floors {
             if let markerData = floorData.markers.first(where: {
-                $0.en.title == selectedMarker || $0.ru.title == selectedMarker
+                ($0.en.title == markerTitle || $0.ru.title == markerTitle) && ($0.en.location == markerLocation || $0.ru.location == markerLocation)
             }) {
                 return InternalMarkerModel(
                     id: markerData.id,
@@ -262,6 +265,7 @@ class MapViewModel: ObservableObject {
 
     func clearSelectedMarker() {
         selectedMarker = ""
+        selectedSearchResult = nil
         markerCoordinate = nil
     }
 

@@ -25,18 +25,19 @@ struct SearchResultRowView: View {
 
     @ViewBuilder
     private var detailsView: some View {
+        let formattedLocation = (mapObject.location == nil || mapObject.location == "") ? "" : "\(mapObject.location!), "
         if mapObject.description == "" || mapObject.description == mapObject.title {
             Text(mapObject.title)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.primary)
-            Text("\(stringFormatType(mapObject.type.displayName)), \(mapObject.floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
+            Text("\(stringFormatType(mapObject.type.displayName)), \(formattedLocation)\(mapObject.floor) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
         } else {
             Text(mapObject.title)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.primary)
-            Text("\(mapObject.description!), \(mapObject.location!), \(String(mapObject.floor)) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
+            Text("\(mapObject.description!), \(formattedLocation)\(String(mapObject.floor)) " + LocalizedString("map_vm_floor") + ", \(formattedDep)")
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
         }

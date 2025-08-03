@@ -40,6 +40,7 @@ struct BottomSearchSheetView: View {
                 .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
                     if newSelectedMarker != "" {
                         withAnimation(.spring()) {
+                            currentSheetContent = .main
                             detent = .height(200)
                         }
                     }
