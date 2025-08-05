@@ -20,10 +20,10 @@ class MapObjectModel: Codable, Identifiable {
 
     init(id: Int?, floor: Int?, department: String? = nil, objectTitle: String?, objectDescription: String?, objectTypeName: String?, objectLocation: String?) {
         if id != nil {
-            self.id = id!
+            self.id = id ?? -99
         }
         self.department = department ?? ""
-        self.floor = floor != nil ? floor! : -99
+        self.floor = floor ?? -99
         self.objectTitle = objectTitle ?? ""
         self.objectDescription = objectDescription ?? ""
         self.objectTypeName = objectTypeName ?? ""
@@ -38,7 +38,7 @@ extension MapObjectModel {
             return nil
         }
 
-        guard let floorData = mapDescription!.floors.first(where: { $0.floor == self.floor }) else {
+        guard let floorData = mapDescription?.floors.first(where: { $0.floor == self.floor }) else {
             print("Conversion failed: floor \(floor) not found in map data.")
             return nil
         }
@@ -50,7 +50,7 @@ extension MapObjectModel {
             return nil
         }
 
-        let uniqueID = "\(mapDescription!.internalName)-\(floorData.floor)-\(objectTitle)"
+        let uniqueID = "\(mapDescription?.internalName ?? "")-\(floorData.floor)-\(objectTitle)"
 
         return InternalMarkerModel(
             id: uniqueID,

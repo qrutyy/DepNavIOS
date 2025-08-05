@@ -21,7 +21,7 @@ struct SearchBarSectionView: View {
             .submitLabel(.search)
             .onSubmit {
                 mapViewModel.commitSearch()
-                if mapViewModel.searchResults != [] {
+                if mapViewModel.searchResults.isEmpty == false {
                     withAnimation(.spring()) {
                         detent = .height(200)
                     }

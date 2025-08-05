@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var languageManager = LanguageManager.shared
+    @ObservedObject var languageManager = LanguageManagerModel.shared
     @State private var showWelcomeScreen = false
     @State private var isBottomSheetPresented = true
     @StateObject private var mapViewModel = MapViewModel()

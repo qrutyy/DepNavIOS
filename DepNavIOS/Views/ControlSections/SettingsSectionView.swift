@@ -10,7 +10,7 @@ struct SettingsSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
     @Binding var currentSheetContent: SheetContent
 
-    @ObservedObject var languageManager = LanguageManager.shared
+    @ObservedObject var languageManager = LanguageManagerModel.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -41,7 +41,7 @@ struct SettingsSectionView: View {
         HStack(spacing: 12) {
             Text(LocalizedString("settings_language_title", comment: "Language switch"))
             Spacer()
-            ForEach(Language.allCases) { lang in
+            ForEach(LanguageModel.allCases) { lang in
                 Button(action: {
                     withAnimation {
                         languageManager.setLanguage(lang)

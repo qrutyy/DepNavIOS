@@ -21,7 +21,7 @@ struct AdvSVGView: View {
     @GestureState private var gestureScale: CGFloat = 1.0
     @State private var liveScale: CGFloat = 1.0
         
-    @ObservedObject var languageManager = LanguageManager.shared
+    @ObservedObject var languageManager = LanguageManagerModel.shared
 
 
     var body: some View {
@@ -73,7 +73,7 @@ struct AdvSVGView: View {
     @ViewBuilder
     private func mapContentView(for geometry: GeometryProxy) -> some View {
         if mapViewModel.currentMapDescription != nil {
-            let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription!.floorWidth, height: mapViewModel.currentMapDescription!.floorHeight)
+            let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription?.floorWidth ?? 0, height: mapViewModel.currentMapDescription?.floorHeight ?? 0)
 
             ZStack {
                 // 1. The base SVG map
@@ -81,7 +81,7 @@ struct AdvSVGView: View {
                     .aspectRatio(svgNaturalSize, contentMode: .fit)
 
                 // 2. The tappable markers for the current floor
-                if let currentFloorData = mapViewModel.currentMapDescription!.floors.first(where: { $0.floor == mapViewModel.selectedFloor }) {
+                if let currentFloorData = mapViewModel.currentMapDescription?.floors.first(where: { $0.floor == mapViewModel.selectedFloor }) {
                     ForEach(currentFloorData.markers, id: \.self) { marker in
                         let markerPosition = calculateMarkerPosition(
                             svgCoordinate: marker.coordinate,

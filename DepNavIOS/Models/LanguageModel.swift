@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-enum Language: String, CaseIterable, Identifiable {
+enum LanguageModel: String, CaseIterable, Identifiable {
     case ru
     case en
 
@@ -28,23 +28,23 @@ enum Language: String, CaseIterable, Identifiable {
     }
 }
 
-class LanguageManager: ObservableObject {
-    static let shared = LanguageManager()
-    @Published var currentLanguage: Language {
+class LanguageManagerModel: ObservableObject {
+    static let shared = LanguageManagerModel()
+    @Published var currentLanguage: LanguageModel {
         didSet {
             UserDefaults.standard.set(currentLanguage.rawValue, forKey: "appLanguage")
         }
     }
 
     private init() {
-        if let saved = UserDefaults.standard.string(forKey: "appLanguage"), let lang = Language(rawValue: saved) {
+        if let saved = UserDefaults.standard.string(forKey: "appLanguage"), let lang = LanguageModel(rawValue: saved) {
             currentLanguage = lang
         } else {
             currentLanguage = .ru // default
         }
     }
 
-    func setLanguage(_ lang: Language) {
+    func setLanguage(_ lang: LanguageModel) {
         currentLanguage = lang
     }
 }

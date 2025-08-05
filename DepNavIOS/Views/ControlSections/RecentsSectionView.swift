@@ -40,10 +40,10 @@ struct RecentsSectionView: View {
                 } else {
                     LazyVStack(spacing: 0) {
                         ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
-                            let internalObject = mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))
-                            if internalObject != nil {
+                            if let internalObject = mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department)) {
+                                
                                 SearchResultRowView(
-                                    mapObject: internalObject!,
+                                    mapObject: internalObject,
                                     currentDep: mapObject.department
                                 )
                                 

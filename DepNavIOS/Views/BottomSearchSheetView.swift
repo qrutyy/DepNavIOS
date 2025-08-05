@@ -17,7 +17,7 @@ struct BottomSearchSheetView: View {
 
     @State private var currentSheetContent: SheetContent = .main // to remove, idk what this shit is
 
-    @ObservedObject var languageManager = LanguageManager.shared
+    @ObservedObject var languageManager = LanguageManagerModel.shared
 
     @State private var markerToDisplay: InternalMarkerModel?
 

@@ -21,7 +21,7 @@ struct FavoriteSectionView: View {
                     .padding(.top, 10)
 
                 Spacer()
-                if mapViewModel.dbViewModel.favoriteItems.count != 0 {
+                if mapViewModel.dbViewModel.favoriteItems.isEmpty {
                     Button(LocalizedString("generic_clear_button", comment: "Generic clear button")) {
                         mapViewModel.dbViewModel.clearAllFavorites()
                     }
@@ -34,7 +34,7 @@ struct FavoriteSectionView: View {
             .padding(.horizontal, 16)
 
             VStack(alignment: .leading, spacing: 12) {
-                if mapViewModel.dbViewModel.favoriteItems.count == 0 {
+                if mapViewModel.dbViewModel.favoriteItems.isEmpty {
                     VStack {
                         HStack {
                             Text(LocalizedString("empty_favorites_list", comment: "Empty favorites list"))
@@ -53,7 +53,12 @@ struct FavoriteSectionView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         // Telling ViewModel that user has selected the marker
-                                        mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))!)
+                                        if let mapDescription = mapViewModel.getMapDescriptionByDepartment(department: mapObject.department) {
+                                            mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapDescription)!)
+                                        }
+                                         else{
+                                                print("Failed to get mapDescription of department \(mapObject.department)")
+                                            }
                                     }
                                     .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
 

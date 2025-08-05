@@ -37,7 +37,7 @@ class MapViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    @ObservedObject var languageManager = LanguageManager.shared
+    @ObservedObject var languageManager = LanguageManagerModel.shared
 
     init(mapDataService: MapDataService = MapDataService()) {
         self.mapDataService = mapDataService
@@ -71,6 +71,9 @@ class MapViewModel: ObservableObject {
 
         do {
             let mapDescription = try await mapDataService.loadMapData(for: selectedDepartment)
+            if mapDescription.floors.isEmpty || mapDescription.floorWidth <= 0 || mapDescription.floorHeight <= 0 || mapDescription.internalName.isEmpty {
+                errorMessage = "MapDescription has unexpected properties"
+            }
             loadedMapDescriptions[selectedDepartment] = mapDescription
         } catch {
             errorMessage = error.localizedDescription
@@ -81,14 +84,12 @@ class MapViewModel: ObservableObject {
 
     func preloadAllDepartments() async {
         let departments = ["spbu-mm", "spbu-pf"]
-        for dep in departments {
-            if loadedMapDescriptions[dep] == nil {
-                do {
-                    let mapDescription = try await mapDataService.loadMapData(for: dep)
-                    loadedMapDescriptions[dep] = mapDescription
-                } catch {
-                    print("Failed to load map for \(dep): \(error)")
-                }
+        for dep in departments where loadedMapDescriptions[dep] == nil {
+            do {
+                let mapDescription = try await mapDataService.loadMapData(for: dep)
+                loadedMapDescriptions[dep] = mapDescription
+            } catch {
+                print("Failed to load map for \(dep): \(error)")
             }
         }
     }
