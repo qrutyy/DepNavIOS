@@ -18,7 +18,7 @@ struct SVGMapView: View {
     @State private var offset: CGSize = .zero
 
     var body: some View {
-        if let url = Bundle.main.url(forResource: "floor\(mapViewModel.selectedFloor)", withExtension: "svg", subdirectory: "Maps/\(mapViewModel.selectedDepartment)") {
+        if let url = mapViewModel.currentMapSVGURL {
             AdvSVGView(
                 url: url,
                 mapViewModel: mapViewModel

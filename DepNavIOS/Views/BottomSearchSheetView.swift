@@ -11,15 +11,9 @@ struct BottomSearchSheetView: View {
     @ObservedObject var mapViewModel: MapViewModel
 
     @Binding var detent: PresentationDetent
-
-    @State private var showMarkerSection = false
+    @StateObject private var sheetVM: BottomSheetViewModel
     @State private var displayDeleteFavoriteButton: Bool = false
-
-    @State private var currentSheetContent: SheetContent = .main // to remove, idk what this shit is
-
     @ObservedObject var languageManager = LanguageManagerModel.shared
-
-    @State private var markerToDisplay: InternalMarkerModel?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -40,7 +34,7 @@ struct BottomSearchSheetView: View {
                 .onChange(of: mapViewModel.selectedMarker) { newSelectedMarker in
                     if newSelectedMarker != "" {
                         withAnimation(.spring()) {
-                            currentSheetContent = .main
+                            sheetVM.showMain()
                             detent = .height(200)
                         }
                     }
@@ -53,14 +47,14 @@ struct BottomSearchSheetView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 0) {
-                    switch currentSheetContent {
+                    switch sheetVM.currentSheetContent {
                     case .settings:
-                            SettingsSectionView(mapViewModel: mapViewModel, currentSheetContent: $currentSheetContent)
-                                .onAppear {
-                                        withAnimation {
-                                            detent = .height(300)
-                                        }
-                                    }
+                        SettingsSectionView(mapViewModel: mapViewModel, currentSheetContent: $sheetVM.currentSheetContent)
+                            .onAppear {
+                                withAnimation {
+                                    detent = .height(300)
+                                }
+                            }
 
                     case .main:
                         if !mapViewModel.searchQuery.isEmpty {
@@ -75,7 +69,7 @@ struct BottomSearchSheetView: View {
                             FavoriteSectionView(mapViewModel: mapViewModel, displayDeleteFavoriteButton: $displayDeleteFavoriteButton)
                             RecentsSectionView(mapViewModel: mapViewModel)
                             if detent != .height(50) {
-                                FaqSectionView(currentSheetContent: $currentSheetContent)
+                                FaqSectionView(currentSheetContent: $sheetVM.currentSheetContent)
                             }
                         }
 
@@ -92,6 +86,12 @@ struct BottomSearchSheetView: View {
                 }
             }
         }
+    }
+
+    init(mapViewModel: MapViewModel, detent: Binding<PresentationDetent>) {
+        self._mapViewModel = ObservedObject(wrappedValue: mapViewModel)
+        self._detent = detent
+        _sheetVM = StateObject(wrappedValue: BottomSheetViewModel(mapViewModel: mapViewModel))
     }
 }
 

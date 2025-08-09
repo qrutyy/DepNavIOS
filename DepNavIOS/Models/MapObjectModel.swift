@@ -32,7 +32,7 @@ class MapObjectModel: Codable, Identifiable {
 }
 
 extension MapObjectModel {
-    @MainActor func toInternalMarkerModel(mapDescription: MapDescription?) -> InternalMarkerModel? {
+    func toInternalMarkerModel(mapDescription: MapDescription?) -> InternalMarkerModel? {
         if mapDescription == nil {
             print("Conversion failed: mapDescription is nil.")
             return nil

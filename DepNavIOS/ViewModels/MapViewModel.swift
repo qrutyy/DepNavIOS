@@ -177,17 +177,18 @@ class MapViewModel: ObservableObject {
     }
 
     func getSelectedMarker() -> InternalMarkerModel? {
-        guard (selectedSearchResult?.title.isEmpty) != nil, let mapDescription = currentMapDescription else {
-            return nil
-        }
-        
-        let markerLocation = selectedSearchResult?.location
-        let markerTitle = selectedSearchResult?.title
+        // If we have a selected marker, try to rehydrate it using current map data
+        // for up-to-date localization. If map data isn't ready yet, return the cached
+        // selection so UI can still present the marker section immediately.
+        guard let selected = selectedSearchResult else { return nil }
 
+        guard let mapDescription = currentMapDescription else {
+            return selected
+        }
+
+        // Prefer matching by stable id, fall back to title/location if needed
         for floorData in mapDescription.floors {
-            if let markerData = floorData.markers.first(where: {
-                ($0.en.title == markerTitle || $0.ru.title == markerTitle) && ($0.en.location == markerLocation || $0.ru.location == markerLocation)
-            }) {
+            if let markerData = floorData.markers.first(where: { $0.id == selected.id }) {
                 return InternalMarkerModel(
                     id: markerData.id,
                     title: (languageManager.currentLanguage == .en ? markerData.en.title : markerData.ru.title) ?? "",
@@ -196,13 +197,14 @@ class MapViewModel: ObservableObject {
                     floor: floorData.floor,
                     coordinate: markerData.coordinate,
                     type: markerData.type,
-                    marker: markerData, department: selectedDepartment
+                    marker: markerData,
+                    department: selectedDepartment
                 )
             }
         }
 
-        print("Warning: getSelectedMarker() could not find a marker with ID '\(selectedMarker)'.")
-        return nil
+        // Fallback: return previously selected
+        return selected
     }
 
     func isMarkerInFavorites(markerID: String) -> Bool {
@@ -213,9 +215,8 @@ class MapViewModel: ObservableObject {
         dbViewModel.addFavoritesItem(marker, department: selectedDepartment)
         // dbViewModel.addHistoryItem(selectedMarker, department: selectedDepartment)
     }
-    
+
     func selectObjectOnMap(_ item: MapObjectModel) {
-        
         let fullMarker = item.toInternalMarkerModel(mapDescription: getMapDescriptionByDepartment(department: item.department))
         if fullMarker == nil {
             print("MapViewModel: Internal error...")
@@ -224,14 +225,12 @@ class MapViewModel: ObservableObject {
         }
     }
 
-
-
     func selectHistoryItem(_ item: MapObjectModel) {
         let fullMarker = item.toInternalMarkerModel(mapDescription: getMapDescriptionByDepartment(department: item.department))
         if fullMarker == nil {
             print("MapViewModel: Internal error...")
         } else {
-            if (item.department != selectedDepartment) {
+            if item.department != selectedDepartment {
                 selectedDepartment = item.department
             }
             selectSearchResult(fullMarker!)
@@ -256,6 +255,15 @@ class MapViewModel: ObservableObject {
 
     func getMapDescriptionByDepartment(department: String) -> MapDescription? {
         loadedMapDescriptions[department] ?? nil
+    }
+
+    // MARK: - Map Asset URL
+    var currentMapSVGURL: URL? {
+        Bundle.main.url(
+            forResource: "floor\(selectedFloor)",
+            withExtension: "svg",
+            subdirectory: "Maps/\(selectedDepartment)"
+        )
     }
 
     func clearMarker() {

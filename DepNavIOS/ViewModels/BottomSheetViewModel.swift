@@ -5,67 +5,74 @@
 //  Created by Michael Gavrilenko on 30.06.2025.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 @MainActor
 class BottomSheetViewModel: ObservableObject {
     // MARK: - Published Properties
-    
+
     @Published var currentSheetContent: SheetContent = .main
-    @Published var detent: PresentationDetent = .height(50)
     @Published var displayDeleteFavoriteButton: Bool = false
     // @Published var showMarkerSection: Bool = false
-    
+
     // MARK: - Dependencies
-    
-    @EnvironmentObject var mapViewModel: MapViewModel
-    @EnvironmentObject var languageManager: LanguageManagerModel
-    
+    let mapViewModel: MapViewModel
+    let languageManager: LanguageManagerModel
+
     // MARK: - Computed Properties
-    
+
     var shouldShowResults: Bool {
         !mapViewModel.searchQuery.isEmpty
     }
-    
+
     var shouldShowMarkerSection: Bool {
         mapViewModel.getSelectedMarker() != nil
     }
-    
+
     var shouldShowFavoritesAndRecents: Bool {
         mapViewModel.searchQuery.isEmpty && mapViewModel.getSelectedMarker() == nil
     }
-    
+
     // MARK: - Initialization
-    
-    init() {
-        // Observers will be set up when View appears
+
+    init(mapViewModel: MapViewModel, languageManager: LanguageManagerModel = .shared) {
+        self.mapViewModel = mapViewModel
+        self.languageManager = languageManager
+        setupObservers()
     }
-    
+
     // MARK: - Private Methods
-    
+
     func setupObservers() {
-        // When search query changes, update content
+        // Live search and content switch
         mapViewModel.$searchQuery
+            .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.updateSheetContent()
+                guard let self else { return }
+                self.mapViewModel.updateSearchResults()
+                self.updateSheetContent()
             }
             .store(in: &cancellables)
-        
-        // When selected search result changes, show marker section
+
+        // Switch to marker section on selection
         mapViewModel.$selectedSearchResult
+            .receive(on: RunLoop.main)
             .sink { [weak self] result in
+                guard let self else { return }
                 if result != nil {
-                    self?.showMarkerSection()
+                    self.showMarkerSection()
+                } else {
+                    self.updateSheetContent()
                 }
             }
             .store(in: &cancellables)
     }
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     // MARK: - Public Methods
-    
+
     func updateSheetContent() {
         if shouldShowResults {
             currentSheetContent = .main
@@ -75,39 +82,20 @@ class BottomSheetViewModel: ObservableObject {
             currentSheetContent = .main
         }
     }
-    
-    func showSettings() {
-        currentSheetContent = .settings
-        detent = .height(300)
-    }
-    
+
+    func showSettings() { currentSheetContent = .settings }
+
     func showMain() {
         currentSheetContent = .main
         updateDetentForMain()
     }
-    
-    func showMarkerSection() {
-        currentSheetContent = .selMarker
-        detent = .height(200)
-    }
-    
-    func updateDetentForMain() {
-        if shouldShowResults || shouldShowMarkerSection {
-            detent = .height(200)
-        } else {
-            detent = .height(50)
-        }
-    }
-    
-    func hideKeyboard() {
-        #if canImport(UIKit)
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        #endif
-    }
-    
+
+    func showMarkerSection() { currentSheetContent = .selMarker }
+
+    func updateDetentForMain() { /* detent handled at View level */ }
+
     func selectSearchResult(_ marker: InternalMarkerModel) {
-        hideKeyboard()
         mapViewModel.selectSearchResult(marker)
         showMarkerSection()
     }
-} 
+}

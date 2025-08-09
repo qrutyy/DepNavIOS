@@ -44,7 +44,6 @@ struct ResultsSectionView: View {
                         .onTapGesture {
                             hideKeyboard()
                             mapViewModel.selectSearchResult(marker)
-                            mapViewModel.selectedSearchResult = marker
                             withAnimation(.spring()) {
                                 self.detent = .height(200)
                             }

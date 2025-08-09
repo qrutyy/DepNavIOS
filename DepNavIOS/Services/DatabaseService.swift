@@ -26,75 +26,75 @@ class DatabaseService: DatabaseServiceProtocol {
 
     // This helper function performs any manager synchronous work
     // in a separate background stream, without blocking the UI, and returns the result.
-    private func perform<T>(work: @escaping @Sendable () -> T) async -> T {
+    private func perform<T>(work: @escaping @Sendable () async -> T) async -> T {
         await Task.detached(priority: .background) {
-            work()
+            await work()
         }.value
     }
 
     func addHistoryItem(_ item: MapObjectModel) async -> Bool {
         await perform {
-            self.databaseManager.insertHistory(item)
+            await self.databaseManager.insertHistory(item)
         }
     }
 
     func getHistoryItems() async -> [MapObjectModel] {
         await perform {
-            self.databaseManager.getAllHistory()
+            await self.databaseManager.getAllHistory()
         }
     }
 
     func updateHistoryItem(_ item: MapObjectModel) async -> Bool {
         await perform {
-            self.databaseManager.updateHistory(item)
+            await self.databaseManager.updateHistory(item)
         }
     }
 
     func deleteHistoryItem(id: Int) async -> Bool {
         await perform {
-            self.databaseManager.deleteHistory(id: id)
+            await self.databaseManager.deleteHistory(id: id)
         }
     }
 
     func clearHistory() async -> Bool {
         await perform {
-            self.databaseManager.clearAllHistory()
+            await self.databaseManager.clearAllHistory()
         }
     }
 
     func addFavoriteItem(_ item: MapObjectModel) async -> Bool {
         await perform {
-            self.databaseManager.insertFavorites(item)
+            await self.databaseManager.insertFavorites(item)
         }
     }
 
     func getFavoriteItems() async -> [MapObjectModel] {
         await perform {
-            self.databaseManager.getAllFavorites()
+            await self.databaseManager.getAllFavorites()
         }
     }
 
     func updateFavoriteItem(_ item: MapObjectModel) async -> Bool {
         await perform {
-            self.databaseManager.updateFavorite(item)
+            await self.databaseManager.updateFavorite(item)
         }
     }
 
     func deleteFavoriteItem(id: Int) async -> Bool {
         await perform {
-            self.databaseManager.deleteFavorite(id: id)
+            await self.databaseManager.deleteFavorite(id: id)
         }
     }
 
     func clearFavorites() async -> Bool {
         await perform {
-            self.databaseManager.clearAllFavorites()
+            await self.databaseManager.clearAllFavorites()
         }
     }
 
     func checkTablesExist() async -> Bool {
         await perform {
-            self.databaseManager.checkTablesExist()
+            await self.databaseManager.checkTablesExist()
         }
     }
 }

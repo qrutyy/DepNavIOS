@@ -20,9 +20,8 @@ struct AdvSVGView: View {
     @State private var latestGestureScale: CGFloat = 1.0
     @GestureState private var gestureScale: CGFloat = 1.0
     @State private var liveScale: CGFloat = 1.0
-        
-    @ObservedObject var languageManager = LanguageManagerModel.shared
 
+    @ObservedObject var languageManager = LanguageManagerModel.shared
 
     var body: some View {
         GeometryReader { geometry in
@@ -95,7 +94,6 @@ struct AdvSVGView: View {
                             .offset(y: -21)
                             .scaleEffect(1.0 / 7.0)
                             .position(markerPosition)
-                            
                     }
                 }
 
@@ -114,7 +112,6 @@ struct AdvSVGView: View {
                 }
             }
             .id(mapViewModel.selectedDepartment)
-
         }
     }
 
