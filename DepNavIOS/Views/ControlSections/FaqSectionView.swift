@@ -32,9 +32,15 @@ struct FaqSectionView: View {
             .frame(width: 45, height: 45)
             .background(Color(red: 238 / 255, green: 238 / 255, blue: 240 / 255))
             .cornerRadius(12)
+
             Spacer().frame(width: 10)
+
             Button(action: {
-                openURL(URL(string: "https://github.com/qrutyy/DepNavIOS")!)
+                if let url = URL(string: "https://github.com/qrutyy/DepNavIOS") {
+                    openURL(url)
+                } else {
+                    print("Error: Cannot open URL")
+                }
             }) {
                 Text(LocalizedString("faq_section_report", comment: "Report an issue")).frame(maxWidth: .infinity, alignment: .center).foregroundColor(.blue).padding()
             }

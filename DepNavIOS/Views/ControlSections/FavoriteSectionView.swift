@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FavoriteSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
+    @StateObject private var vm: FavoritesSectionVM
     @Binding var displayDeleteFavoriteButton: Bool
 
     var body: some View {
@@ -21,9 +22,9 @@ struct FavoriteSectionView: View {
                     .padding(.top, 10)
 
                 Spacer()
-                if mapViewModel.dbViewModel.favoriteItems.count != 0 {
+                if !vm.isEmpty {
                     Button(LocalizedString("generic_clear_button", comment: "Generic clear button")) {
-                        mapViewModel.dbViewModel.clearAllFavorites()
+                        vm.clearFavorites()
                     }
                     .font(.subheadline)
                     .buttonStyle(.borderless)
@@ -34,7 +35,7 @@ struct FavoriteSectionView: View {
             .padding(.horizontal, 16)
 
             VStack(alignment: .leading, spacing: 12) {
-                if mapViewModel.dbViewModel.favoriteItems.count == 0 {
+                if vm.isEmpty {
                     VStack {
                         HStack {
                             Text(LocalizedString("empty_favorites_list", comment: "Empty favorites list"))
@@ -47,19 +48,18 @@ struct FavoriteSectionView: View {
                     }
                 } else {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), alignment: .leading, spacing: 16) {
-                        ForEach(mapViewModel.dbViewModel.favoriteItems, id: \.id) { mapObject in
+                        ForEach(vm.favoriteItems) { item in
                             ZStack {
-                                FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: mapObject.objectTypeName), title: mapObject.objectTitle, subtitle: mapObject.objectDescription, type: mapObject.objectTypeName, iconColor: .blue)
+                                FavoriteItemView(icon: getMapObjectIconByType(objectTypeName: item.type.displayName), title: item.title, subtitle: item.description ?? "", type: item.type.displayName, iconColor: .blue)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
-                                        // Telling ViewModel that user has selected the marker
-                                        mapViewModel.selectSearchResult(mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))!)
+                                        vm.select(item)
                                     }
                                     .onLongPressGesture(minimumDuration: 0.2, perform: { withAnimation { displayDeleteFavoriteButton = true }})
 
                                 if displayDeleteFavoriteButton {
                                     CloseButtonView {
-                                        mapViewModel.removeFavoriteItem(mapObject)
+                                        vm.remove(item)
                                     }
                                     .offset(x: 22, y: -45)
                                 }
@@ -76,5 +76,10 @@ struct FavoriteSectionView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
+    }
+    init(mapViewModel: MapViewModel, displayDeleteFavoriteButton: Binding<Bool>) {
+        self._mapViewModel = ObservedObject(wrappedValue: mapViewModel)
+        self._displayDeleteFavoriteButton = displayDeleteFavoriteButton
+        _vm = StateObject(wrappedValue: FavoritesSectionVM(mapViewModel: mapViewModel))
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
 struct GenericMarkerView: View {
     let type: MarkerType
     let title: String
-    @Binding var selectedMarker: String
+    @ObservedObject var mapViewModel: MapViewModel
     let coords: CGPoint
 
     var body: some View {
@@ -20,7 +20,7 @@ struct GenericMarkerView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 print("updated selectedMarker to: \(title), \(coords), \(type)")
-                selectedMarker = title
+                mapViewModel.selectMarkerOnMap(markerID: title)
                 let labRooms = (3241 ... 3251).map { String($0) }
                 if labRooms.contains(title) {
                     print("playing doom easter egg")

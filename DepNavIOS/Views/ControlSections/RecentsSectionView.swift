@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RecentsSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
+    @StateObject private var vm: RecentsSectionVM
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -19,9 +20,9 @@ struct RecentsSectionView: View {
                     .padding(.leading, 16)
                     .padding(.top, 10)
                 Spacer()
-                if !mapViewModel.dbViewModel.historyItems.isEmpty {
+                if !vm.isEmpty {
                     Button(LocalizedString("generic_clear_button", comment: "Generic clear button")) {
-                        mapViewModel.dbViewModel.clearAllHistory()
+                        vm.clearHistory()
                     }
                     .font(.subheadline)
                     .buttonStyle(.borderless)
@@ -32,33 +33,26 @@ struct RecentsSectionView: View {
             .padding(.horizontal, 16)
 
             VStack(alignment: .leading, spacing: 0) {
-                if mapViewModel.dbViewModel.historyItems.isEmpty {
+                if vm.isEmpty {
                     Text(LocalizedString("empty_history_list", comment: "History is empty"))
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding()
                 } else {
                     LazyVStack(spacing: 0) {
-                        ForEach(mapViewModel.dbViewModel.historyItems.prefix(10)) { mapObject in
-                            let internalObject = mapObject.toInternalMarkerModel(mapDescription: mapViewModel.getMapDescriptionByDepartment(department: mapObject.department))
-                            if internalObject != nil {
-                                SearchResultRowView(
-                                    mapObject: internalObject!,
-                                    currentDep: mapObject.department
-                                )
-                                
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    mapViewModel.selectHistoryItem(mapObject)
-                                }
-                                
-                                .overlay(
-                                    Rectangle()
-                                        .frame(height: 1)
-                                        .foregroundColor(Color.gray.opacity(0.2)),
-                                    alignment: .bottom
-                                )
-                            }
+                        ForEach(vm.recentItems) { item in
+                            SearchResultRowView(
+                                mapObject: item,
+                                currentDep: item.department
+                            )
+                            .contentShape(Rectangle())
+                            .onTapGesture { vm.select(item: item) }
+                            .overlay(
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(Color.gray.opacity(0.2)),
+                                alignment: .bottom
+                            )
                         }
                     }
                     .padding(.horizontal, 16)
@@ -70,5 +64,9 @@ struct RecentsSectionView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
+    }
+    init(mapViewModel: MapViewModel) {
+        self._mapViewModel = ObservedObject(wrappedValue: mapViewModel)
+        _vm = StateObject(wrappedValue: RecentsSectionVM(mapViewModel: mapViewModel))
     }
 }

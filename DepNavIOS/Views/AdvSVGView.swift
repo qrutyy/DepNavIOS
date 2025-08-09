@@ -21,6 +21,8 @@ struct AdvSVGView: View {
     @GestureState private var gestureScale: CGFloat = 1.0
     @State private var liveScale: CGFloat = 1.0
 
+    @ObservedObject var languageManager = LanguageManagerModel.shared
+
     var body: some View {
         GeometryReader { geometry in
             mapContentView(for: geometry)
@@ -69,8 +71,8 @@ struct AdvSVGView: View {
     /// Creates the main map content including the SVG and all markers.
     @ViewBuilder
     private func mapContentView(for geometry: GeometryProxy) -> some View {
-        if let description = mapViewModel.currentMapDescription {
-            let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription!.floorWidth, height: mapViewModel.currentMapDescription!.floorHeight)
+        if mapViewModel.currentMapDescription != nil {
+            let svgNaturalSize = CGSize(width: mapViewModel.currentMapDescription?.floorWidth ?? 0, height: mapViewModel.currentMapDescription?.floorHeight ?? 0)
 
             ZStack {
                 // 1. The base SVG map
@@ -78,7 +80,7 @@ struct AdvSVGView: View {
                     .aspectRatio(svgNaturalSize, contentMode: .fit)
 
                 // 2. The tappable markers for the current floor
-                if let currentFloorData = mapViewModel.currentMapDescription!.floors.first(where: { $0.floor == mapViewModel.selectedFloor }) {
+                if let currentFloorData = mapViewModel.currentMapDescription?.floors.first(where: { $0.floor == mapViewModel.selectedFloor }) {
                     ForEach(currentFloorData.markers, id: \.self) { marker in
                         let markerPosition = calculateMarkerPosition(
                             svgCoordinate: marker.coordinate,
@@ -87,12 +89,11 @@ struct AdvSVGView: View {
                         )
 
                         // Note: Simplified the marker view for this example
-                        let displayTitle = marker.ru.title ?? marker.en.title ?? ""
-                        GenericMarkerView(type: marker.type, title: displayTitle, selectedMarker: $mapViewModel.selectedMarker, coords: marker.coordinate)
+                        let displayTitle = (languageManager.currentLanguage.rawValue == "ru") ? (marker.ru.title ?? "") : (marker.en.title ?? "")
+                        GenericMarkerView(type: marker.type, title: displayTitle, mapViewModel: mapViewModel, coords: marker.coordinate)
                             .offset(y: -21)
                             .scaleEffect(1.0 / 7.0)
                             .position(markerPosition)
-                            .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
                     }
                 }
 
@@ -110,6 +111,7 @@ struct AdvSVGView: View {
                         .transition(.move(edge: .top).combined(with: .opacity).animation(.spring()))
                 }
             }
+            .id(mapViewModel.selectedDepartment)
         }
     }
 

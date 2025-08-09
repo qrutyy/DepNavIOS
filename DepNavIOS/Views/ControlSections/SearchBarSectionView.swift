@@ -16,22 +16,16 @@ struct SearchBarSectionView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
 
-            TextField(LocalizedString("search_section_textfield", comment: "Textfield placeholder"), text: $mapViewModel.searchQuery, onEditingChanged: { isEditing in
-                withAnimation(.spring()) {
-                    if isEditing {
-                        detent = .large
+            TextField(LocalizedString("search_section_textfield", comment: "Textfield placeholder"), text: $mapViewModel.searchQuery)
+                .submitLabel(.search)
+                .onSubmit {
+                    mapViewModel.commitSearch()
+                    if mapViewModel.searchResults.isEmpty == false {
+                        withAnimation(.spring()) {
+                            detent = .height(200)
+                        }
                     }
                 }
-            })
-            .submitLabel(.search)
-            .onSubmit {
-                mapViewModel.commitSearch()
-                if mapViewModel.searchResults != [] {
-                    withAnimation(.spring()) {
-                        detent = .height(50)
-                    }
-                }
-            }
 
             if !mapViewModel.searchQuery.isEmpty {
                 Button(action: {

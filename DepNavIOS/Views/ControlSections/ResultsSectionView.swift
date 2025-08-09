@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ResultsSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
+    @Binding var detent: PresentationDetent
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -41,9 +42,11 @@ struct ResultsSectionView: View {
                         )
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            // Telling ViewModel that user has selected the marker
+                            hideKeyboard()
                             mapViewModel.selectSearchResult(marker)
-                            mapViewModel.selectedSearchResult = marker
+                            withAnimation(.spring()) {
+                                self.detent = .height(200)
+                            }
                         }
                         .overlay(
                             Rectangle()
