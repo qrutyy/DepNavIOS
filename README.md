@@ -16,6 +16,9 @@ The following maps are available:
 - Easily locate the rooms you are looking for with **search**.
 - **In future - custom map system is planned to be implemented.**
 
+| ![Map](https://github.com/qrutyy/DepNavIOS/blob/ci%2Baltstore/AltStoreResources/markersection.jpg) | ![Search](https://github.com/qrutyy/DepNavIOS/blob/ci%2Baltstore/AltStoreResources/searchsection.png) |
+|:---------------------------------------:|:------------------------------------------:|
+
 ## Installation
 Suitable with IOS 16.6 + 
 ### Native build for development
