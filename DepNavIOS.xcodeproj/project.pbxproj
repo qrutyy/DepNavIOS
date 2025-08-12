@@ -46,6 +46,11 @@
 			path = Sounds;
 			sourceTree = "<group>";
 		};
+		6A3C7FF12E4B349E00FF6F33 /* Preview Content */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 		6AD4F8CC2E0D9BAB00201BF5 /* DepNavIOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DepNavIOS;
@@ -92,6 +97,7 @@
 		6AD4F8C12E0D9BAB00201BF5 = {
 			isa = PBXGroup;
 			children = (
+				6A3C7FF12E4B349E00FF6F33 /* Preview Content */,
 				6AC0B7B02E34E31000E514B0 /* Info.plist */,
 				6AC0B7AD2E34E15300E514B0 /* Assets.xcassets */,
 				6A355FC72E2BF89A00B99AF2 /* Localizable.xcstrings */,
@@ -139,6 +145,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				6A355F752E257E3400B99AF2 /* Sounds */,
+				6A3C7FF12E4B349E00FF6F33 /* Preview Content */,
 				6AD4F8CC2E0D9BAB00201BF5 /* DepNavIOS */,
 			);
 			name = DepNavIOS;
@@ -437,7 +444,7 @@
 				CODE_SIGN_ENTITLEMENTS = DepNavIOS/DepNavIOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"DepNavIOS/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = AR5VBJUYR5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -475,7 +482,7 @@
 				CODE_SIGN_ENTITLEMENTS = DepNavIOS/DepNavIOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"DepNavIOS/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = AR5VBJUYR5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
