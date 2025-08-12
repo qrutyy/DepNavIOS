@@ -25,8 +25,8 @@ You can build the app natively by using Xcode version 16.2 and newer.
 
 Clone this repo and build using debug/release profile. You may need some dependencies - [SVGView](https://github.com/exyte/SVGView).
 
-### Alpha testing
-All the invitations were sent directly to the testers. Issues and feedback is appretiated. 
+### AltStore
+Copy this [link](https://qrutyy.github.io/DepNavIOS/AltStoreResources/alt-config.json) and add it as a source in AltStore app on your device. Download the latest version and you're done. Enjoy!
 
 ### Beta testing (WIP)
 Will be announced soon if we get this baaaaags.
