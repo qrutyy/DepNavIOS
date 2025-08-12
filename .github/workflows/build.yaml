@@ -1,0 +1,35 @@
+name: iOS Build
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+#      - name: Select Xcode 16
+#        run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+
+#      - name: Cache SwiftPM
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            ~/Library/Developer/Xcode/DerivedData
+#            .build
+#          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+#          restore-keys: |
+#            ${{ runner.os }}-spm-
+
+#      - name: Build
+#        run: |
+#          xcodebuild \
+#            -project DepNavIOS.xcodeproj \
+#            -scheme DepNavIOS \
+#            -sdk iphonesimulator \
+#            -destination 'platform=iOS Simulator,name=iPhone 15' \
+#            clean build

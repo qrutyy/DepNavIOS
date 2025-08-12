@@ -258,6 +258,7 @@ class MapViewModel: ObservableObject {
     }
 
     // MARK: - Map Asset URL
+
     var currentMapSVGURL: URL? {
         Bundle.main.url(
             forResource: "floor\(selectedFloor)",

@@ -1,0 +1,25 @@
+name: SwiftLint & Formatter
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+#     - name: Run SwiftLint
+#        run: swiftlint
+
+      - name: Install SwiftFormat
+        run: brew install swiftformat
+
+      - name: Run SwiftFormat
+        run: swiftformat . --lint

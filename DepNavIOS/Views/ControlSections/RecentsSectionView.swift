@@ -65,8 +65,9 @@ struct RecentsSectionView: View {
             .padding(.vertical, 10)
         }
     }
+
     init(mapViewModel: MapViewModel) {
-        self._mapViewModel = ObservedObject(wrappedValue: mapViewModel)
+        _mapViewModel = ObservedObject(wrappedValue: mapViewModel)
         _vm = StateObject(wrappedValue: RecentsSectionVM(mapViewModel: mapViewModel))
     }
 }

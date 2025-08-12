@@ -77,9 +77,10 @@ struct FavoriteSectionView: View {
             .padding(.vertical, 10)
         }
     }
+
     init(mapViewModel: MapViewModel, displayDeleteFavoriteButton: Binding<Bool>) {
-        self._mapViewModel = ObservedObject(wrappedValue: mapViewModel)
-        self._displayDeleteFavoriteButton = displayDeleteFavoriteButton
+        _mapViewModel = ObservedObject(wrappedValue: mapViewModel)
+        _displayDeleteFavoriteButton = displayDeleteFavoriteButton
         _vm = StateObject(wrappedValue: FavoritesSectionVM(mapViewModel: mapViewModel))
     }
 }

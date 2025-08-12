@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 final class SettingsSectionVM: ObservableObject {
@@ -12,8 +12,8 @@ final class SettingsSectionVM: ObservableObject {
     init(mapViewModel: MapViewModel, languageManager: LanguageManagerModel = .shared) {
         self.mapViewModel = mapViewModel
         self.languageManager = languageManager
-        self.selectedLanguage = languageManager.currentLanguage
-        self.selectedDepartment = mapViewModel.selectedDepartment
+        selectedLanguage = languageManager.currentLanguage
+        selectedDepartment = mapViewModel.selectedDepartment
     }
 
     func setLanguage(_ lang: LanguageModel) {
@@ -28,4 +28,3 @@ final class SettingsSectionVM: ObservableObject {
         mapViewModel.selectedDepartment = dep
     }
 }
-

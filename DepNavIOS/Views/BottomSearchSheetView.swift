@@ -89,8 +89,8 @@ struct BottomSearchSheetView: View {
     }
 
     init(mapViewModel: MapViewModel, detent: Binding<PresentationDetent>) {
-        self._mapViewModel = ObservedObject(wrappedValue: mapViewModel)
-        self._detent = detent
+        _mapViewModel = ObservedObject(wrappedValue: mapViewModel)
+        _detent = detent
         _sheetVM = StateObject(wrappedValue: BottomSheetViewModel(mapViewModel: mapViewModel))
     }
 }

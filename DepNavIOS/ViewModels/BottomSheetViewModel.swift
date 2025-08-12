@@ -17,6 +17,7 @@ class BottomSheetViewModel: ObservableObject {
     // @Published var showMarkerSection: Bool = false
 
     // MARK: - Dependencies
+
     let mapViewModel: MapViewModel
     let languageManager: LanguageManagerModel
 

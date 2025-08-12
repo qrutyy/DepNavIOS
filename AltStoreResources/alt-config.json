@@ -1,0 +1,60 @@
+{
+    "name": "@qrutyy dev",
+    "subtitle": "Per il popolo, dal popolo",
+    "description": "",
+    "tintColor": "#4185A9",
+    "featuredApps": [
+        "qrutyy.DepNavIOS"
+    ],
+    "apps": [
+        {
+            "name": "DepNav",
+            "bundleIdentifier": "qrutyy.DepNavIOS",
+            "developerName": "Mikhail Gavrilenko",
+            "subtitle": "DepNavIOS is an IOS application for viewing indoor maps of departments and searching for specific rooms on them.\nThe following maps are available:\nMathematics and Mechanics Faculty, St. Petersburg State University\nFaculty of Physics, St. Petersburg State University",
+            "localizedDescription": "Highlights:\n - Maps are displayed by floors.\n - Two languages are available - English and Russian.\n - Easily locate the rooms you are looking for with search.\n - In future - custom map system is planned to be implemented.",
+            "iconURL": "https://qrutyy.github.io/DepNavIOS/Assets.xcassets/AppIcon.appiconset/image-1024x1024.jpg",
+            "tintColor": "#5CA399",
+            "screenshots": [
+                "https://qrutyy.github.io/DepNavIOS/AltStoreResources/markersection.jpg",
+                "https://qrutyy.github.io/DepNavIOS/AltStoreResources/searchsection.png"
+            ],
+            "versions": [
+                {
+                    "version": "0.3",
+                    "date": "2025-07-27",
+                    "size": 120,
+                    "downloadURL": "https://qrutyy.github.io/DepNavIOS/AltStoreResources/Payload.ipa",
+                    "localizedDescription": "Alpha v0.3 release.",
+                    "minOSVersion": "16.0"
+                }
+            ],
+            "appPermissions": {
+                "entitlements": [
+                ],
+                "privacy": {
+                }
+            }
+        }
+    ],
+    "news": [
+        {
+            "title": "Alpha release is available now!",
+            "identifier": "alpha_pub",
+            "caption": "Introducing ready-to-use MVP of DepNav",
+            "date": "2025-07-27",
+            "tintColor": "#5CA399",
+            "notify": true,
+            "appID": "qrutyy.DepNavIOS"
+        },
+		{
+            "title": "Version 0.3 is released!",
+            "identifier": "v03",
+            "caption": "Fixed minor bugs with UI/UX. Added more details for AltStore page.",
+            "date": "2025-08-12",
+            "tintColor": "#5CA399",
+            "notify": true,
+            "appID": "qrutyy.DepNavIOS"
+        }
+    ]
+}

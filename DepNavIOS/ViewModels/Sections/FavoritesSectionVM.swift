@@ -34,4 +34,3 @@ final class FavoritesSectionVM: ObservableObject {
 
     func select(_ item: InternalMarkerModel) { mapViewModel.selectSearchResult(item) }
 }
-

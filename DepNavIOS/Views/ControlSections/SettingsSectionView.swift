@@ -97,8 +97,8 @@ struct SettingsSectionView: View {
 
 extension SettingsSectionView {
     init(mapViewModel: MapViewModel, currentSheetContent: Binding<SheetContent>) {
-        self._mapViewModel = ObservedObject(wrappedValue: mapViewModel)
-        self._currentSheetContent = currentSheetContent
+        _mapViewModel = ObservedObject(wrappedValue: mapViewModel)
+        _currentSheetContent = currentSheetContent
         _vm = StateObject(wrappedValue: SettingsSectionVM(mapViewModel: mapViewModel))
     }
 }
