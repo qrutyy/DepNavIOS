@@ -28,8 +28,8 @@ jobs:
       - name: Build
         run: |
           xcodebuild \
-            -project YourApp.xcodeproj \
-            -scheme YourApp \
+            -project DepNavIOS.xcodeproj \
+            -scheme DepNavIOS \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             clean build
