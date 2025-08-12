@@ -16,12 +16,12 @@
             "iconURL": "https://qrutyy.github.io/DepNavIOS/Assets.xcassets/AppIcon.appiconset/image-1024x1024.jpg",
             "tintColor": "#5CA399",
             "screenshots": [
-                "https://qrutyy.github.io/DepNavIOS/AltStoreResources/markersection.jpg",
+                "https://qrutyy.github.io/DepNavIOS/AltStoreResources/markersection.png",
                 "https://qrutyy.github.io/DepNavIOS/AltStoreResources/searchsection.png"
             ],
             "versions": [
                 {
-                    "version": "0.3",
+                    "version": "0.2",
                     "date": "2025-07-27",
                     "size": 120,
                     "downloadURL": "https://qrutyy.github.io/DepNavIOS/AltStoreResources/Payload.ipa",
