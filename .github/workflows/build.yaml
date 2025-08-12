@@ -26,9 +26,10 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Build
-        run: xcodebuild \
-          -project YourApp.xcodeproj \
-          -scheme YourApp \
-          -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15' \
-          clean build
+        run: |
+          xcodebuild \
+            -project YourApp.xcodeproj \
+            -scheme YourApp \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            clean build
