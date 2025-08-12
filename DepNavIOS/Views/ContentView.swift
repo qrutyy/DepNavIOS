@@ -19,7 +19,7 @@ struct ContentView: View {
         .height(200), // marker section
         .height(300), // for settings
         .medium, // medium
-        .large // full screen
+        .large, // full screen
     ]
     @State private var selectedDetent: PresentationDetent = .height(50)
 
