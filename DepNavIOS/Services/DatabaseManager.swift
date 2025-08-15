@@ -2,7 +2,7 @@
 //  DatabaseManager.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 04.07.2025.
+//  Created by Mikhail Gavrilenko on 04.07.2025.
 //
 import Foundation
 import SQLite3

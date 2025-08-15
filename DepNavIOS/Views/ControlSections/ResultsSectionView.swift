@@ -2,7 +2,7 @@
 //  ResultsSectionView.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 20.07.2025.
+//  Created by Mikhail Gavrilenko on 20.07.2025.
 //
 
 import SwiftUI

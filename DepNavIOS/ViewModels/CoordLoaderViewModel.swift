@@ -2,7 +2,7 @@
 //  CoordLoaderViewModel.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 29.06.2025.
+//  Created by Mikhail Gavrilenko on 29.06.2025.
 //
 
 import Foundation

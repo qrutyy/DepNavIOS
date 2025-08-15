@@ -4,7 +4,7 @@
    Info.plist
    DepNavIOS
 
-   Created by Michael Gavrilenko on 26.07.2025.
+   Created by Mikhail Gavrilenko on 26.07.2025.
    Copyright (c) 2025 ___ORGANIZATIONNAME___. All rights reserved.
 -->
 <dict>
@@ -12,7 +12,7 @@
 <false/>
 
 <key>NSHumanReadableCopyright</key>
-<string>© 2025 Michael Gavrilenko</string>
+<string>© 2025 Mikhail Gavrilenko</string>
 </dict>
 <plist version="1.0">
 <dict/>

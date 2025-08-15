@@ -2,7 +2,7 @@
 //  MapObjectModel.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 19.07.2025.
+//  Created by Mikhail Gavrilenko on 19.07.2025.
 //
 
 import Foundation
