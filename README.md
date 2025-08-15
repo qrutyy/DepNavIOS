@@ -44,8 +44,4 @@ Based on the original [Android project](https://github.com/timPushkin/DepNav/) m
 
 ## License
 
-This code is currently not licensed for reuse.
-
-It is shared for demonstration or evaluation purposes only. Commercial use, redistribution, or modification is not permitted.
-
-A full open-source license (e.g., MIT or Apache 2.0) may be added in the future.
+This code is published under Proprietary Non-Commercial License described in [LICENSE](https://github.com/qrutyy/DepNavIOS/blob/main/LICENSE.md)
