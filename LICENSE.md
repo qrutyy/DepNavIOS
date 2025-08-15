@@ -14,7 +14,16 @@ This license grants you a limited, non-exclusive, non-transferable right to view
     *   Remove, alter, or obscure any copyright, trademark, or other proprietary notices contained in the Software.
     *   Use any media files (images, audio, video), data sets, documentation, or APIs included with the Software.
 
-2.  **EXCEPTION: SPECIFIC FILES UNDER GPLv3**
+2.  **ACCESS AND USE BASED ON PERMISSIONS**
+
+    The copyright holder may grant additional permissions to specific users or collaborators under separate written agreements. Depending on such permissions:
+
+    *   Some users may be allowed to modify or use the Software in the scope of the Project or for development purposes **under the direction of the copyright holder**.
+    *   Other users may receive specific permission to use, modify, or redistribute the Software for their own purposes, as explicitly stated in a separate agreement.  
+    *   In all cases, the copyright and moral rights of the original work remain with the copyright holder.
+    *   Contributions via pull requests (PRs) are permitted **under the terms described in the repository's README**.
+
+3.  **EXCEPTION: SPECIFIC FILES UNDER GPLv3**
 
     The terms of this license DO NOT apply to the following files and directories:
 
@@ -28,11 +37,11 @@ This license grants you a limited, non-exclusive, non-transferable right to view
     *   Any use, modification, or redistribution of these files must comply with the terms of the GPLv3.
     *   The GPLv3 terms apply ONLY to these files and do not extend to any other part of this Software.
 
-3.  **NO WARRANTY**
+4.  **NO WARRANTY**
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-4.  **CONTACT AND LICENSING INQUIRIES**
+5.  **CONTACT AND LICENSING INQUIRIES**
 
     For any inquiries regarding licensing, commercial use, or permissions beyond the scope of this license, please contact: qrutyq@gmail.com.
 
