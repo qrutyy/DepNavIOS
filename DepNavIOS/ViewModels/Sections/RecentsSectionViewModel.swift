@@ -2,7 +2,7 @@
 //  RecentsSectionViewModel.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 05.08.2025.
+//  Created by Mikhail Gavrilenko on 05.08.2025.
 //
 
 import Combine

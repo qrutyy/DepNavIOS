@@ -2,7 +2,7 @@
 //  SearchResultRowView.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 11.07.2025.
+//  Created by Mikhail Gavrilenko on 11.07.2025.
 //
 
 import SwiftUI

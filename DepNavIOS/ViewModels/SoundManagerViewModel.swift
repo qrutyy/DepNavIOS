@@ -2,7 +2,7 @@
 //  SoundManagerViewModel.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 14.07.2025.
+//  Created by Mikhail Gavrilenko on 14.07.2025.
 //
 
 import AVKit

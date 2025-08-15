@@ -2,7 +2,7 @@
 //  BottomSearchSheetView.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 30.06.2025.
+//  Created by Mikhail Gavrilenko on 30.06.2025.
 //
 import SwiftUI
 

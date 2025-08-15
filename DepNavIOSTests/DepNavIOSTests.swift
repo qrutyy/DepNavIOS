@@ -2,7 +2,7 @@
 //  DepNavIOSTests.swift
 //  DepNavIOSTests
 //
-//  Created by Michael Gavrilenko on 26.06.2025.
+//  Created by Mikhail Gavrilenko on 26.06.2025.
 //
 
 @testable import DepNavIOS

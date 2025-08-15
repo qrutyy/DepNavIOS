@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  DepNavIOS
 //
-//  Created by Michael Gavrilenko on 23.06.2025.
+//  Created by Mikhail Gavrilenko on 23.06.2025.
 //
 
 import SwiftUI
