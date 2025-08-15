@@ -31,6 +31,16 @@ Copy this [link](https://qrutyy.github.io/DepNavIOS/AltStoreResources/alt-config
 ### Beta testing (WIP)
 Will be announced soon if we get this baaaaags.
 
+## Contributing
+
+Please read our [CONTRIBUTING.md](https://github.com/qrutyy/DepNavIOS/blob/main/CONTRIBUTING.md) file before submitting any pull requests. It contains important information about:
+
+- How to submit pull requests (PRs)  
+- What types of contributions are allowed  
+- Permissions and licensing for contributed code  
+
+By following the guidelines in `CONTRIBUTING.md`, you help us maintain code quality and ensure all contributions comply with the project license.
+
 ## Contact Me
 
 * Email: qrutyq@gmail.com
@@ -40,7 +50,7 @@ Questions about DepNavIOS in general? Make sure to read the [FAQ (WIP)](https://
 
 ## Credits
 
-Based on the original [Android project](https://github.com/timPushkin/DepNav/) made by **Timofei Pushkin**.  
+DepNavIOS continues the idea and path of a similar [Android project](https://github.com/timPushkin/DepNav/) made by **Timofei Pushkin**. We are grateful for the inspiration provided by their work.
 
 ## License
 
