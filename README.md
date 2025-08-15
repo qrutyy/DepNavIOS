@@ -50,7 +50,7 @@ Questions about DepNavIOS in general? Make sure to read the [FAQ (WIP)](https://
 
 ## Credits
 
-DepNavIOS continues the idea and path of a similar [Android project](https://github.com/timPushkin/DepNav/) made by **Timofei Pushkin**. We are grateful for the inspiration provided by their work.
+DepNavIOS continues the idea and path of a similar [Android project](https://github.com/timPushkin/DepNav/) made by **Timofei Pushkin**. We are grateful for the inspiration provided by his work.
 
 ## License
 
