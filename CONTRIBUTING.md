@@ -9,8 +9,8 @@ Access to this repository **does not grant any rights** to copy, redistribute, o
 ## How to Contribute
 
 1. **Fork the repository** (if you don't have direct write access).  
-2. **Create a branch** for your changes. Use descriptive names like `fix-typo` or `feature-add-xyz`.  
-3. **Make your changes** in your branch.  
+2. **Create a branch** for your changes. Use descriptive names like `fix/typo` or `feat/add-xyz`. Branch should have a tag (`fix/`, `chore/`, `build/` and so on), being a structural element from ones described [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Version-based postfix like `.../v3.0` can be included if it matters. 
+3. **Make your changes** in your branch. Commits should be made according to the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. 
 4. **Submit a Pull Request (PR)** to the main repository.  
    - Provide a clear description of what your PR does.  
    - Include screenshots, logs, or tests if relevant.  
