@@ -6,10 +6,25 @@
 //
 import SwiftUI
 
+struct Message: Codable {
+    let text: String
+}
+struct AuthResponse: Codable { let token: String }
+struct AuthRequest: Codable {
+    let deviceName: String
+    let userUUID: String
+    let deviceModel: String
+    let priorityMode: String 
+
+    let mapCode: String
+}
+
 struct SettingsSectionView: View {
     @ObservedObject var mapViewModel: MapViewModel
     @Binding var currentSheetContent: SheetContent
     @StateObject private var vm: SettingsSectionVM
+    @State private var message = "Нажми кнопку"
+    @State private var jwtToken: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -71,7 +86,7 @@ struct SettingsSectionView: View {
             ForEach(departments, id: \.id) { dep in
                 let isSelected = vm.selectedDepartment == dep.id
 
-                Button(action: {
+               Button(action: {
                     withAnimation {
                         vm.setDepartment(dep.id)
                     }

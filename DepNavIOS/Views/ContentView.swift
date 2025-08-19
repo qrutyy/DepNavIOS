@@ -90,7 +90,9 @@ struct ContentView: View {
                     showWelcomeScreen = true
                     hasLaunchedBefore = true
                 } else {
-                    await mapViewModel.loadMapData()
+                    showWelcomeScreen = true
+                    hasLaunchedBefore = true
+                    // await mapViewModel.loadMapData()
                 }
             }
         }
