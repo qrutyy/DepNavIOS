@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var showWelcomeScreen = false
     @State private var isBottomSheetPresented = true
     @StateObject private var mapViewModel = MapViewModel()
+    @State private var session = SessionStore()
 
     // Basic set of detents for the Bottom sheet.
     private let searchSheetDetents: Set<PresentationDetent> = [
@@ -70,8 +71,8 @@ struct ContentView: View {
             }
         } content: {
             WelcomeScreen(
-                showWelcomeScreen: $showWelcomeScreen,
-                selectedDepartment: $mapViewModel.selectedDepartment, selectedMapType: $mapViewModel.selectedMapType
+                mapViewModel: mapViewModel,
+                session: $session
             )
         }
         .sheet(isPresented: $isBottomSheetPresented) {
