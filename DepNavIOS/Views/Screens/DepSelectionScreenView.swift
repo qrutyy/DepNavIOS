@@ -26,10 +26,6 @@ struct DepartmentSelectionScreen: View {
         _session = session
     }
 
-    private var isContinueButtonDisabled: Bool {
-        mapViewModel.selectedMapType == "custom" && authorisationFailed
-    }
-
     var body: some View {
         ZStack {
             // Blurred background
@@ -54,29 +50,18 @@ struct DepartmentSelectionScreen: View {
                         TextField(LocalizedString("map_code_placeholder", comment: "Textfield placeholder for map code"), text: $vm.mapCodeInput)
                             .textFieldStyle(.roundedBorder)
                             .submitLabel(.search)
-                        // when re entering - make blue
-
+                            
                         if authorisationFailed {
                             Text(LocalizedString("authorisation_fail", comment: "Failed to authorise")).foregroundStyle(Color(.red)).font(.caption)
-                            if let error = vm.error {
-                                if error.contains("error:") {
-                                    let start = error.index(error.startIndex, offsetBy: 10)
-                                    let end = error.index(error.endIndex, offsetBy: -2)
-                                    let substring = error[start ..< end]
-                                    Text(String(substring))
+                            if vm.error != nil {
+                                Text(String(vm.error!))
                                         .foregroundStyle(Color.red)
                                         .font(.caption)
-                                } else {
-                                    Text(String(error))
-                                        .foregroundStyle(Color.red)
-                                        .font(.caption)
-                                }
                             }
                         }
                     } else {
                         Picker(LocalizedString("generic_map_department_selection_title", comment: "Map"), selection: $mapViewModel.selectedDepartment) {
                             Text(LocalizedString("department_name_mm", comment: "Mathematics and Mechanics")).tag("spbu-mm")
-                            Text(LocalizedString("department_name_ph", comment: "Faculty of Phisics")).tag("spbu-pf")
                         }.pickerStyle(.automatic)
                     }
                 }
@@ -91,20 +76,17 @@ struct DepartmentSelectionScreen: View {
                                 vm.mapCodeInput = ""
                                 print("Failed to authorize: \(vm.error!)")
                             } else {
-                                if !isContinueButtonDisabled {
                                     isLoading = true
                                     await mapViewModel.loadCustomMapFromServer(mapCode: vm.mapCodeInput)
                                     print("loading custom map")
                                     isLoading = false
                                     showDepartmentSelection = false
                                     showWelcomeScreen = false
-                                }
                             }
                         } else {
-                            if !isContinueButtonDisabled {
                                 showDepartmentSelection = false
                                 showWelcomeScreen = false
-                            }
+                        
                         }
                     }
                 }) {
@@ -114,7 +96,7 @@ struct DepartmentSelectionScreen: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .frame(width: 260, height: 35)
-                .background(isContinueButtonDisabled ? Color.gray : Color.blue)
+                .background(Color.blue)
                 .cornerRadius(8)
                 .padding(.bottom, 5)
                 .disabled(isLoading) // prevent spam taps

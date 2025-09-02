@@ -73,26 +73,24 @@ struct SettingsSectionView: View {
         }
         .padding(.vertical, 8)
     }
-
+    
+    // TODO: CRITICAL - fix ui layout of section
     private var departmentSection: some View {
-        let departments: [(id: String, display: String)] = [
-            ("spbu-mm", LocalizedString("settings_department_mm", comment: "MM department")),
-            ("spbu-pf", LocalizedString("settings_department_pf", comment: "PF department"))
-        ]
+        let departments = vm.getAvailableDepartments()
 
         return HStack(spacing: 12) {
             Text(LocalizedString("settings_department_title", comment: "Department switch"))
             Spacer()
 
-            ForEach(departments, id: \.id) { dep in
-                let isSelected = vm.selectedDepartment == dep.id
+            ForEach(departments, id: \.internalName) { dep in
+                let isSelected = vm.selectedDepartment == dep.internalName
 
                 Button(action: {
                     withAnimation {
-                        vm.setDepartment(dep.id)
+                        vm.setDepartment(dep.internalName)
                     }
                 }) {
-                    Text(dep.display)
+                    Text(vm.getDepartmentName(displayName: dep.displayName))
                         .fontWeight(isSelected ? .bold : .regular)
                         .foregroundColor(isSelected ? .blue : .primary)
                         .padding(6)
