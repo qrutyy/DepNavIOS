@@ -14,16 +14,13 @@ protocol MapDataServiceProtocol {
 
 class MapDataService: MapDataServiceProtocol {
     func loadMapData(for department: String) async throws -> MapDescription {
-        guard let url = Bundle.main.url(
-            forResource: department,
-            withExtension: "json",
-            subdirectory: "Maps/\(department)"
-        ) else {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let jsonURL = docs.appendingPathComponent("Maps").appendingPathComponent(department).appendingPathComponent("\(department).json")
+        guard FileManager.default.fileExists(atPath: jsonURL.path) else {
             throw MapDataError.fileNotFound(department)
         }
-
         do {
-            let data = try Data(contentsOf: url)
+            let data = try Data(contentsOf: jsonURL)
             let decodedData = try JSONDecoder().decode(MapDescription.self, from: data)
             return decodedData
         } catch {

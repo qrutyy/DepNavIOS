@@ -37,6 +37,23 @@
         }
       }
     },
+    "authorisation_fail" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authorization failed:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Авторизация не удалась:"
+          }
+        }
+      }
+    },
     "department_name_mm" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -247,6 +264,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В процессе реализации"
+          }
+        }
+      }
+    },
+    "map_code_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter map code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите код карты"
           }
         }
       }

@@ -45,7 +45,7 @@ actor DatabaseManager {
     }
 
     func checkTablesExist() -> Bool {
-        let requiredTables: Set<String> = ["History", "Favorites", "DBHandler"]
+        let requiredTables: Set<String> = ["History", "Favorites"]
         var foundTables: Set<String> = []
 
         let querySQL = "SELECT name FROM sqlite_master WHERE type='table';"
@@ -77,24 +77,6 @@ actor DatabaseManager {
     private func createTables() {
         createHistoryTable()
         createFavoriteTable()
-        createDBHandlerTable()
-    }
-
-    private func createDBHandlerTable() {
-        let createTableString = """
-            CREATE TABLE IF NOT EXISTS DBHandler(
-            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT,
-            Result TEXT,
-            AvailableDepartments TEXT,
-            HistoryList TEXT,
-            FavoritesList TEXT
-        );
-        """
-        if sqlite3_exec(db, createTableString, nil, nil, nil) != SQLITE_OK {
-            let errmsg = String(cString: sqlite3_errmsg(db)!)
-            print("Error creating DBHandler table: \(errmsg)")
-        }
     }
 
     private func bind(text: String?, to statement: OpaquePointer?, at index: Int32) {
@@ -257,90 +239,6 @@ extension DatabaseManager {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             print("Error creating History table: \(errmsg)")
         }
-    }
-
-    // MARK: - DBHandler CRUD Operations
-
-    // Note: The logic for storing arrays as JSON strings is maintained.
-
-    func insertDBHandler(_ handler: DBHandlerModel) -> Bool {
-        var success = false
-        let insertSQL = "INSERT INTO DBHandler (Name, Result, AvailableDepartments, HistoryList, FavoritesList) VALUES (?, ?, ?, ?, ?);"
-        var statement: OpaquePointer?
-
-        if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
-            bind(text: handler.name, to: statement, at: 1)
-            bind(text: handler.result, to: statement, at: 2)
-
-            let encoder = JSONEncoder()
-            if let departmentsData = try? encoder.encode(handler.availableDepartments),
-               let departmentsJSON = String(data: departmentsData, encoding: .utf8)
-            {
-                bind(text: departmentsJSON, to: statement, at: 3)
-            }
-
-            if let historyData = try? encoder.encode(handler.historyList),
-               let historyJSON = String(data: historyData, encoding: .utf8)
-            {
-                bind(text: historyJSON, to: statement, at: 4)
-            }
-
-            if let favoritesData = try? encoder.encode(handler.favoritesList),
-               let favoritesJSON = String(data: favoritesData, encoding: .utf8)
-            {
-                bind(text: favoritesJSON, to: statement, at: 5)
-            }
-
-            if sqlite3_step(statement) == SQLITE_DONE {
-                success = true
-            }
-        }
-        sqlite3_finalize(statement)
-        return success
-    }
-
-    func getAllDBHandlers() -> [DBHandlerModel] {
-        var handlers: [DBHandlerModel] = []
-        let querySQL = "SELECT Id, Name, Result, AvailableDepartments, HistoryList, FavoritesList FROM DBHandler;"
-        var statement: OpaquePointer?
-
-        if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
-            while sqlite3_step(statement) == SQLITE_ROW {
-                let id = Int(sqlite3_column_int(statement, 0))
-                let name = String(cString: sqlite3_column_text(statement, 1))
-                let result = String(cString: sqlite3_column_text(statement, 2))
-
-                let decoder = JSONDecoder()
-                var departments: [String]?
-                if let departmentsText = sqlite3_column_text(statement, 3), let data = String(cString: departmentsText).data(using: .utf8) {
-                    departments = try? decoder.decode([String].self, from: data)
-                }
-
-                var historyList: [MapObjectModel]?
-                if let historyText = sqlite3_column_text(statement, 4), let data = String(cString: historyText).data(using: .utf8) {
-                    historyList = try? decoder.decode([MapObjectModel].self, from: data)
-                }
-
-                var favoritesList: [MapObjectModel]?
-                if let favoritesText = sqlite3_column_text(statement, 5), let data = String(cString: favoritesText).data(using: .utf8) {
-                    favoritesList = try? decoder.decode([MapObjectModel].self, from: data)
-                }
-
-                let handler = DBHandlerModel(
-                    id: id,
-                    name: name,
-                    result: result,
-                    availableDepartments: departments,
-                    historyLength: historyList?.count, // Deriving length from the list
-                    historyList: historyList,
-                    favoritesLength: favoritesList?.count, // for faster "get"
-                    favoriteList: favoritesList
-                )
-                handlers.append(handler)
-            }
-        }
-        sqlite3_finalize(statement)
-        return handlers
     }
 
     // MARK: Favorites section

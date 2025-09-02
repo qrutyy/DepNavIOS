@@ -19,6 +19,7 @@ final class DepSelectionViewModel: ObservableObject {
 
     @MainActor
     func authorizeAndStore(mapCode: String) async {
+        error = nil
         isLoading = true
         defer { isLoading = false }
         do {

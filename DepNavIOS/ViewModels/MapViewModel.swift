@@ -15,7 +15,7 @@ class MapViewModel: ObservableObject {
     // MARK: - Published Properties for UI State
 
     @Published var selectedFloor: Int = 1
-    @Published var selectedDepartment: String = "spbu-pf"
+    @Published var selectedDepartment: String = "spbu-mm"
     @Published var markerCoordinate: CGPoint?
     @Published var searchQuery: String = ""
     @Published var isLoading: Bool = false
@@ -28,6 +28,8 @@ class MapViewModel: ObservableObject {
     @Published var dbViewModel = DatabaseViewModel()
 
     @Published var searchResults: [InternalMarkerModel] = []
+
+    @Published var sessionStore: SessionStore?
 
     // MARK: - Services and Dependencies
 
@@ -82,8 +84,62 @@ class MapViewModel: ObservableObject {
         isLoading = false
     }
 
+    // MARK: - Unified Map Storage
+
+    private let mapsDirectory: URL = {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent("Maps")
+    }()
+
+    private var hasCopiedBundledMaps: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasCopiedBundledMaps") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasCopiedBundledMaps") }
+    }
+
+    /// Call this on app launch to ensure bundled maps are available in Documents/Maps
+    func ensureMapsDirectory() {
+        let fileManager = FileManager.default
+        if !hasCopiedBundledMaps {
+            if let bundleMapsURL = Bundle.main.url(forResource: "Maps", withExtension: nil) {
+                do {
+                    if fileManager.fileExists(atPath: mapsDirectory.path) {
+                        try fileManager.removeItem(at: mapsDirectory)
+                    }
+                    try fileManager.copyItem(at: bundleMapsURL, to: mapsDirectory)
+                    hasCopiedBundledMaps = true
+                } catch {
+                    print("Failed to copy bundled Maps: \(error)")
+                }
+            } else {
+                print("Maps directory not found in bundle.")
+            }
+        }
+    }
+
+    /// Helper to get a file URL for a map asset (SVG or JSON)
+    func mapFileURL(department: String, fileName: String) -> URL? {
+        let dir = mapsDirectory.appendingPathComponent(selectedDepartment)
+        let fileURL = dir.appendingPathComponent(fileName)
+        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
+    }
+
+    func getAllAvailableMapNames() -> [String] {
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(at: mapsDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+            let directories = contents.filter { url in
+                var isDir: ObjCBool = false
+                return FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) && isDir.boolValue
+            }
+            return directories.map { $0.lastPathComponent }
+        } catch {
+            print("Failed reading the directory: \(error)")
+            return []
+        }
+    }
+
     func preloadAllDepartments() async {
-        let departments = ["spbu-mm", "spbu-pf"]
+        var departments = ["spbu-mm"]
+        departments += getAllAvailableMapNames() // we assert that if the folder is present - loading was successfull
         for dep in departments where loadedMapDescriptions[dep] == nil {
             do {
                 let mapDescription = try await mapDataService.loadMapData(for: dep)
@@ -92,6 +148,40 @@ class MapViewModel: ObservableObject {
                 print("Failed to load map for \(dep): \(error)")
             }
         }
+    }
+
+    // In loadCustomMapFromServer, use extractCustomMap and update loadedMapDescriptions
+    func loadCustomMapFromServer(mapCode: String) async {
+        let directory = URL(string: "http://localhost:8080/maps/" + mapCode)!
+        guard let session = sessionStore, let token = session.token else {
+            print("No session or token")
+            return
+        }
+        do {
+            let remoteService = MapRemoteService(session: session)
+            let zipURL = try await remoteService.downloadMap(url: directory)
+            if let mapDir = extractCustomMap(zipURL: zipURL) {
+                let files = try FileManager.default.contentsOfDirectory(at: mapDir, includingPropertiesForKeys: nil)
+                if let jsonFile = files.first(where: { $0.pathExtension.lowercased() == "json" }) {
+                    let jsonData = try Data(contentsOf: jsonFile)
+                    let mapDesc = try JSONDecoder().decode(MapDescription.self, from: jsonData)
+                    Task { @MainActor in
+                        self.loadedMapDescriptions[mapDesc.internalName] = mapDesc
+                        self.selectedDepartment = mapDesc.internalName
+                    }
+                    let svgs = files.filter { $0.pathExtension.lowercased() == "svg" }
+                    print("SVG files:", svgs.map { $0.lastPathComponent })
+                } else {
+                    print("❌ JSON file not found in extracted map directory")
+                }
+            }
+        } catch {
+            print("Error while loading map:", error)
+        }
+    }
+
+    func setSessionStore(_ session: SessionStore) {
+        sessionStore = session
     }
 
     func changeFloor(_ floor: Int) {
@@ -260,11 +350,7 @@ class MapViewModel: ObservableObject {
     // MARK: - Map Asset URL
 
     var currentMapSVGURL: URL? {
-        Bundle.main.url(
-            forResource: "floor\(selectedFloor)",
-            withExtension: "svg",
-            subdirectory: "Maps/\(selectedDepartment)"
-        )
+        mapFileURL(department: selectedDepartment, fileName: "floor\(selectedFloor).svg")
     }
 
     func clearMarker() {
@@ -289,5 +375,57 @@ class MapViewModel: ObservableObject {
                                     floor: floorData.floor, coordinate: marker.coordinate, type: marker.type, marker: marker, department: selectedDepartment)
             }
         }
+    }
+
+    // When extracting a custom map, always extract to Documents/Maps/<mapCode>/
+    func extractCustomMap(zipURL: URL) -> URL? {
+        let fileManager = FileManager.default
+        let tmpDestinationURL = mapsDirectory.appendingPathComponent("tmp")
+        do {
+            if fileManager.fileExists(atPath: tmpDestinationURL.path) {
+                try fileManager.removeItem(at: tmpDestinationURL)
+            }
+            try fileManager.createDirectory(at: tmpDestinationURL, withIntermediateDirectories: true)
+            try fileManager.unzipItem(at: zipURL, to: tmpDestinationURL)
+            try fileManager.removeItem(at: zipURL)
+
+            let fileManager = FileManager.default
+            let tmpDestinationURL = mapsDirectory.appendingPathComponent("tmp")
+
+            do {
+                let contents = try fileManager.contentsOfDirectory(
+                    at: tmpDestinationURL,
+                    includingPropertiesForKeys: nil,
+                    options: [.skipsHiddenFiles]
+                )
+
+                if let jsonFile = contents.first(where: { $0.pathExtension.lowercased() == "json" }) {
+                    let mapInternalName = jsonFile.deletingPathExtension().lastPathComponent
+
+                    print("Found JSON file:", jsonFile.lastPathComponent)
+                    print("Internal name:", mapInternalName)
+
+                    let mapDirectoryURL = mapsDirectory.appendingPathComponent(mapInternalName)
+                    
+                    if fileManager.fileExists(atPath: mapDirectoryURL.path) {
+                        try fileManager.removeItem(at: mapDirectoryURL)
+                    }
+                    print(mapDirectoryURL, tmpDestinationURL)
+
+                    try fileManager.moveItem(at: tmpDestinationURL, to: mapDirectoryURL)
+                    
+                    return mapDirectoryURL
+                } else {
+                    print("❌ No JSON file found in tmp directory")
+                }
+            } catch {
+                print("Error reading tmp directory:", error)
+            }
+
+        } catch {
+            print("Failed to unzip custom map: \(error)")
+            return nil
+        }
+        return nil
     }
 }

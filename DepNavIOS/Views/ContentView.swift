@@ -20,7 +20,7 @@ struct ContentView: View {
         .height(200), // marker section
         .height(300), // for settings
         .medium, // medium
-        .large, // full screen
+        .large // full screen
     ]
     @State private var selectedDetent: PresentationDetent = .height(50)
 
@@ -41,6 +41,9 @@ struct ContentView: View {
                 SVGMapView(
                     mapViewModel: mapViewModel
                 )
+                .onAppear {
+                    print("fucked, \(mapViewModel.selectedDepartment)")
+                }
                 .edgesIgnoringSafeArea(.all)
 
                 FloorSelectionView(
@@ -57,6 +60,7 @@ struct ContentView: View {
                     .onAppear {
                         if !showWelcomeScreen {
                             Task {
+                                mapViewModel.ensureMapsDirectory()
                                 await mapViewModel.preloadAllDepartments()
                                 await mapViewModel.loadMapData()
                             }
@@ -72,7 +76,8 @@ struct ContentView: View {
         } content: {
             WelcomeScreen(
                 mapViewModel: mapViewModel,
-                session: $session
+                session: $session,
+                showWelcomeScreen: $showWelcomeScreen
             )
         }
         .sheet(isPresented: $isBottomSheetPresented) {

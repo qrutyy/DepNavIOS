@@ -10,6 +10,7 @@ import SwiftUI
 struct WelcomeScreen: View {
     @ObservedObject var mapViewModel: MapViewModel
     @Binding var session: SessionStore
+    @Binding var showWelcomeScreen: Bool
     @State private var showDepartmentSelection = false
 
     var body: some View {
@@ -69,7 +70,7 @@ struct WelcomeScreen: View {
             }
             .padding()
             .sheet(isPresented: $showDepartmentSelection) {
-                DepartmentSelectionScreen(showDepartmentSelection: $showDepartmentSelection, mapViewModel: mapViewModel,
+                DepartmentSelectionScreen(showDepartmentSelection: $showDepartmentSelection, showWelcomeScreen: $showWelcomeScreen, mapViewModel: mapViewModel,
                                           session: $session)
             }
         }
@@ -80,4 +81,4 @@ struct WelcomeScreen: View {
 //    static var previews: some View {
 //        WelcomeScreen(showWelcomeScreen: .constant(true), selectedDepartment: .constant("spbu-mm"), selectedMapType: .constant(""))
 //    }
-//}
+// }

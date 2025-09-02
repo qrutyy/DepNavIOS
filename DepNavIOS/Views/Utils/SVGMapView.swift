@@ -17,10 +17,33 @@ struct SVGMapView: View {
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
 
+    func directoryTree(at url: URL, prefix: String = "") -> String {
+        var result = ""
+        let fileManager = FileManager.default
+
+        guard let contents = try? fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) else {
+            return result
+        }
+
+        for (index, item) in contents.enumerated() {
+            let isLast = index == contents.count - 1
+            let branch = isLast ? "└── " : "├── "
+            result += prefix + branch + item.lastPathComponent + "\n"
+
+            var isDir: ObjCBool = false
+            if fileManager.fileExists(atPath: item.path, isDirectory: &isDir), isDir.boolValue {
+                let newPrefix = prefix + (isLast ? "    " : "│   ")
+                result += directoryTree(at: item, prefix: newPrefix)
+            }
+        }
+        return result
+    }
+
     var body: some View {
-        if let url = mapViewModel.currentMapSVGURL {
+        let url = mapViewModel.currentMapSVGURL
+        if url != nil {
             AdvSVGView(
-                url: url,
+                url: url!,
                 mapViewModel: mapViewModel
             )
             .onAppear {
@@ -35,7 +58,9 @@ struct SVGMapView: View {
                     .font(.headline)
             }
             .onAppear {
-                print("SVGView: File '\(mapViewModel.selectedDepartment)/floor\(mapViewModel.selectedFloor).svg' wasn't found.")
+                print("SVGView: File 'Maps/\(mapViewModel.selectedDepartment)/floor\(mapViewModel.selectedFloor).svg' wasn't found.")
+                print(directoryTree(at: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                ))
             }
         }
     }

@@ -11,6 +11,7 @@
 		6A3A255B2E0DDDAA00C3249A /* Maps in Resources */ = {isa = PBXBuildFile; fileRef = 6A3A255A2E0DDDAA00C3249A /* Maps */; };
 		6A59DB522E117F1900174334 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 6A59DB512E117F1900174334 /* SVGView */; };
 		6AC0B7AE2E34E15300E514B0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6AC0B7AD2E34E15300E514B0 /* Assets.xcassets */; };
+		6AEF78CF2E5B509100E95F09 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 6AEF78CE2E5B509100E95F09 /* ZIPFoundation */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6A59DB522E117F1900174334 /* SVGView in Frameworks */,
+				6AEF78CF2E5B509100E95F09 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,6 +153,7 @@
 			name = DepNavIOS;
 			packageProductDependencies = (
 				6A59DB512E117F1900174334 /* SVGView */,
+				6AEF78CE2E5B509100E95F09 /* ZIPFoundation */,
 			);
 			productName = DepNavIOS;
 			productReference = 6AD4F8CA2E0D9BAB00201BF5 /* DepNavIOS.app */;
@@ -237,6 +240,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6A59DB502E117EC300174334 /* XCRemoteSwiftPackageReference "SVGView" */,
+				6AEF78CD2E5B509100E95F09 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AD4F8CB2E0D9BAB00201BF5 /* Products */;
@@ -630,6 +634,14 @@
 				minimumVersion = 1.0.6;
 			};
 		};
+		6AEF78CD2E5B509100E95F09 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -637,6 +649,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6A59DB502E117EC300174334 /* XCRemoteSwiftPackageReference "SVGView" */;
 			productName = SVGView;
+		};
+		6AEF78CE2E5B509100E95F09 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6AEF78CD2E5B509100E95F09 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

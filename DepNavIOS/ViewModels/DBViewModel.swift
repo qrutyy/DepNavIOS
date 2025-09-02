@@ -15,7 +15,6 @@ import Foundation
 class DatabaseViewModel: ObservableObject {
     @Published var historyItems: [MapObjectModel] = []
     @Published var favoriteItems: [MapObjectModel] = []
-    @Published var DBHandlerItems: [DBHandlerModel] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -32,26 +31,22 @@ class DatabaseViewModel: ObservableObject {
 
     // MARK: - History Methods
 
-    func loadHistoryItems() {
+    func loadHistoryItems() async {
         isLoading = true
         errorMessage = nil
-        Task {
-            let items = await databaseService.getHistoryItems()
-            // @Published properties updates are happening in the main thread, bc of the @MainActor
-            self.historyItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
-            self.isLoading = false
-        }
+        let items = await databaseService.getHistoryItems()
+        // @Published properties updates are happening in the main thread, bc of the @MainActor
+        historyItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
+        isLoading = false
     }
 
-    func loadFavoriteItems() {
+    func loadFavoriteItems() async {
         isLoading = true
         errorMessage = nil
-        Task {
-            let items = await databaseService.getFavoriteItems()
-            // @Published properties updates are happening in the main thread, bc of the @MainActor
-            self.favoriteItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
-            self.isLoading = false
-        }
+        let items = await databaseService.getFavoriteItems()
+        // @Published properties updates are happening in the main thread, bc of the @MainActor
+        favoriteItems = items.sorted(by: { $0.id > $1.id }) // Sort for the UI
+        isLoading = false
     }
 
     func addHistoryItem(_ item: MapObjectModel) {
@@ -148,8 +143,8 @@ class DatabaseViewModel: ObservableObject {
 
     func loadData() {
         Task {
-            loadHistoryItems()
-            loadFavoriteItems()
+            await loadHistoryItems()
+            await loadFavoriteItems()
         }
     }
 

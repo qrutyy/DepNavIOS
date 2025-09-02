@@ -7,19 +7,20 @@
 
 import SwiftUI
 
-
 struct DepartmentSelectionScreen: View {
     @Binding var showDepartmentSelection: Bool
+    @Binding var showWelcomeScreen: Bool
     @ObservedObject var mapViewModel: MapViewModel
     @Binding var session: SessionStore
-    
+
     @State var authorisationFailed: Bool = false
     @StateObject private var vm: DepSelectionViewModel
-    
+
     @State private var isLoading: Bool = false
 
-    init(showDepartmentSelection: Binding<Bool>, mapViewModel: MapViewModel, session: Binding<SessionStore>) {
+    init(showDepartmentSelection: Binding<Bool>, showWelcomeScreen: Binding<Bool>, mapViewModel: MapViewModel, session: Binding<SessionStore>) {
         _showDepartmentSelection = showDepartmentSelection
+        _showWelcomeScreen = showWelcomeScreen
         _mapViewModel = ObservedObject(initialValue: mapViewModel)
         _vm = StateObject(wrappedValue: DepSelectionViewModel(session: session.wrappedValue))
         _session = session
@@ -54,18 +55,23 @@ struct DepartmentSelectionScreen: View {
                             .textFieldStyle(.roundedBorder)
                             .submitLabel(.search)
                         // when re entering - make blue
-                        
+
                         if authorisationFailed {
                             Text(LocalizedString("authorisation_fail", comment: "Failed to authorise")).foregroundStyle(Color(.red)).font(.caption)
                             if let error = vm.error {
-                                let start = error.index(error.startIndex, offsetBy: 10)
-                                let end = error.index(error.endIndex, offsetBy: -2)
-                                let substring = error[start..<end]
-                                Text(String(substring))
-                                    .foregroundStyle(Color.red)
-                                    .font(.caption)
+                                if error.contains("error:") {
+                                    let start = error.index(error.startIndex, offsetBy: 10)
+                                    let end = error.index(error.endIndex, offsetBy: -2)
+                                    let substring = error[start ..< end]
+                                    Text(String(substring))
+                                        .foregroundStyle(Color.red)
+                                        .font(.caption)
+                                } else {
+                                    Text(String(error))
+                                        .foregroundStyle(Color.red)
+                                        .font(.caption)
+                                }
                             }
-                    
                         }
                     } else {
                         Picker(LocalizedString("generic_map_department_selection_title", comment: "Map"), selection: $mapViewModel.selectedDepartment) {
@@ -80,7 +86,7 @@ struct DepartmentSelectionScreen: View {
                     Task {
                         if mapViewModel.selectedMapType == "custom" {
                             await vm.authorizeAndStore(mapCode: vm.mapCodeInput)
-                            if (vm.error != nil && vm.error!.isEmpty == false) {
+                            if vm.error != nil && vm.error!.isEmpty == false {
                                 authorisationFailed = true
                                 vm.mapCodeInput = ""
                                 print("Failed to authorize: \(vm.error!)")
@@ -88,16 +94,18 @@ struct DepartmentSelectionScreen: View {
                                 if !isContinueButtonDisabled {
                                     isLoading = true
                                     await mapViewModel.loadCustomMapFromServer(mapCode: vm.mapCodeInput)
+                                    print("loading custom map")
                                     isLoading = false
                                     showDepartmentSelection = false
+                                    showWelcomeScreen = false
                                 }
                             }
                         } else {
                             if !isContinueButtonDisabled {
                                 showDepartmentSelection = false
+                                showWelcomeScreen = false
                             }
                         }
-                        
                     }
                 }) {
                     Text(LocalizedString("generic_continue_button", comment: "Generic continue button"))
@@ -138,6 +146,7 @@ struct BlurView: UIViewRepresentable {
 
 struct DepartmentSelectionScreen_Previews: PreviewProvider {
     static var previews: some View {
-        DepartmentSelectionScreen(showDepartmentSelection: .constant(true), mapViewModel: MapViewModel(), session: .constant(SessionStore()))
+        
+        DepartmentSelectionScreen(showDepartmentSelection: .constant(true), showWelcomeScreen: .constant(true), mapViewModel: MapViewModel(), session: .constant(SessionStore()))
     }
 }
