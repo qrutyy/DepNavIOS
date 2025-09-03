@@ -73,7 +73,7 @@ struct SettingsSectionView: View {
         }
         .padding(.vertical, 8)
     }
-    
+
     // TODO: CRITICAL - fix ui layout of section
     private var departmentSection: some View {
         let departments = vm.getAvailableDepartments()

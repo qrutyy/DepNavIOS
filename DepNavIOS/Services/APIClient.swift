@@ -15,8 +15,19 @@ struct APIClient {
                                headers: [String: String] = [:],
                                body: Data? = nil,
                                decoder: JSONDecoder = JSONDecoder()) async throws -> T {
-        var url = baseURL
-        url.append(path: path)
+        // Support query parameters in path
+        var url: URL
+        if let qIndex = path.firstIndex(of: "?") {
+            let basePath = String(path[..<qIndex])
+            let query = String(path[qIndex...])
+            var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)!
+            components.path += basePath
+            components.percentEncodedQuery = String(query.dropFirst())
+            url = components.url!
+        } else {
+            url = baseURL
+            url.append(path: path)
+        }
 
         var req = URLRequest(url: url)
         req.httpMethod = method

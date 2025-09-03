@@ -59,5 +59,17 @@ struct MapRemoteService {
         return zipURL
     }
 
+    func checkMapExists(mapCode: String) async -> Bool {
+        struct ExistsResponse: Decodable { let exists: Bool }
+        do {
+            let resp: ExistsResponse = try await api.request("/maps/exists?map_code=\(mapCode)")
+            return resp.exists
+        } catch {
+            // If the API returns 404 or any error, treat as not found
+            print("Error checking map existence: \(error)")
+            return false
+        }
+    }
+
     // Remove extractMap and any temp directory logic for maps. Extraction is now handled in MapViewModel to Documents/Maps/<mapCode>/
 }

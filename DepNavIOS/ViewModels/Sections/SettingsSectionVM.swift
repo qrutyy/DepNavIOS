@@ -27,12 +27,12 @@ final class SettingsSectionVM: ObservableObject {
         selectedDepartment = dep
         mapViewModel.selectedDepartment = dep
     }
-    
+
     func getAvailableDepartments() -> [(internalName: String, displayName: LocalizedText)] {
         return mapViewModel.getAvailableDepartments()
     }
+
     func getDepartmentName(displayName: LocalizedText) -> String {
         return selectedLanguage == LanguageModel.ru ? displayName.ru : displayName.en
     }
-    
 }

@@ -13,7 +13,7 @@ import SwiftUI
 @MainActor
 class MapViewModel: ObservableObject {
     // MARK: - Published Properties for UI State
-    
+
     @Published var selectedFloor: Int = 1
     @Published var selectedDepartment: String = "spbu-mm"
     @Published var markerCoordinate: CGPoint?
@@ -24,26 +24,26 @@ class MapViewModel: ObservableObject {
     @Published var selectedMarker: String = "" // from map choose
     @Published var selectedMapType: String = "" // just a plug for now. will be a part of the custom map import system
     @Published var mapControl: MapControlModel = .init()
-    
+
     @Published var dbViewModel = DatabaseViewModel()
-    
+
     @Published var searchResults: [InternalMarkerModel] = []
-    
+
     @Published var sessionStore: SessionStore?
-    
+
     // MARK: - Services and Dependencies
-    
+
     private let mapDataService: MapDataService
-    
+
     private var loadedMapDescriptions: [String: MapDescription] = [:]
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     @ObservedObject var languageManager = LanguageManagerModel.shared
-    
+
     init(mapDataService: MapDataService = MapDataService()) {
         self.mapDataService = mapDataService
-        
+
         $selectedDepartment
             .dropFirst() // чтобы не сработало на дефолтном значении
             .sink { [weak self] _ in
@@ -52,25 +52,25 @@ class MapViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-        
+
         dbViewModel.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
     }
-    
+
     // MARK: - Map Management
-    
+
     func loadMapData() async {
         if loadedMapDescriptions[selectedDepartment] != nil {
             print("Map for \(selectedDepartment) already loaded.")
             return
         }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         do {
             let mapDescription = try await mapDataService.loadMapData(for: selectedDepartment)
             if mapDescription.floors.isEmpty || mapDescription.floorWidth <= 0 || mapDescription.floorHeight <= 0 || mapDescription.internalName.isEmpty {
@@ -80,22 +80,22 @@ class MapViewModel: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
         }
-        
+
         isLoading = false
     }
-    
+
     // MARK: - Unified Map Storage
-    
+
     private let mapsDirectory: URL = {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return docs.appendingPathComponent("Maps")
     }()
-    
+
     private var hasCopiedBundledMaps: Bool {
         get { UserDefaults.standard.bool(forKey: "hasCopiedBundledMaps") }
         set { UserDefaults.standard.set(newValue, forKey: "hasCopiedBundledMaps") }
     }
-    
+
     /// Call this on app launch to ensure bundled maps are available in Documents/Maps
     func ensureMapsDirectory() {
         let fileManager = FileManager.default
@@ -115,14 +115,14 @@ class MapViewModel: ObservableObject {
             }
         }
     }
-    
+
     /// Helper to get a file URL for a map asset (SVG or JSON)
-    func mapFileURL(department: String, fileName: String) -> URL? {
+    func mapFileURL(department _: String, fileName: String) -> URL? {
         let dir = mapsDirectory.appendingPathComponent(selectedDepartment)
         let fileURL = dir.appendingPathComponent(fileName)
         return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
     }
-    
+
     func getAllAvailableMapNames() -> [String] {
         do {
             let contents = try FileManager.default.contentsOfDirectory(at: mapsDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
@@ -136,9 +136,9 @@ class MapViewModel: ObservableObject {
             return []
         }
     }
-    
+
     func getAvailableDepartments() -> [(internalName: String, displayName: LocalizedText)] {
-        return loadedMapDescriptions.map { (key, mapDescription) in
+        return loadedMapDescriptions.map { _, mapDescription in
             (internalName: mapDescription.internalName, displayName: mapDescription.title)
         }
     }
@@ -156,9 +156,19 @@ class MapViewModel: ObservableObject {
         }
     }
 
+    func checkMapExists(mapCode: String) async -> Bool {
+        guard let session = sessionStore else {
+            print("No session")
+            return false
+        }
+        let remoteService = MapRemoteService(session: session)
+        return await remoteService.checkMapExists(mapCode: mapCode)
+    }
+
     // In loadCustomMapFromServer, use extractCustomMap and update loadedMapDescriptions
+    // TODO: move some logic to pure MapRemoteService methods
     func loadCustomMapFromServer(mapCode: String) async {
-        let directory = URL(string: "http://localhost:8080/maps/" + mapCode)!
+        let directory = URL(string: "http://localhost:8080/maps?map_code=\(mapCode)")!
         guard let session = sessionStore, let token = session.token else {
             print("No session or token")
             return
@@ -412,14 +422,14 @@ class MapViewModel: ObservableObject {
                     print("Internal name:", mapInternalName)
 
                     let mapDirectoryURL = mapsDirectory.appendingPathComponent(mapInternalName)
-                    
+
                     if fileManager.fileExists(atPath: mapDirectoryURL.path) {
                         try fileManager.removeItem(at: mapDirectoryURL)
                     }
                     print(mapDirectoryURL, tmpDestinationURL)
 
                     try fileManager.moveItem(at: tmpDestinationURL, to: mapDirectoryURL)
-                    
+
                     return mapDirectoryURL
                 } else {
                     print("❌ No JSON file found in tmp directory")

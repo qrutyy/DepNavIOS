@@ -14,11 +14,12 @@ final class DepSelectionViewModel: ObservableObject {
 
     let auth = AuthService()
     @ObservedObject var session: SessionStore
+    @ObservedObject var mapViewModel: MapViewModel
 
-    init(session: SessionStore) { self.session = session }
+    init(session: SessionStore, mapViewModel: MapViewModel) { self.session = session; self.mapViewModel = mapViewModel }
 
     @MainActor
-    func authorizeAndStore(mapCode: String) async {
+    func authorize() async {
         error = nil
         isLoading = true
         defer { isLoading = false }
@@ -28,14 +29,25 @@ final class DepSelectionViewModel: ObservableObject {
                 deviceName: device.name,
                 userUUID: device.identifierForVendor?.uuidString ?? UUID().uuidString,
                 deviceModel: device.model,
-                priorityMode: "user",
-                mapCode: mapCode
+                priorityMode: "user"
             )
             session.token = token
-            session.mapCode = mapCode
-            print("Entered map code \(mapCode) and received token \(token)")
         } catch {
-            self.error = error.localizedDescription
+            self.error = LocalizedString("authorisation_fail", comment: "Failed to authorise")
         }
+    }
+
+    @MainActor
+    func checkMapExists() async -> Bool {
+        let result: Bool
+        error = nil
+        print("Checking if map \(mapCodeInput) exists")
+        do {
+            result = await mapViewModel.checkMapExists(mapCode: mapCodeInput)
+        }
+        if !result {
+            error = LocalizedString("map_existence_fail", comment: "Map does not exist")
+        }
+        return result
     }
 }

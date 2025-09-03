@@ -22,7 +22,7 @@ struct DepartmentSelectionScreen: View {
         _showDepartmentSelection = showDepartmentSelection
         _showWelcomeScreen = showWelcomeScreen
         _mapViewModel = ObservedObject(initialValue: mapViewModel)
-        _vm = StateObject(wrappedValue: DepSelectionViewModel(session: session.wrappedValue))
+        _vm = StateObject(wrappedValue: DepSelectionViewModel(session: session.wrappedValue, mapViewModel: mapViewModel))
         _session = session
     }
 
@@ -50,19 +50,15 @@ struct DepartmentSelectionScreen: View {
                         TextField(LocalizedString("map_code_placeholder", comment: "Textfield placeholder for map code"), text: $vm.mapCodeInput)
                             .textFieldStyle(.roundedBorder)
                             .submitLabel(.search)
-                            
-                        if authorisationFailed {
-                            Text(LocalizedString("authorisation_fail", comment: "Failed to authorise")).foregroundStyle(Color(.red)).font(.caption)
-                            if vm.error != nil {
-                                Text(String(vm.error!))
-                                        .foregroundStyle(Color.red)
-                                        .font(.caption)
-                            }
-                        }
                     } else {
                         Picker(LocalizedString("generic_map_department_selection_title", comment: "Map"), selection: $mapViewModel.selectedDepartment) {
                             Text(LocalizedString("department_name_mm", comment: "Mathematics and Mechanics")).tag("spbu-mm")
                         }.pickerStyle(.automatic)
+                    }
+                    if vm.error != nil {
+                        Text(String(vm.error!))
+                            .foregroundStyle(Color.red)
+                            .font(.caption)
                     }
                 }
                 .frame(width: 260)
@@ -70,23 +66,19 @@ struct DepartmentSelectionScreen: View {
                 Button(action: {
                     Task {
                         if mapViewModel.selectedMapType == "custom" {
-                            await vm.authorizeAndStore(mapCode: vm.mapCodeInput)
-                            if vm.error != nil && vm.error!.isEmpty == false {
-                                authorisationFailed = true
-                                vm.mapCodeInput = ""
-                                print("Failed to authorize: \(vm.error!)")
-                            } else {
-                                    isLoading = true
-                                    await mapViewModel.loadCustomMapFromServer(mapCode: vm.mapCodeInput)
-                                    print("loading custom map")
-                                    isLoading = false
-                                    showDepartmentSelection = false
-                                    showWelcomeScreen = false
-                            }
-                        } else {
+                            isLoading = true
+
+                            let result = await vm.checkMapExists()
+                            if result {
+                                await mapViewModel.loadCustomMapFromServer(mapCode: vm.mapCodeInput)
+                                print("loading custom map")
                                 showDepartmentSelection = false
                                 showWelcomeScreen = false
-                        
+                            }
+                            isLoading = false
+                        } else {
+                            showDepartmentSelection = false
+                            showWelcomeScreen = false
                         }
                     }
                 }) {
@@ -109,7 +101,25 @@ struct DepartmentSelectionScreen: View {
         .onAppear {
             mapViewModel.selectedMapType = "pre-defined"
             mapViewModel.setSessionStore($session.wrappedValue)
+            Task {
+                await vm.authorize()
+                if vm.error != nil && vm.error!.isEmpty == false {
+                    authorisationFailed = true
+                    vm.mapCodeInput = ""
+                    print("Failed to authorize: \(vm.error!)")
+                }
+            }
         }
+        .alert(
+            "Authorisation Failed",
+            isPresented: $authorisationFailed,
+            actions: {
+                Button(LocalizedStringKey("retry_button")) {}
+            },
+            message: {
+                Text("Please try again.")
+            }
+        )
     }
 }
 
@@ -128,7 +138,6 @@ struct BlurView: UIViewRepresentable {
 
 struct DepartmentSelectionScreen_Previews: PreviewProvider {
     static var previews: some View {
-        
         DepartmentSelectionScreen(showDepartmentSelection: .constant(true), showWelcomeScreen: .constant(true), mapViewModel: MapViewModel(), session: .constant(SessionStore()))
     }
 }
